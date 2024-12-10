@@ -1,7 +1,17 @@
+import { useState } from "react";
+
 import Grid from "./Grid/Grid";
+import List from "./List/List";
+
 import "./Home.scss";
 
 function Home() {
+	const [isList, setIsList] = useState(false);
+
+	function switchDisplayMode() {
+		setIsList(c => !c);
+	}
+
 	return (
 		<main className="main-page">
 			<form className="main-page__search-container">
@@ -24,8 +34,11 @@ function Home() {
 						<option value="">Cana: rosnąco</option>
 					</select>
 				</div>
+				<button className="main-page__toolbar__view" onClick={switchDisplayMode}>
+					<i className={`fas fa-${isList ? "border-all" : "list"}`}></i>
+				</button>
 			</section>
-			<Grid />
+			{isList ? <List /> : <Grid />}
 		</main>
 	);
 }

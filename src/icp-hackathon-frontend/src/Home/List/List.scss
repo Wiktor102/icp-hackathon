@@ -1,0 +1,51 @@
+.main-page__list {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.main-page__list__item {
+	display: flex;
+	padding: 1rem;
+	gap: 2rem;
+	background-color: var(--surface-variant);
+	border-radius: 1.5rem;
+	box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+	color: var(--on-surface-variant);
+	cursor: pointer;
+	transition: background-color 0.2s, box-shadow 0.2s;
+
+	&:not(:has(button:hover)):hover {
+		background-color: var(--surface-variant-highlight);
+		box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
+	}
+
+	img {
+		max-height: 11rem;
+		border-radius: 0.5rem;
+	}
+
+	.rating {
+		margin-block: 0.25rem 0;
+	}
+
+	.reviews {
+		margin-block: 0.25rem 0;
+		opacity: 0.85;
+	}
+
+	&__last-collumn {
+		display: grid;
+		margin-left: auto;
+		padding-inline-start: 1rem;
+		border-left: 2px solid var(--elevated-surface);
+
+		.price {
+			font-size: 1.5rem;
+		}
+
+		button {
+			margin-block-start: auto;
+		}
+	}
+}
