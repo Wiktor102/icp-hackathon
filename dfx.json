@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "icp-hackathon-backend": {
+      "candid": "src/icp-hackathon-backend/icp-hackathon-backend.did",
+      "package": "icp-hackathon-backend",
+      "type": "rust"
+    },
+    "icp-hackathon-frontend": {
+      "dependencies": [
+        "icp-hackathon-backend"
+      ],
+      "source": [
+        "src/icp-hackathon-frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "icp-hackathon-frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

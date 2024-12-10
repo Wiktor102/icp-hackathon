@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/icp-hackathon-backend"
+]
+resolver = "2"
