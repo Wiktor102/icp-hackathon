@@ -1,3 +1,26 @@
+type Listing = record {
+    title: text;
+    date: nat64;
+    description: text;
+    category: text;
+    price: nat8;
+    amount: nat8;
+};
+
+type Config = record {
+    max_title_len: nat8;
+    min_title_len: nat8;
+    max_description_len: nat16;
+    min_description_len: nat16;
+};
+
+type Result = variant { 
+    Ok : Listing; 
+    Err : text; 
+};
+
 service : {
-    "greet": (text) -> (text) query;
-}
+    "add_listing": (text, text, text, nat8, nat8) -> (Result);
+    "get_listings": () -> (vec Listing) query;
+    "get_config": () -> (Config) query;
+};

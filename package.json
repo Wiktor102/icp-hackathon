@@ -14,5 +14,11 @@
   "type": "module",
   "workspaces": [
     "src/icp-hackathon-frontend"
-  ]
+  ],
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@nfid/identitykit": "^1.0.3"
+  }
 }
