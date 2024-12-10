@@ -1,31 +1,30 @@
-import { useState } from 'react';
-import { icp_hackathon_backend } from 'declarations/icp-hackathon-backend';
+import React, { useState } from "react";
+import { icp_hackathon_backend } from "declarations/icp-hackathon-backend";
+import { BrowserRouter, Route, Routes } from "react-router";
+
+import Header from "./Header/Header";
+import Home from "./Home/Home";
+
+import { IdentityKitAuthType, InternetIdentity } from "@nfid/identitykit";
+import { IdentityKitProvider } from "@nfid/identitykit/react";
+import "@nfid/identitykit/react/styles.css";
 
 function App() {
-  const [greeting, setGreeting] = useState('');
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    icp_hackathon_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
-  }
-
-  return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
-  );
+	return (
+		<IdentityKitProvider
+			className="identity-kit-provider"
+			authType={IdentityKitAuthType.DELEGATION}
+			featuredSigner={InternetIdentity}
+			signerClientOptions={{ targets: [] }}
+		>
+			<Header />
+			<BrowserRouter>
+				<Routes>
+					<Route path="/" element={<Home />} />
+				</Routes>
+			</BrowserRouter>
+		</IdentityKitProvider>
+	);
 }
 
 export default App;

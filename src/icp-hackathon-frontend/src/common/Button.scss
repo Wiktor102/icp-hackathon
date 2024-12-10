@@ -1,0 +1,13 @@
+.pill-button {
+	all: unset;
+	padding: 0.5rem 1.5rem;
+	background-color: var(--accent);
+	color: inherit;
+	border-radius: 10rem;
+	cursor: pointer;
+	transition: background-color 0.2s;
+
+	&:hover {
+		background-color: var(--accent-highlight);
+	}
+}

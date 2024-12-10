@@ -1,0 +1,9 @@
+header.page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-inline: 2rem;
+	background-color: var(--elevated-surface);
+	color: var(--on-elevated-surface);
+	height: 6rem;
+}
