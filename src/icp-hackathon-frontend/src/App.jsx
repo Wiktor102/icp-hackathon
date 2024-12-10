@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 
 import Header from "./Header/Header";
 import Home from "./Home/Home";
+import Cart from "./Cart/Cart";
 
 import { IdentityKitAuthType, InternetIdentity } from "@nfid/identitykit";
 import { IdentityKitProvider } from "@nfid/identitykit/react";
@@ -17,10 +18,12 @@ function App() {
 			featuredSigner={InternetIdentity}
 			signerClientOptions={{ targets: [] }}
 		>
-			<Header />
 			<BrowserRouter>
 				<Routes>
-					<Route path="/" element={<Home />} />
+					<Route element={<Header />}>
+						<Route path="/" element={<Home />} />
+						<Route path="/cart" element={<Cart />} />
+					</Route>
 				</Routes>
 			</BrowserRouter>
 		</IdentityKitProvider>

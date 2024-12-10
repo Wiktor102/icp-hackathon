@@ -6,4 +6,21 @@ header.page-header {
 	background-color: var(--elevated-surface);
 	color: var(--on-elevated-surface);
 	height: 6rem;
+
+	& > div {
+		display: flex;
+		align-items: center;
+		gap: 2rem;
+	}
+
+	.page-header__cart {
+		all: unset;
+		font-size: 1.75rem;
+		transition: color 200ms;
+		cursor: pointer;
+
+		&:hover {
+			color: #6aa527;
+		}
+	}
 }
