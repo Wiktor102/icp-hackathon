@@ -64,8 +64,16 @@ fn add_listing(
     category: String,
     price: u8,
     amount: u8,
+    images: Vec<String>,
 ) -> Result<Listing, String> {
-    let caller = ic_cdk::caller(); // Pobieranie Principal użytkownika
+    let caller = ic_cdk::caller();
+    let owner = USERS.with(|users| {
+        users.borrow().iter().find(|user| user.id == caller).cloned()
+    });
+
+    if owner.is_none() {
+        return Err("User not found!".to_string());
+    }
     let config = CONFIG.with(|config| config.borrow().clone());
 
     if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
@@ -77,7 +85,7 @@ fn add_listing(
         return Err("Desc len is wrong!".to_string());
     }
 
-    let listing = Listing::new(title, description, category, price, amount, caller);
+    let listing = Listing::new(title, description, category, price, amount, owner.unwrap(), images);
     LISTINGS.with(|listings| listings.borrow_mut().push(listing.clone()));
 
     Ok(listing)
@@ -90,10 +98,6 @@ fn get_listings() -> Vec<Listing> {
 }
 #[ic_cdk::query]
 fn get_config() -> Config {
-    CONFIG.with(|config| config.borrow().clone())
-}
-#[ic_cdk::query]
-fn get_config2() -> Config {
     CONFIG.with(|config| config.borrow().clone())
 }
 

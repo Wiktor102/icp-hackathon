@@ -7,12 +7,13 @@ type Config = record {
 type Icrc28TrustedOriginsResponse = record { trusted_origins : vec text };
 type Listing = record {
   title : text;
-  owner : principal;
+  owner : User;
   date : nat64;
   description : text;
   category : text;
   price : nat8;
   amount : nat8;
+  images : blob;
 };
 type Result = variant { Ok : Listing; Err : text };
 type Result_1 = variant { Ok : User; Err : text };
@@ -24,10 +25,9 @@ type User = record {
   creation_date : nat64;
 };
 service : {
-  add_listing : (text, text, text, nat8, nat8) -> (Result);
+  add_listing : (text, text, text, nat8, nat8, vec text) -> (Result);
   add_user : (text, text) -> (Result_1);
   get_config : () -> (Config) query;
-  get_config2 : () -> (Config) query;
   get_listings : () -> (vec Listing) query;
   get_users : () -> (vec User) query;
   icrc10_supported_standards : () -> (vec SupportedStandard);
