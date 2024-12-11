@@ -18,7 +18,7 @@ function App() {
 			className="identity-kit-provider"
 			authType={IdentityKitAuthType.DELEGATION}
 			featuredSigner={InternetIdentity}
-			signerClientOptions={{ targets: [] }}
+			signerClientOptions={{ targets: ["bkyz2-fmaaa-aaaaa-qaaaq-cai"] }}
 		>
 			<BrowserRouter>
 				<Routes>
