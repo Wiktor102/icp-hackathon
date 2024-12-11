@@ -1,8 +1,7 @@
+@use "../common/scss/mixins.scss" as *;
+
 .main-page {
-	width: 80%;
-	max-width: 1400px;
-	margin: 0 auto;
-	padding: 2rem;
+	@include page-container;
 
 	&__search-container {
 		display: flex;
@@ -72,7 +71,6 @@
 			padding: 0.5rem;
 			border-radius: 0.5em;
 			cursor: pointer;
-			transition: background-color 0.2s, color 0.2s;
 		}
 
 		&__sort span {
