@@ -1,16 +1,17 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 import "./ListingDetails.scss";
 import Button from "../common/Button";
 
 function ListingDetails() {
 	const { listingId } = useParams();
+	const navigate = useNavigate();
 
 	return (
 		<main className="listing-details">
 			<header className="listing-details__header">
 				<nav>
-					<button>
+					<button onClick={() => navigate(-1)}>
 						<i className="fas fa-arrow-left"></i>
 					</button>
 				</nav>
