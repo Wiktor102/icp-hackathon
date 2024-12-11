@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 
 import Header from "./Header/Header";
 import Home from "./Home/Home";
+import ListingDetails from "./ListingDetails/ListingDetails";
 import Cart from "./Cart/Cart";
 
 import { IdentityKitAuthType, InternetIdentity } from "@nfid/identitykit";
@@ -22,6 +23,7 @@ function App() {
 				<Routes>
 					<Route element={<Header />}>
 						<Route path="/" element={<Home />} />
+						<Route path="/product/:productId" element={<ListingDetails />} />
 						<Route path="/cart" element={<Cart />} />
 					</Route>
 				</Routes>
