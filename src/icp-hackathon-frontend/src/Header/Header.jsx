@@ -1,5 +1,5 @@
 import { ConnectWallet } from "@nfid/identitykit/react";
-import Button from "../common/Button/Button";
+import Button from "../common/Button";
 import { Link, Outlet, useLocation } from "react-router";
 
 import "./Header.scss";

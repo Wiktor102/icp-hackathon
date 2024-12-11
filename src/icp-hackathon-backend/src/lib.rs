@@ -36,3 +36,6 @@ fn get_listings() -> Vec<Listing> {
 fn get_config() -> Config {
     CONFIG.with(|config| config.borrow().clone())
 }
+
+ic_cdk::export_candid!();
+
