@@ -24,3 +24,22 @@ header.page-header {
 		}
 	}
 }
+
+.profile-dropdown-item {
+	all: unset;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+	transition: background-color 200ms;
+	border-radius: 0.5rem;
+
+	&:hover {
+		background-color: var(--surface-variant);
+	}
+
+	i {
+		font-size: 1.3rem;
+	}
+}

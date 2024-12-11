@@ -10,4 +10,8 @@
 	&:hover {
 		background-color: var(--accent-highlight);
 	}
+
+	i.fas:first-child {
+		margin-inline-end: 1rem;
+	}
 }
