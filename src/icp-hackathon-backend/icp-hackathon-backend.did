@@ -1,26 +1,35 @@
-type Listing = record {
-    title: text;
-    date: nat64;
-    description: text;
-    category: text;
-    price: nat8;
-    amount: nat8;
-};
-
 type Config = record {
-    max_title_len: nat8;
-    min_title_len: nat8;
-    max_description_len: nat16;
-    min_description_len: nat16;
+  min_description_len : nat16;
+  max_description_len : nat16;
+  max_title_len : nat8;
+  min_title_len : nat8;
 };
-
-type Result = variant { 
-    Ok : Listing; 
-    Err : text; 
+type Icrc28TrustedOriginsResponse = record { trusted_origins : vec text };
+type Listing = record {
+  title : text;
+  owner : principal;
+  date : nat64;
+  description : text;
+  category : text;
+  price : nat8;
+  amount : nat8;
 };
-
+type Result = variant { Ok : Listing; Err : text };
+type Result_1 = variant { Ok : User; Err : text };
+type SupportedStandard = record { url : text; name : text };
+type User = record {
+  id : principal;
+  name : text;
+  email : text;
+  creation_date : nat64;
+};
 service : {
-    "add_listing": (text, text, text, nat8, nat8) -> (Result);
-    "get_listings": () -> (vec Listing) query;
-    "get_config": () -> (Config) query;
-};
+  add_listing : (text, text, text, nat8, nat8) -> (Result);
+  add_user : (text, text) -> (Result_1);
+  get_config : () -> (Config) query;
+  get_config2 : () -> (Config) query;
+  get_listings : () -> (vec Listing) query;
+  get_users : () -> (vec User) query;
+  icrc10_supported_standards : () -> (vec SupportedStandard);
+  icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);
+}

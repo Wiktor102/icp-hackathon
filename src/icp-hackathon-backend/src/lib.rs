@@ -1,8 +1,14 @@
 use std::cell::RefCell;
 use crate::listing::Listing;
 use crate::config::Config;
+use crate::user::User;
+
 use candid::{self, CandidType, Deserialize};
  
+mod listing;
+mod config;
+mod user;
+
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug)]
 pub struct SupportedStandard {
     pub url: String,
@@ -45,31 +51,38 @@ fn icrc28_trusted_origins() -> Icrc28TrustedOriginsResponse {
     return Icrc28TrustedOriginsResponse { trusted_origins }
 }
 
-mod listing;
-mod config;
-
 thread_local! {
     static CONFIG: RefCell<Config> = RefCell::new(Config::new());
     static LISTINGS: RefCell<Vec<Listing>> = RefCell::new(Vec::new());
+    static USERS: RefCell<Vec<User>> = RefCell::new(Vec::new());
 }
+
 #[ic_cdk::update]
-fn add_listing(title: String, description: String, category: String, price: u8, amount: u8) -> Result<Listing, String>{
+fn add_listing(
+    title: String,
+    description: String,
+    category: String,
+    price: u8,
+    amount: u8,
+) -> Result<Listing, String> {
+    let caller = ic_cdk::caller(); // Pobieranie Principal użytkownika
     let config = CONFIG.with(|config| config.borrow().clone());
-    if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize{
-        return Err("Title len is wrong!".to_string())
+
+    if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
+        return Err("Title len is wrong!".to_string());
     }
-    if description.len() > config.max_description_len as usize || description.len() < config.min_description_len as usize {
-        return Err("Desc len is wrong!".to_string())
+    if description.len() > config.max_description_len as usize
+        || description.len() < config.min_description_len as usize
+    {
+        return Err("Desc len is wrong!".to_string());
     }
-    let listing = Listing::new(title, description, category, price, amount);
-    LISTINGS.with(|listings| listings.borrow_mut().push(listing));
-    let last_listing = LISTINGS.with(|listings| 
-        listings
-        .borrow()
-        .last()
-        .expect("Vec should not be empty").clone());
-    Ok(last_listing)
+
+    let listing = Listing::new(title, description, category, price, amount, caller);
+    LISTINGS.with(|listings| listings.borrow_mut().push(listing.clone()));
+
+    Ok(listing)
 }
+
 
 #[ic_cdk::query]
 fn get_listings() -> Vec<Listing> {
@@ -83,5 +96,21 @@ fn get_config() -> Config {
 fn get_config2() -> Config {
     CONFIG.with(|config| config.borrow().clone())
 }
+
+#[ic_cdk::update]
+fn add_user(name: String, email: String) -> Result<User, String> {
+    let caller = ic_cdk::caller();
+    let user = User::new(caller, name, email);
+
+    USERS.with(|users| users.borrow_mut().push(user.clone()));
+
+    Ok(user)
+}
+
+#[ic_cdk::query]
+fn get_users() -> Vec<User> {
+    USERS.with(|users| users.borrow().clone())
+}
+
 ic_cdk::export_candid!();
 
