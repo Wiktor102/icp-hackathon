@@ -22,7 +22,7 @@ function ContactInfo({ editButton = false }) {
 		const email = formData.get("e-mail");
 		const phone = formData.get("phone");
 
-		const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 		const phonePattern = /^\d{9}$/;
 
 		if (!emailPattern.test(email)) {
