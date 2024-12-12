@@ -2,9 +2,13 @@ type Category = record { name : text; lower_categories : opt Vec };
 type Config = record {
   categories : vec Category;
   min_description_len : nat16;
+  min_user_name_len : nat8;
+  max_company_name_len : nat8;
   max_description_len : nat16;
+  max_user_name_len : nat8;
   max_title_len : nat8;
   min_title_len : nat8;
+  min_company_name_len : nat8;
 };
 type Icrc28TrustedOriginsResponse = record { trusted_origins : vec text };
 type Listing = record {
@@ -24,13 +28,16 @@ type SupportedStandard = record { url : text; name : text };
 type User = record {
   id : principal;
   name : text;
+  company_name : text;
   email : text;
+  phone_number : text;
   creation_date : nat64;
 };
 type Vec = vec record { name : text; lower_categories : opt Vec };
 service : {
   add_listing : (text, text, text, nat8, nat8, vec text, text) -> (Result);
-  add_user : (text, text) -> (Result_1);
+  add_user : (text, text, text, text) -> (Result_1);
+  edit_active_user : (text, text, text, text) -> (text);
   get_active_user : () -> (opt User) query;
   get_categories : () -> (vec Category) query;
   get_config : () -> (Config) query;

@@ -8,6 +8,10 @@ pub struct Config {
     pub min_description_len: u16,
     pub min_title_len: u8,
     pub categories: Vec<Category>,
+    pub min_user_name_len: u8,
+    pub max_user_name_len: u8,
+    pub min_company_name_len: u8,
+    pub max_company_name_len: u8,
 }
 
 impl Config {
@@ -17,6 +21,10 @@ impl Config {
             max_title_len: 250,
             min_description_len: 50,
             min_title_len: 12,
+            min_user_name_len: 5,
+            max_user_name_len: 50,
+            min_company_name_len: 5,
+            max_company_name_len: 50,
             categories: vec![
                 Category::new("Electronics".to_string(), Some(vec![
                     Category::new("Mobile Phones".to_string(), None),

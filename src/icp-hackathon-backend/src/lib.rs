@@ -3,7 +3,7 @@ use crate::listing::Listing;
 use crate::config::Config;
 use crate::user::User;
 use crate::category::Category;
-
+use regex::Regex;
 use candid::{self, CandidType, Deserialize};
 mod category;
 mod listing;
@@ -109,14 +109,43 @@ fn get_categories() -> Vec<Category> {
     config.categories
 }
 #[ic_cdk::update]
-fn add_user(name: String, email: String) -> Result<User, String> {
+fn add_user(name: String, email: String, phone_number: String, company_name: String) -> Result<User, String> {
     let caller = ic_cdk::caller();
-    let user = User::new(caller, name, email);
+    
+    // Tworzymy użytkownika
+    let user = User::new(caller, name.clone(), email.clone(), phone_number.clone(), company_name.clone());
+    
+    let config = CONFIG.with(|config| config.borrow().clone());
 
+    // Walidacja nazwy użytkownika
+    if name.len() < config.min_user_name_len as usize || name.len() > config.max_user_name_len as usize {
+        return Err("Name length is wrong!".to_string());
+    }
+
+    // Walidacja formatu email
+    let email_regex = Regex::new(r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})").unwrap();
+    if !email_regex.is_match(&email) {
+        return Err("Wrong email format!".to_string());
+    }
+
+    // Walidacja formatu numeru telefonu (dokładnie 9 cyfr)
+    let phone_number_regex = Regex::new(r"^\d{9}$").unwrap();
+    if !phone_number_regex.is_match(&phone_number) {
+        return Err("Wrong phone number format!".to_string());
+    }
+
+    // Walidacja długości nazwy firmy
+    if company_name.len() < config.min_company_name_len as usize || company_name.len() > config.max_company_name_len as usize {
+        return Err("Company name length is wrong!".to_string());
+    }
+
+    // Dodanie użytkownika do listy
     USERS.with(|users| users.borrow_mut().push(user.clone()));
 
+    // Zwrócenie użytkownika
     Ok(user)
 }
+
 
 #[ic_cdk::query]
 fn get_users() -> Vec<User> {
@@ -130,6 +159,63 @@ fn get_active_user() -> Option<User> {
         users.borrow().iter().find(|user| user.id == caller).cloned()
     })
 }
+
+#[ic_cdk::update]
+fn edit_active_user(name: String, email: String, phone_number: String, company_name: String) -> String {
+    let caller = ic_cdk::caller();
+    let config = CONFIG.with(|config| config.borrow().clone());
+
+    // Pobieramy mutowalną referencję do USERS
+    USERS.with(|users| {
+        let mut users = users.borrow_mut();
+
+        // Znajdź użytkownika na podstawie 'caller'
+        if let Some(user) = users.iter_mut().find(|user| user.id == caller) {
+            // Walidacja danych
+
+            // Walidacja długości imienia
+            if name.len() < config.min_user_name_len as usize || name.len() > config.max_user_name_len as usize {
+                return "Name length is wrong!".to_string();
+            }
+
+            // Walidacja formatu emaila
+            let email_regex = Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
+            if !email_regex.is_match(&email) {
+                return "Wrong email format!".to_string();
+            }
+
+            // Walidacja formatu numeru telefonu
+            let phone_number_regex = Regex::new(r"^\d{9}$").unwrap();
+            if !phone_number_regex.is_match(&phone_number) {
+                return "Wrong phone number format!".to_string();
+            }
+
+            // Walidacja długości nazwy firmy
+            if company_name.len() < config.min_company_name_len as usize || company_name.len() > config.max_company_name_len as usize {
+                return "Company name length is wrong!".to_string();
+            }
+
+            // Zalogowanie przed aktualizacją
+            println!("Before update: {:?}", user);
+
+            // Aktualizacja danych użytkownika
+            user.name = name;
+            user.email = email;
+            user.phone_number = phone_number;
+            user.company_name = company_name;
+
+            // Zalogowanie po aktualizacji
+            println!("After update: {:?}", user);
+            
+            return "User updated successfully!".to_string();
+        }
+
+        // Jeśli użytkownik nie został znaleziony
+        "User not found!".to_string()
+    })
+}
+
+
 
 ic_cdk::export_candid!();
 
