@@ -1,16 +1,56 @@
+import { useEffect } from "react";
 import {
 	ConnectWallet,
 	ConnectWalletDropdownMenu,
 	ConnectWalletDropdownMenuButton,
-	ConnectWalletDropdownMenuItems
+	ConnectWalletDropdownMenuItems,
+	useIdentity
 } from "@nfid/identitykit/react";
-import Button from "../common/Button";
 import { Link, Outlet, useLocation } from "react-router";
+import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
+
+import Button from "../common/Button";
+
+import useStore from "../store/store.js";
+import usePrevious from "../common/hooks/usePrevious.js";
 
 import "./Header.scss";
 
 function Header() {
 	const { pathname: location } = useLocation();
+
+	const identity = useIdentity();
+	const previousIdentity = usePrevious(identity);
+	const user = useStore(state => state.user);
+	const setUser = useStore(state => state.setUser);
+
+	function createEmptyUser() {
+		backend.add_user("", "").then(response => {
+			setUser(response);
+		});
+	}
+
+	function fetchUser() {
+		backend.get_active_user().then(response => {
+			if (Array.isArray(response) && response.length === 0) {
+				createEmptyUser();
+				fetchUser();
+				return;
+			}
+
+			setUser(response[0]);
+		});
+	}
+
+	useEffect(() => {
+		if (identity === previousIdentity && user != null) return;
+		if (identity == null) {
+			setUser(null);
+			return;
+		}
+
+		fetchUser();
+	}, [identity]);
 
 	return (
 		<>
