@@ -22,11 +22,12 @@ type Listing = record {
   categories_path : text;
   images : blob;
 };
-type Result = variant { Ok : Listing; Err : text };
-type Result_1 = variant { Ok : User; Err : text };
+type Result = variant { Ok : User; Err : text };
+type Result_1 = variant { Ok : Listing; Err : text };
 type SupportedStandard = record { url : text; name : text };
 type User = record {
   id : principal;
+  favorites : opt vec Listing;
   name : text;
   company_name : text;
   email : text;
@@ -35,8 +36,9 @@ type User = record {
 };
 type Vec = vec record { name : text; lower_categories : opt Vec };
 service : {
-  add_listing : (text, text, text, nat8, nat8, vec text, text) -> (Result);
-  add_user : (text, text, text, text) -> (Result_1);
+  add_empty_user : () -> (Result);
+  add_listing : (text, text, text, nat8, nat8, vec text, text) -> (Result_1);
+  add_user : (text, text, text, text) -> (Result);
   edit_active_user : (text, text, text, text) -> (text);
   get_active_user : () -> (opt User) query;
   get_categories : () -> (vec Category) query;

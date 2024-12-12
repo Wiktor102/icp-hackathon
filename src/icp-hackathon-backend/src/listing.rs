@@ -4,7 +4,7 @@ use crate::category::Category;
 
 use crate::User;
 
-#[derive(Clone, CandidType, Deserialize)]
+#[derive(Clone, CandidType, Deserialize, Debug)]
 pub struct Listing {
     pub title: String,
     pub date: u64,

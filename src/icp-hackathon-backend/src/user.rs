@@ -1,6 +1,8 @@
 use candid::{CandidType, Deserialize};
 use ic_cdk::api::{time};
 use candid::Principal;
+use crate::listing::Listing;
+
 #[derive(Clone, CandidType, Deserialize, Debug)]
 pub struct User {
     pub id: Principal,
@@ -9,6 +11,7 @@ pub struct User {
     pub phone_number: String,
     pub company_name: String,
     pub creation_date: u64,
+    pub favorites: Option<Vec<Listing>>,
 }
 
 impl User {
@@ -20,6 +23,7 @@ impl User {
             creation_date: time(),
             phone_number,
             company_name,
+            favorites: None,
         }
     }
 }

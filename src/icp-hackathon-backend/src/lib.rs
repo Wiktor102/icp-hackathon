@@ -112,40 +112,50 @@ fn get_categories() -> Vec<Category> {
 fn add_user(name: String, email: String, phone_number: String, company_name: String) -> Result<User, String> {
     let caller = ic_cdk::caller();
     
-    // Tworzymy użytkownika
+    if USERS.with(|users| users.borrow().iter().any(|user| user.id == caller)) {
+        return Err("User already exists!".to_string());
+    }
+
     let user = User::new(caller, name.clone(), email.clone(), phone_number.clone(), company_name.clone());
     
     let config = CONFIG.with(|config| config.borrow().clone());
 
-    // Walidacja nazwy użytkownika
     if name.len() < config.min_user_name_len as usize || name.len() > config.max_user_name_len as usize {
         return Err("Name length is wrong!".to_string());
     }
 
-    // Walidacja formatu email
     let email_regex = Regex::new(r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})").unwrap();
     if !email_regex.is_match(&email) {
         return Err("Wrong email format!".to_string());
     }
 
-    // Walidacja formatu numeru telefonu (dokładnie 9 cyfr)
     let phone_number_regex = Regex::new(r"^\d{9}$").unwrap();
     if !phone_number_regex.is_match(&phone_number) {
         return Err("Wrong phone number format!".to_string());
     }
 
-    // Walidacja długości nazwy firmy
     if company_name.len() < config.min_company_name_len as usize || company_name.len() > config.max_company_name_len as usize {
         return Err("Company name length is wrong!".to_string());
     }
 
-    // Dodanie użytkownika do listy
     USERS.with(|users| users.borrow_mut().push(user.clone()));
 
-    // Zwrócenie użytkownika
     Ok(user)
 }
 
+#[ic_cdk::update]
+fn add_empty_user() -> Result<User, String>
+{
+    let caller = ic_cdk::caller();
+
+    if USERS.with(|users| users.borrow().iter().any(|user| user.id == caller)) {
+        return Err("User already exists!".to_string());
+    }
+
+    let user = User::new(caller, "".to_string(), "".to_string(), "".to_string(), "".to_string());
+    USERS.with(|users| users.borrow_mut().push(user.clone()));
+    Ok(user)
+}
 
 #[ic_cdk::query]
 fn get_users() -> Vec<User> {
