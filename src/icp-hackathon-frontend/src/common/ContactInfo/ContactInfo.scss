@@ -1,7 +1,7 @@
+@use "../scss/mixins.scss" as *;
+
 .contact-info {
-	padding: 1rem;
-	background-color: var(--surface-variant);
-	border-radius: 1rem;
+	@include elevated-container;
 	align-self: flex-end;
 
 	& > div {
@@ -39,13 +39,8 @@
 	.grid input {
 		margin-block-start: 0.15rem;
 		padding: 0.4rem;
-		background-color: var(--surface);
 		border: none;
 		border-radius: 0.25rem;
-
-		&:focus-visible {
-			outline: 2px solid var(--accent-highlight);
-		}
 	}
 
 	button {

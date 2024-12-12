@@ -4,3 +4,17 @@
 	margin: 0 auto;
 	padding: 2rem;
 }
+
+@mixin elevated-container {
+	padding: 1rem;
+	background-color: var(--surface-variant);
+	border-radius: 1rem;
+
+	input {
+		background-color: var(--surface);
+
+		&:focus-visible {
+			outline: 2px solid var(--accent-highlight);
+		}
+	}
+}
