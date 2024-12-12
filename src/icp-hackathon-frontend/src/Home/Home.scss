@@ -79,3 +79,19 @@
 		}
 	}
 }
+
+.warning-card {
+	@include elevated-container;
+	margin-block-end: 4rem;
+	background-color: var(--warning);
+	color: var(--on-warning);
+	font-size: 1.2rem;
+
+	i {
+		margin-inline-end: 1rem;
+	}
+
+	a {
+		text-decoration: underline;
+	}
+}

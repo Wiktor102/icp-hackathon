@@ -1,4 +1,10 @@
 import { forwardRef, useRef, useState } from "react";
+import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
+
+// hooks
+import useStore from "../../../store/store.js";
+
+// components
 import OutlinedButton from "../../OutlinedButton/OutlinedButton.jsx";
 
 import "./ContactInfo.scss";
@@ -14,7 +20,11 @@ const Wrapper = forwardRef(({ condition, children, ...props }, ref) =>
 );
 
 function ContactInfo({ editButton = false }) {
-	const [editable, setEditable] = useState(false);
+	const user = useStore(state => state.user);
+	const setUser = useStore(state => state.setUser);
+
+	const [editable, setEditable] = useState(editButton && !user.initialised);
+	const [loading, setLoading] = useState(false);
 	const formRef = useRef(null);
 
 	const validateUserData = () => {
@@ -51,16 +61,35 @@ function ContactInfo({ editButton = false }) {
 		return true;
 	};
 
-	const saveUserData = () => {
+	const saveUserData = async () => {
 		const formData = new FormData(formRef.current);
+		const name = formData.get("name");
+		const email = formData.get("e-mail");
+		const phone = formData.get("phone");
+		const company = formData.get("company");
+
+		const error = await backend.edit_active_user(name, email, phone, company);
+
+		if (error) {
+			alert("Wystąpił błąd podczas zapisywania danych: " + error);
+			return false;
+		}
+
+		setUser({ name, email, phone, company, initialised: true });
+		return true;
 	};
 
-	const onClick = () => {
-		setEditable(e => {
-			if (!e) return !e;
-			if (validateUserData()) return !e;
-			saveUserData();
-		});
+	const onClick = async () => {
+		if (editable && !validateUserData()) return;
+		if (editable) {
+			setLoading(true);
+			const success = await saveUserData();
+			setLoading(false);
+			if (success) setEditable(false);
+			return;
+		}
+
+		setEditable(e => !e);
 	};
 
 	return (
@@ -72,34 +101,45 @@ function ContactInfo({ editButton = false }) {
 						<i className="fas fa-building"></i>
 						<span className="label">Firma:</span>
 						{editable ? (
-							<input type="text" name="company" defaultValue="Ubraniex Sp ZOO" />
+							<input type="text" name="company" defaultValue={user.company} />
 						) : (
-							<span>Ubraniex Sp ZOO</span>
+							<span>{user.initialised ? user.company : "???"}</span>
 						)}
 					</div>
 					<div>
 						<i className="fas fa-user"></i>
 						<span className="label">Imię i nazwisko:</span>
 						{editable ? (
-							<input type="text" name="name" defaultValue="Jan Kowalski" />
+							<input type="text" name="name" defaultValue={user.name} />
 						) : (
-							<span>Jan Kowalski</span>
+							<span>{user.initialised ? user.name : "???"}</span>
 						)}
 					</div>
 					<div>
 						<i className="fas fa-envelope"></i>
 						<span className="label">Adres e-mail:</span>
 						{editable ? (
-							<input type="email" name="e-mail" defaultValue="abs@example.com" />
+							<input type="email" name="e-mail" defaultValue={user.email} />
 						) : (
-							<span>abs@example.com</span>
+							<span>{user.initialised ? user.email : "???"}</span>
 						)}
 					</div>
 					<div>
 						<i className="fa fa-phone"></i>
 						<span className="label">Telefon:</span>
-						{editable ? <input type="tel" name="phone" defaultValue="123456789" /> : <span>123456789</span>}
+						{editable ? (
+							<input type="tel" name="phone" defaultValue={user.phone} />
+						) : (
+							<span>{user.initialised ? user.phone : "???"}</span>
+						)}
 					</div>
+					{loading && (
+						<div className="contact-info__loading-container">
+							<div class="ball-clip-rotate">
+								<div></div>
+							</div>
+						</div>
+					)}
 				</Wrapper>
 				{editButton && (
 					<OutlinedButton onClick={onClick}>

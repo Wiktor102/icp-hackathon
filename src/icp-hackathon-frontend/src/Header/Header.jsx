@@ -6,7 +6,7 @@ import {
 	ConnectWalletDropdownMenuItems,
 	useIdentity
 } from "@nfid/identitykit/react";
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
 import Button from "../common/Button";
@@ -18,15 +18,36 @@ import "./Header.scss";
 
 function Header() {
 	const { pathname: location } = useLocation();
+	const navigate = useNavigate();
 
 	const identity = useIdentity();
 	const previousIdentity = usePrevious(identity);
 	const user = useStore(state => state.user);
 	const setUser = useStore(state => state.setUser);
 
+	function parseBackendUser(user) {
+		user.initialised = !(user.name === "" && user.email === "" && user.phone === "" && user.company === "");
+		var user = {
+			name: user.name,
+			email: user.email,
+			phone: user.phone_number,
+			company: user.company_name,
+			initialised: user.initialised
+		};
+
+		setUser(user);
+		return user;
+	}
+
 	function createEmptyUser() {
-		backend.add_user("", "").then(response => {
-			setUser(response);
+		backend.add_empty_user().then(({ Err, Ok }) => {
+			if (Err) {
+				console.log(Err);
+				alert("Wystąpił błąd podczas tworzenia użytkownika");
+				return;
+			}
+
+			navigate("/profile");
 		});
 	}
 
@@ -34,11 +55,10 @@ function Header() {
 		backend.get_active_user().then(response => {
 			if (Array.isArray(response) && response.length === 0) {
 				createEmptyUser();
-				fetchUser();
 				return;
 			}
 
-			setUser(response[0]);
+			parseBackendUser(response[0]);
 		});
 	}
 

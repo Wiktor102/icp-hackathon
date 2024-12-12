@@ -10,7 +10,10 @@ import Cart from "./Cart/Cart";
 
 import { IdentityKitAuthType, InternetIdentity } from "@nfid/identitykit";
 import { IdentityKitProvider } from "@nfid/identitykit/react";
+
+// styles
 import "@nfid/identitykit/react/styles.css";
+import "./common/scss/loaders.min.css";
 
 function App() {
 	return (
