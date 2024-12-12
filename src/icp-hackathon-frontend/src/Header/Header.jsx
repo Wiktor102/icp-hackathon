@@ -26,7 +26,6 @@ function Header() {
 	const setUser = useStore(state => state.setUser);
 
 	function parseBackendUser(user) {
-		user.initialised = !(user.name === "" && user.email === "" && user.phone === "" && user.company === "");
 		var user = {
 			name: user.name,
 			email: user.email,
@@ -34,6 +33,8 @@ function Header() {
 			company: user.company_name,
 			initialised: user.initialised
 		};
+
+		user.initialised = !(user.name === "" && user.email === "" && user.phone === "" && user.company === "");
 
 		setUser(user);
 		return user;

@@ -23,8 +23,8 @@ function ContactInfo({ editButton = false }) {
 	const user = useStore(state => state.user);
 	const setUser = useStore(state => state.setUser);
 
-	const [editable, setEditable] = useState(editButton && !user.initialised);
-	const [loading, setLoading] = useState(false);
+	const [editable, setEditable] = useState(editButton && !user?.initialised);
+	const [loading, setLoading] = useState(false || user == null);
 	const formRef = useRef(null);
 
 	const validateUserData = () => {
@@ -69,8 +69,8 @@ function ContactInfo({ editButton = false }) {
 		const company = formData.get("company");
 
 		const error = await backend.edit_active_user(name, email, phone, company);
-
-		if (error) {
+		console.log(error);
+		if (error != "") {
 			alert("Wystąpił błąd podczas zapisywania danych: " + error);
 			return false;
 		}
