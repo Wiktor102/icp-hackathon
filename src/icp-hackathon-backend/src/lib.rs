@@ -171,7 +171,7 @@ fn get_active_user() -> Option<User> {
 }
 
 #[ic_cdk::update]
-fn edit_active_user(name: String, email: String, phone_number: String, company_name: String) -> String {
+fn edit_active_user(name: String, email: String, phone_number: String, company_name: String) -> Option<String> {
     let caller = ic_cdk::caller();
     let config = CONFIG.with(|config| config.borrow().clone());
 
@@ -185,47 +185,84 @@ fn edit_active_user(name: String, email: String, phone_number: String, company_n
 
             // Walidacja długości imienia
             if name.len() < config.min_user_name_len as usize || name.len() > config.max_user_name_len as usize {
-                return "Name length is wrong!".to_string();
+                Some( "Name length is wrong!".to_string() );
             }
 
             // Walidacja formatu emaila
             let email_regex = Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
             if !email_regex.is_match(&email) {
-                return "Wrong email format!".to_string();
+                Some( "Wrong email format!".to_string());
             }
 
             // Walidacja formatu numeru telefonu
             let phone_number_regex = Regex::new(r"^\d{9}$").unwrap();
             if !phone_number_regex.is_match(&phone_number) {
-                return "Wrong phone number format!".to_string();
+                Some( "Wrong phone number format!".to_string());
             }
 
             // Walidacja długości nazwy firmy
             if company_name.len() < config.min_company_name_len as usize || company_name.len() > config.max_company_name_len as usize {
-                return "Company name length is wrong!".to_string();
+                Some( "Company name length is wrong!".to_string());
             }
 
             // Zalogowanie przed aktualizacją
-            println!("Before update: {:?}", user);
-
             // Aktualizacja danych użytkownika
             user.name = name;
             user.email = email;
             user.phone_number = phone_number;
             user.company_name = company_name;
 
-            // Zalogowanie po aktualizacji
-            println!("After update: {:?}", user);
-            
-            return "User updated successfully!".to_string();
+            return None
         }
 
         // Jeśli użytkownik nie został znaleziony
-        "User not found!".to_string()
+        Some("User not found!".to_string())
     })
 }
+#[ic_cdk::update]
+fn add_favorite_listing(listing_id: u64)
+{
+    let caller = ic_cdk::caller();
+    let config = CONFIG.with(|config| config.borrow().clone());
 
+    // Pobieramy mutowalną referencję do USERS
+    USERS.with(|users| {
+        let mut users = users.borrow_mut();
 
+        // Znajdź użytkownika na podstawie 'caller'
+        if let Some(user) = users.iter_mut().find(|user| user.id == caller) {
+            // Znajdź ogłoszenie na podstawie 'listing_id'
+            LISTINGS.with(|listings| {
+                if let Some(listing) = listings.borrow().iter().find(|listing| listing.id == listing_id) {
+                    if user.favorites_id.is_none() {
+                        user.favorites_id = Some(vec![listing.id]);
+                    } else {
+                        user.favorites_id.as_mut().unwrap().push(listing.id);
+                    }
+                }                
+            });
+        }
+
+    });
+}
+
+#[ic_cdk::query]
+fn get_active_user_favorite_listings() -> Vec<Listing> {
+    let user = get_active_user();
+    let mut favorites = Vec::new();
+    if let Some(user) = user {
+        if let Some(favorites_id) = user.favorites_id {
+            LISTINGS.with(|listings| {
+                for listing_id in favorites_id {
+                    if let Some(listing) = listings.borrow().iter().find(|listing| listing.id == listing_id) {
+                        favorites.push(listing.clone());
+                    }
+                }
+            });
+        }
+    }
+    return favorites;
+}
 
 ic_cdk::export_candid!();
 

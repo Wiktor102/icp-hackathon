@@ -1,11 +1,13 @@
 use candid::{CandidType, Deserialize};
 use ic_cdk::api::{time};
-use crate::category::Category;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::User;
+static AMOUNT_OF_LISTINGS: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone, CandidType, Deserialize, Debug)]
 pub struct Listing {
+    pub id: u64,
     pub title: String,
     pub date: u64,
     pub description: String,
@@ -29,6 +31,7 @@ impl Listing {
         categories_path: String
     ) -> Self {
         Self {
+            id: AMOUNT_OF_LISTINGS.fetch_add(1, Ordering::SeqCst),
             title,
             date: time(),
             description,
