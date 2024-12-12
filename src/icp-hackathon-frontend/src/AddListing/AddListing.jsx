@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useIdentity } from "@nfid/identitykit/react";
 import { useNavigate } from "react-router";
+import imageCompression from "browser-image-compression";
 
 import Button from "../common/Button";
 
@@ -11,7 +12,6 @@ function AddListing() {
 	const navigate = useNavigate();
 
 	const [photoPaths, setPhotoPaths] = useState([]);
-	const photos = useMemo(() => photoPaths.map(p => URL.createObjectURL(p)), [photoPaths]);
 
 	const [base64Photos, setBase64Photos] = useState([]);
 	const [category, setCategory] = useState([]);
@@ -21,31 +21,45 @@ function AddListing() {
 	}
 
 	function uploadFile(e) {
-		setPhotoPaths(p => {
-			if (p.length + e.target.files > 3) {
-				alert("Maksymalnie można dodać 3 zdjęcia");
-				return p;
-			}
+		if (photoPaths.length + e.target.files.length > 3) {
+			alert("Maksymalnie można dodać 3 zdjęcia");
+			e.preventDefault();
+			return;
+		}
 
-			return [...p, ...e.target.files];
-		});
-	}
-
-	useEffect(() => {
-		photoPaths.map(img => {
+		setPhotoPaths(p => [...p, ...e.target.files]);
+		Array.from(e.target.files).map(async img => {
+			const compressed = await compressImage(img);
 			const reader = new FileReader();
-			reader.readAsDataURL(img);
+			reader.readAsDataURL(compressed);
 			reader.onload = () => {
 				const base64 = reader.result;
 				setBase64Photos(prev => [...prev, base64]);
 			};
 		});
-	}, [photoPaths]);
-
-	if (!identity) {
-		navigate("/");
-		return null;
 	}
+
+	async function compressImage(file) {
+		const options = {
+			maxSizeMB: 1,
+			maxWidthOrHeight: 1024,
+			useWebWorker: true
+		};
+
+		try {
+			const compressedFile = await imageCompression(file, options);
+			// console.log("Original File:", file.size / 1024, "KB");
+			// console.log("Compressed File:", compressedFile.size / 1024, "KB");
+			return compressedFile;
+		} catch (error) {
+			console.error("Error compressing image:", error);
+		}
+	}
+
+	// if (!identity) {
+	// 	navigate("/");
+	// 	return null;
+	// }
 
 	return (
 		<main className="add-listing">
@@ -58,22 +72,22 @@ function AddListing() {
 				</div>
 
 				<div className="form-image-container">
-					{photos.map((photo, i) => (
-						<div className="image-container">
-							<img src={photo} key={i} alt="Zdjęcie produktu" />
+					{base64Photos.map((photo, i) => (
+						<div className="image-container" key={i}>
+							<img src={photo} alt="Zdjęcie produktu" />
 							<button type="buton" onClick={() => deletePhoto(i)}>
 								<i className="fas fa-trash"></i>
 							</button>
 						</div>
 					))}
-					{photos.length < 3 &&
-						new Array(3 - photos.length).fill(null).map((_, i) => (
+					{base64Photos.length < 3 &&
+						new Array(3 - base64Photos.length).fill(null).map((_, i) => (
 							<div className="image-placeholder" key={i}>
 								<i className="fa-regular fa-image"></i>
 								Nie dodałeś jeszcze zdjęcia
 							</div>
 						))}
-					<label htmlFor="image" className={photos.length >= 3 ? "disabled" : ""}>
+					<label htmlFor="image" className={base64Photos.length >= 3 ? "disabled" : ""}>
 						<i className="fas fa-upload"></i>
 						Wybierz plik
 						<input
@@ -83,7 +97,7 @@ function AddListing() {
 							accept="image/*"
 							value=""
 							onChange={uploadFile}
-							disabled={photos.length >= 3}
+							disabled={base64Photos.length >= 3}
 						/>
 					</label>
 				</div>
