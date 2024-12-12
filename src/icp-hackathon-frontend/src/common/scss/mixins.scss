@@ -10,7 +10,9 @@
 	background-color: var(--surface-variant);
 	border-radius: 1rem;
 
-	input {
+	input,
+	textarea,
+	select {
 		background-color: var(--surface);
 
 		&:focus-visible {
