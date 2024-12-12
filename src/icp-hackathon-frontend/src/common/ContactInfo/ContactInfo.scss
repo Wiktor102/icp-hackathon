@@ -4,6 +4,11 @@
 	border-radius: 1rem;
 	align-self: flex-end;
 
+	& > div {
+		display: flex;
+		flex-direction: column;
+	}
+
 	h3 {
 		margin-block: 0 1rem;
 	}
@@ -14,7 +19,7 @@
 		grid-template-columns: max-content max-content;
 	}
 
-	& > .grid > div {
+	.grid > div {
 		display: grid;
 		column-gap: 1rem;
 		grid-template-columns: min-content max-content;
@@ -29,5 +34,22 @@
 			opacity: 0.85;
 			font-size: 0.9rem;
 		}
+	}
+
+	.grid input {
+		margin-block-start: 0.15rem;
+		padding: 0.4rem;
+		background-color: var(--surface);
+		border: none;
+		border-radius: 0.25rem;
+
+		&:focus-visible {
+			outline: 2px solid var(--accent-highlight);
+		}
+	}
+
+	button {
+		margin-block-start: 1.5rem;
+		border-color: var(--accent-highlight);
 	}
 }
