@@ -6,7 +6,7 @@ import {
 	ConnectWalletDropdownMenuItems,
 	useIdentity
 } from "@nfid/identitykit/react";
-import { Link, Outlet, useLocation } from "react-router";
+import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
 import Button from "../common/Button";
@@ -18,11 +18,26 @@ import "./Header.scss";
 
 function Header() {
 	const { pathname: location } = useLocation();
+	const navigate = useNavigate();
 
 	const identity = useIdentity();
 	const previousIdentity = usePrevious(identity);
 	const user = useStore(state => state.user);
 	const setUser = useStore(state => state.setUser);
+
+	function parseBackendUser(user) {
+		user.initialised = !(user.name === "" && user.email === "" && user.phone === "" && user.company === "");
+		var user = {
+			name: user.name,
+			email: user.email,
+			phone: user.phone_number,
+			company: user.company_name,
+			initialised: user.initialised
+		};
+
+		setUser(user);
+		return user;
+	}
 
 	function createEmptyUser() {
 		backend.add_empty_user().then(({ Err, Ok }) => {
@@ -32,8 +47,7 @@ function Header() {
 				return;
 			}
 
-			console.log(Ok);
-			setUser(Ok);
+			navigate("/profile");
 		});
 	}
 
@@ -44,15 +58,7 @@ function Header() {
 				return;
 			}
 
-			const user = response[0];
-			user.initialised = !(
-				user.name === "" &&
-				user.email === "" &&
-				user.phone_number === "" &&
-				user.company_name === ""
-			);
-
-			setUser(user);
+			parseBackendUser(response[0]);
 		});
 	}
 
@@ -63,7 +69,6 @@ function Header() {
 			return;
 		}
 
-		console.log("fetching user");
 		fetchUser();
 	}, [identity]);
 

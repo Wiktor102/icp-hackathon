@@ -1,5 +1,10 @@
 import { useState } from "react";
+import { NavLink } from "react-router";
 
+// hooks
+import useStore from "../store/store.js";
+
+// components
 import Grid from "./Grid/Grid";
 import List from "./List/List";
 
@@ -7,6 +12,7 @@ import "./Home.scss";
 
 function Home() {
 	const [isList, setIsList] = useState(false);
+	const userInitialised = useStore(state => state.user)?.initialised;
 
 	function switchDisplayMode() {
 		setIsList(c => !c);
@@ -14,6 +20,11 @@ function Home() {
 
 	return (
 		<main className="main-page">
+			{userInitialised === false && (
+				<WarningCard>
+					Uzupełnij swój profil, aby móc dodawać ogłoszenia <NavLink to="/profile">Przejdź do profilu</NavLink>
+				</WarningCard>
+			)}
 			<form className="main-page__search-container">
 				<label htmlFor="search">Szukaj produktów</label>
 				<input type="search" id="search" placeholder="np. Ozdoby świąteczne" />
@@ -40,6 +51,15 @@ function Home() {
 			</section>
 			{isList ? <List /> : <Grid />}
 		</main>
+	);
+}
+
+function WarningCard({ children }) {
+	return (
+		<div className="warning-card">
+			<i className="fas fa-exclamation-triangle"></i>
+			{children}
+		</div>
 	);
 }
 

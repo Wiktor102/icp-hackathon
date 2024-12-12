@@ -3,6 +3,9 @@
 .contact-info {
 	@include elevated-container;
 	align-self: flex-end;
+	position: relative;
+	overflow: hidden;
+	overflow: clip;
 
 	& > div {
 		display: flex;
@@ -46,5 +49,15 @@
 	button {
 		margin-block-start: 1.5rem;
 		border-color: var(--accent-highlight);
+	}
+
+	&__loading-container {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background-color: rgba(0, 0, 0, 0.5);
 	}
 }
