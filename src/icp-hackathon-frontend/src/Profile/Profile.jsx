@@ -2,7 +2,7 @@ import { useIdentity } from "@nfid/identitykit/react";
 import { Link, useNavigate } from "react-router";
 
 // components
-import ContactInfo from "../common/ContactInfo/ContactInfo";
+import ContactInfo from "../common/components/ContactInfo/ContactInfo";
 
 import "./Profile.scss";
 import Grid from "../Home/Grid/Grid";

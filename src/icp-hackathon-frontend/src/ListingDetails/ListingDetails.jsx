@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router";
 
 import "./ListingDetails.scss";
 import Button from "../common/Button";
-import ContactInfo from "../common/ContactInfo/ContactInfo";
+import ContactInfo from "../common/components/ContactInfo/ContactInfo";
 
 function ListingDetails() {
 	const { listingId } = useParams();

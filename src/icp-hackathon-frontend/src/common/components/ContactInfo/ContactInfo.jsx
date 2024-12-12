@@ -1,5 +1,5 @@
 import { forwardRef, useRef, useState } from "react";
-import OutlinedButton from "../OutlinedButton/OutlinedButton";
+import OutlinedButton from "../../OutlinedButton/OutlinedButton.jsx";
 
 import "./ContactInfo.scss";
 
