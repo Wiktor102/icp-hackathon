@@ -2,9 +2,10 @@ use std::cell::RefCell;
 use crate::listing::Listing;
 use crate::config::Config;
 use crate::user::User;
+use crate::category::Category;
 
 use candid::{self, CandidType, Deserialize};
- 
+mod category;
 mod listing;
 mod config;
 mod user;
@@ -65,6 +66,7 @@ fn add_listing(
     price: u8,
     amount: u8,
     images: Vec<String>,
+    categories_path: String,
 ) -> Result<Listing, String> {
     let caller = ic_cdk::caller();
     let owner = USERS.with(|users| {
@@ -85,7 +87,7 @@ fn add_listing(
         return Err("Desc len is wrong!".to_string());
     }
 
-    let listing = Listing::new(title, description, category, price, amount, owner.unwrap(), images);
+    let listing = Listing::new(title, description, category, price, amount, owner.unwrap(), images, categories_path);
     LISTINGS.with(|listings| listings.borrow_mut().push(listing.clone()));
 
     Ok(listing)
@@ -101,6 +103,11 @@ fn get_config() -> Config {
     CONFIG.with(|config| config.borrow().clone())
 }
 
+#[ic_cdk::query]
+fn get_categories() -> Vec<Category> {
+    let config = CONFIG.with(|config| config.borrow().clone());
+    config.categories
+}
 #[ic_cdk::update]
 fn add_user(name: String, email: String) -> Result<User, String> {
     let caller = ic_cdk::caller();
@@ -114,6 +121,14 @@ fn add_user(name: String, email: String) -> Result<User, String> {
 #[ic_cdk::query]
 fn get_users() -> Vec<User> {
     USERS.with(|users| users.borrow().clone())
+}
+
+#[ic_cdk::query]
+fn get_active_user() -> Option<User> {
+    let caller = ic_cdk::caller();
+    USERS.with(|users| {
+        users.borrow().iter().find(|user| user.id == caller).cloned()
+    })
 }
 
 ic_cdk::export_candid!();

@@ -1,6 +1,6 @@
 use candid::{CandidType, Deserialize};
-use ic_cdk::api::{time, caller};
-use candid::Principal;
+use ic_cdk::api::{time};
+use crate::category::Category;
 
 use crate::User;
 
@@ -14,6 +14,7 @@ pub struct Listing {
     pub amount: u8,
     pub owner: User,
     pub images: Vec<u8>,
+    pub categories_path: String,
 }
 
 impl Listing {
@@ -25,6 +26,7 @@ impl Listing {
         amount: u8,
         owner: User,
         images_strings: Vec<String>,
+        categories_path: String
     ) -> Self {
         Self {
             title,
@@ -35,6 +37,7 @@ impl Listing {
             amount,
             owner,
             images: images_strings.iter().map(|s| s.len() as u8).collect(),
+            categories_path,
         }
     }
 }

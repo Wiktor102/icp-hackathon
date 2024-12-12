@@ -1,5 +1,5 @@
 use candid::{CandidType, Deserialize};
-use ic_cdk::api::{time, caller};
+use ic_cdk::api::{time};
 use candid::Principal;
 #[derive(Clone, CandidType, Deserialize)]
 pub struct User {

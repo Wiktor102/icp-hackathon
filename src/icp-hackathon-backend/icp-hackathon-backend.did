@@ -1,4 +1,6 @@
+type Category = record { name : text; lower_categories : opt Vec };
 type Config = record {
+  categories : vec Category;
   min_description_len : nat16;
   max_description_len : nat16;
   max_title_len : nat8;
@@ -13,6 +15,7 @@ type Listing = record {
   category : text;
   price : nat8;
   amount : nat8;
+  categories_path : text;
   images : blob;
 };
 type Result = variant { Ok : Listing; Err : text };
@@ -24,9 +27,12 @@ type User = record {
   email : text;
   creation_date : nat64;
 };
+type Vec = vec record { name : text; lower_categories : opt Vec };
 service : {
-  add_listing : (text, text, text, nat8, nat8, vec text) -> (Result);
+  add_listing : (text, text, text, nat8, nat8, vec text, text) -> (Result);
   add_user : (text, text) -> (Result_1);
+  get_active_user : () -> (opt User) query;
+  get_categories : () -> (vec Category) query;
   get_config : () -> (Config) query;
   get_listings : () -> (vec Listing) query;
   get_users : () -> (vec User) query;
