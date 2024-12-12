@@ -25,8 +25,15 @@ function Header() {
 	const setUser = useStore(state => state.setUser);
 
 	function createEmptyUser() {
-		backend.add_user("", "").then(response => {
-			setUser(response);
+		backend.add_empty_user().then(({ Err, Ok }) => {
+			if (Err) {
+				console.log(Err);
+				alert("Wystąpił błąd podczas tworzenia użytkownika");
+				return;
+			}
+
+			console.log(Ok);
+			setUser(Ok);
 		});
 	}
 
@@ -34,11 +41,18 @@ function Header() {
 		backend.get_active_user().then(response => {
 			if (Array.isArray(response) && response.length === 0) {
 				createEmptyUser();
-				fetchUser();
 				return;
 			}
 
-			setUser(response[0]);
+			const user = response[0];
+			user.initialised = !(
+				user.name === "" &&
+				user.email === "" &&
+				user.phone_number === "" &&
+				user.company_name === ""
+			);
+
+			setUser(user);
 		});
 	}
 
@@ -49,6 +63,7 @@ function Header() {
 			return;
 		}
 
+		console.log("fetching user");
 		fetchUser();
 	}, [identity]);
 
