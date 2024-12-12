@@ -1,16 +1,18 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 import "./ListingDetails.scss";
 import Button from "../common/Button";
+import ContactInfo from "../common/ContactInfo/ContactInfo";
 
 function ListingDetails() {
 	const { listingId } = useParams();
+	const navigate = useNavigate();
 
 	return (
 		<main className="listing-details">
 			<header className="listing-details__header">
 				<nav>
-					<button>
+					<button onClick={() => navigate(-1)}>
 						<i className="fas fa-arrow-left"></i>
 					</button>
 				</nav>
@@ -28,7 +30,7 @@ function ListingDetails() {
 					<div className="price">234,76 zł</div>
 				</div>
 				{/* <ListingContactForm /> */}
-				<ListingContactInfo />
+				<ContactInfo />
 			</section>
 			<article className="listing-details__description">
 				<h2>Opis produktu</h2>
@@ -75,36 +77,6 @@ function ListingContactForm() {
 				Wyślij <i className="fas fa-envelope"></i>
 			</Button>
 		</form>
-	);
-}
-
-function ListingContactInfo() {
-	return (
-		<section className="listing-details__contact-info">
-			<h3>Dane kontaktowe</h3>
-			<div className="grid">
-				<div>
-					<i className="fas fa-building"></i>
-					<span className="label">Firma:</span>
-					<span>Ubraniex Sp ZOO</span>
-				</div>
-				<div>
-					<i className="fas fa-user"></i>
-					<span className="label">Imię i nazwisko:</span>
-					<span>Jan Kowalski</span>
-				</div>
-				<div>
-					<i className="fas fa-envelope"></i>
-					<span className="label">Adres e-mail:</span>
-					<span>abs@example.com</span>
-				</div>
-				<div>
-					<i className="fa fa-phone"></i>
-					<span className="label">Telefon:</span>
-					<span>123456789</span>
-				</div>
-			</div>
-		</section>
 	);
 }
 
