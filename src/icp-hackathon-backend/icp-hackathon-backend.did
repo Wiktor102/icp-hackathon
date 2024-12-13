@@ -3,9 +3,9 @@ type Config = record {
   categories : vec Category;
   min_description_len : nat16;
   min_user_name_len : nat8;
-  max_company_name_len : nat8;
+  max_company_name_len : nat16;
   max_description_len : nat16;
-  max_user_name_len : nat8;
+  max_user_name_len : nat16;
   max_title_len : nat8;
   min_title_len : nat8;
   min_company_name_len : nat8;
@@ -18,13 +18,14 @@ type Listing = record {
   date : nat64;
   description : text;
   category : text;
-  price : nat8;
-  amount : nat8;
+  price : float64;
+  amount : nat32;
   categories_path : text;
   images : blob;
 };
 type Result = variant { Ok : User; Err : text };
 type Result_1 = variant { Ok : Listing; Err : text };
+type Result_2 = variant { Ok : text; Err : text };
 type SupportedStandard = record { url : text; name : text };
 type User = record {
   id : principal;
@@ -39,9 +40,14 @@ type Vec = vec record { name : text; lower_categories : opt Vec };
 service : {
   add_empty_user : () -> (Result);
   add_favorite_listing : (nat64) -> ();
-  add_listing : (text, text, text, nat8, nat8, vec text, text) -> (Result_1);
+  add_listing : (text, text, text, float64, nat32, vec text, text) -> (
+      Result_1,
+    );
   add_user : (text, text, text, text) -> (Result);
   edit_active_user : (text, text, text, text) -> (opt text);
+  edit_listing : (nat64, text, text, text, float64, nat32, vec text, text) -> (
+      Result_2,
+    );
   get_active_user : () -> (opt User) query;
   get_active_user_favorite_listings : () -> (vec Listing) query;
   get_categories : () -> (vec Category) query;

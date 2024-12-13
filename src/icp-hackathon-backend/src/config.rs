@@ -9,9 +9,9 @@ pub struct Config {
     pub min_title_len: u8,
     pub categories: Vec<Category>,
     pub min_user_name_len: u8,
-    pub max_user_name_len: u8,
+    pub max_user_name_len: u16,
     pub min_company_name_len: u8,
-    pub max_company_name_len: u8,
+    pub max_company_name_len: u16,
 }
 
 impl Config {

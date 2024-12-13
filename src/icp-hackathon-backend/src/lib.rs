@@ -63,8 +63,8 @@ fn add_listing(
     title: String,
     description: String,
     category: String,
-    price: u8,
-    amount: u8,
+    price: f64,
+    amount: u32,
     images: Vec<String>,
     categories_path: String,
 ) -> Result<Listing, String> {
@@ -91,6 +91,53 @@ fn add_listing(
     LISTINGS.with(|listings| listings.borrow_mut().push(listing.clone()));
 
     Ok(listing)
+}
+#[ic_cdk::update]
+fn edit_listing(
+    id: u64,
+    title: String,
+    description: String,
+    category: String,
+    price: f64,
+    amount: u32,
+    images_strings: Vec<String>,
+    categories_path: String,
+) -> Result<String, String> {
+    let caller = ic_cdk::caller(); // Get the Principal of the caller
+
+    // Check config limits
+    let config = CONFIG.with(|config| config.borrow().clone());
+    if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
+        return Err("Title length is invalid!".to_string());
+    }
+    if description.len() > config.max_description_len as usize || description.len() < config.min_description_len as usize {
+        return Err("Description length is invalid!".to_string());
+    }
+
+    LISTINGS.with(|listings| {
+        let mut listings = listings.borrow_mut();
+
+        // Find the listing by id
+        if let Some(listing) = listings.iter_mut().find(|listing| listing.id == id) {
+            // Check if the caller is the owner
+            if listing.owner.id != caller {
+                return Err("Permission denied: You are not the owner of this listing.".to_string());
+            }
+
+            // Update the listing fields
+            listing.title = title;
+            listing.description = description;
+            listing.category = category;
+            listing.price = price;
+            listing.amount = amount;
+            listing.images = images_strings.iter().map(|s| s.len() as u8).collect();
+            listing.categories_path = categories_path;
+
+            Ok("Listing updated successfully!".to_string())
+        } else {
+            Err("Listing not found!".to_string())
+        }
+    })
 }
 
 
