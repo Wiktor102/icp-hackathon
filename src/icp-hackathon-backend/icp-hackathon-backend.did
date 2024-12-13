@@ -21,7 +21,7 @@ type Listing = record {
   price : float64;
   amount : nat32;
   categories_path : text;
-  images : blob;
+  images : vec nat64;
 };
 type Result = variant { Ok : User; Err : text };
 type Result_1 = variant { Ok : Listing; Err : text };
