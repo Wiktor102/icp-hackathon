@@ -15,7 +15,7 @@ pub struct Listing {
     pub price: f64,
     pub amount: u32,
     pub owner: User,
-    pub images: Vec<u8>,
+    pub images: Vec<u64>,
     pub categories_path: String,
 }
 
@@ -39,7 +39,7 @@ impl Listing {
             price,
             amount,
             owner,
-            images: images_strings.iter().map(|s| s.len() as u8).collect(),
+            images: images_strings.iter().map(|s| s.len() as u64).collect(),
             categories_path,
         }
     }

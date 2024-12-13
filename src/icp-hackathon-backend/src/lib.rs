@@ -130,7 +130,7 @@ fn edit_listing(
             listing.category = category;
             listing.price = price;
             listing.amount = amount;
-            listing.images = images_strings.iter().map(|s| s.len() as u8).collect();
+            listing.images = images_strings.iter().map(|s| s.len() as u64).collect();
             listing.categories_path = categories_path;
 
             Ok("Listing updated successfully!".to_string())
