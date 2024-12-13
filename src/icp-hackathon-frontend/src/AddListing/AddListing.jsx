@@ -23,6 +23,7 @@ function AddListing() {
 
 	const navigate = useNavigate();
 	const categories = useStore(state => state.categories);
+	const addListings = useStore(state => state.addListings);
 
 	function deletePhoto(i) {
 		setPhotoPaths(p => p.filter((_, j) => i !== j));
@@ -111,8 +112,7 @@ function AddListing() {
 				category.join("/")
 			);
 			if (Ok) {
-				alert("Ogłoszenie zostało dodane");
-				console.log("Listing added:", Ok);
+				addListings(Ok);
 				navigate("/");
 			}
 

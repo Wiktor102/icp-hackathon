@@ -14,12 +14,17 @@
 		padding: 0;
 
 		li {
-			padding: 1rem;
 			transition: background-color 200ms;
 		}
 
 		li:hover {
 			background-color: var(--accent-highlight);
+		}
+
+		a {
+			display: inline-block;
+			width: 100%;
+			padding: 1rem;
 		}
 	}
 
