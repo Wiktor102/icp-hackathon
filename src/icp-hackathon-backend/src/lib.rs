@@ -140,6 +140,53 @@ fn edit_listing(
     })
 }
 
+#[ic_cdk::query]
+fn search_listings_by_keyword(keyword: String) -> Vec<Listing> {
+    LISTINGS.with(|listings| {
+        listings
+            .borrow()
+            .iter()
+            .filter(|listing| {
+                listing.title.contains(&keyword) || listing.description.contains(&keyword)
+            })
+            .cloned()
+            .collect()
+    })
+}
+
+#[ic_cdk::query]
+fn get_listings_by_category(category: String) -> Vec<Listing> {
+    LISTINGS.with(|listings| {
+        listings
+            .borrow()
+            .iter()
+            .filter(|listing| listing.category == category)
+            .cloned()
+            .collect()
+    })
+}
+#[ic_cdk::update]
+fn delete_listing(id: u64) -> Result<String, String> {
+    let caller = ic_cdk::caller(); // Get the Principal of the caller
+
+    LISTINGS.with(|listings| {
+        let mut listings = listings.borrow_mut();
+
+        // Find the index of the listing by id
+        if let Some(index) = listings.iter().position(|listing| listing.id == id) {
+            // Check if the caller is the owner
+            if listings[index].owner.id != caller {
+                return Err("Permission denied: You are not the owner of this listing.".to_string());
+            }
+
+            // Remove the listing
+            listings.remove(index);
+            Ok("Listing deleted successfully!".to_string())
+        } else {
+            Err("Listing not found!".to_string())
+        }
+    })
+}
 
 #[ic_cdk::query]
 fn get_listings() -> Vec<Listing> {

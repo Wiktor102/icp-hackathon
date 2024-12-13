@@ -44,6 +44,7 @@ service : {
       Result_1,
     );
   add_user : (text, text, text, text) -> (Result);
+  delete_listing : (nat64) -> (Result_2);
   edit_active_user : (text, text, text, text) -> (opt text);
   edit_listing : (nat64, text, text, text, float64, nat32, vec text, text) -> (
       Result_2,
@@ -53,7 +54,9 @@ service : {
   get_categories : () -> (vec Category) query;
   get_config : () -> (Config) query;
   get_listings : () -> (vec Listing) query;
+  get_listings_by_category : (text) -> (vec Listing) query;
   get_users : () -> (vec User) query;
   icrc10_supported_standards : () -> (vec SupportedStandard);
   icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);
+  search_listings_by_keyword : (text) -> (vec Listing) query;
 }
