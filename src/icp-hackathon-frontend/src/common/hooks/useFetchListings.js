@@ -1,10 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 import useStore from "../../store/store.js";
 
 function useFetchListings() {
 	const listings = useStore(state => state.listings);
 	const addListings = useStore(state => state.addListings);
+	const fetched = useRef(false);
 
 	async function fetchListings() {
 		try {
@@ -16,7 +17,8 @@ function useFetchListings() {
 	}
 
 	useEffect(() => {
-		if (Object.keys(listings).length > 0) return;
+		if (fetched.current) return;
+		fetched.current = true;
 		fetchListings();
 	}, [listings]);
 }
