@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { NavLink } from "react-router";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { NavLink, useSearchParams } from "react-router";
 
 // hooks
 import useStore from "../store/store.js";
+import { useFetchCategoryListings } from "../common/hooks/useFetchListings.js";
 
 // components
 import Grid from "./Grid/Grid";
@@ -13,12 +14,36 @@ import CategoryNav from "./CategoryNav/CategoryNav.jsx";
 import "./Home.scss";
 
 function Home() {
-	const [isList, setIsList] = useState(false);
 	const userInitialised = useStore(state => state.user)?.initialised;
+	const allListings = useStore(state => state.listings);
+
+	const [listingsToDisplay, setListingsToDisplay] = useState(Object.values(allListings));
+	const [isList, setIsList] = useState(false);
+
+	const fetchCategoryListings = useFetchCategoryListings();
+	const [isPending, startTransition] = useTransition();
+	const [searchParams] = useSearchParams();
+	const category = useMemo(() => searchParams.get("category"), [searchParams]);
 
 	function switchDisplayMode() {
 		setIsList(c => !c);
 	}
+
+	useEffect(() => {
+		if (!category) return;
+		fetchCategoryListings(category);
+	}, [category]);
+
+	useEffect(() => {
+		startTransition(() => {
+			if (!category) {
+				setListingsToDisplay(Object.values(allListings));
+			} else {
+				const filtered = Object.values(allListings).filter(listing => listing.categories_path.startsWith(category));
+				setListingsToDisplay(filtered);
+			}
+		});
+	}, [category, allListings]);
 
 	return (
 		<main className="main-page">
@@ -52,7 +77,12 @@ function Home() {
 					<i className={`fas fa-${isList ? "border-all" : "list"}`}></i>
 				</button>
 			</section>
-			{isList ? <List /> : <Grid />}
+			{isPending && (
+				<div className="ball-clip-rotate">
+					<div></div>
+				</div>
+			)}
+			{!isPending && <>{isList ? <List listings={listingsToDisplay} /> : <Grid listings={listingsToDisplay} />}</>}
 		</main>
 	);
 }

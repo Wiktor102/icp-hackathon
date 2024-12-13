@@ -1,3 +1,5 @@
+import { NavLink } from "react-router";
+
 // hooks
 import useStore from "../../store/store.js";
 
@@ -27,12 +29,12 @@ function CategoryNav() {
 					<ul>
 						{categories.map(({ name, children }, i) => (
 							<li key={i} className="category-item">
-								<button>{name}</button>
+								<NavLink to={`/?category=${name}`}>{name}</NavLink>
 								{children && children.length > 0 && (
 									<ul className="dropdown">
 										{children.map((child, j) => (
 											<li key={j}>
-												<button>{child.name}</button>
+												<NavLink to={`/?category=${name}/${child.name}`}>{child.name}</NavLink>
 											</li>
 										))}
 									</ul>
