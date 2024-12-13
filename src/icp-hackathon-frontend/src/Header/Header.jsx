@@ -24,6 +24,7 @@ function Header() {
 	const previousIdentity = usePrevious(identity);
 	const user = useStore(state => state.user);
 	const setUser = useStore(state => state.setUser);
+	const setUserLoading = useStore(state => state.setUserLoading);
 
 	function parseBackendUser(user) {
 		var user = {
@@ -40,19 +41,24 @@ function Header() {
 		return user;
 	}
 
-	function createEmptyUser() {
-		backend.add_empty_user().then(({ Err, Ok }) => {
+	async function createEmptyUser() {
+		try {
+			const { Ok, Err } = backend.add_empty_user();
 			if (Err) {
 				console.log(Err);
 				alert("Wystąpił błąd podczas tworzenia użytkownika");
 				return;
 			}
 
+			parseBackendUser(Ok);
 			navigate("/profile");
-		});
+		} catch {
+			alert("Wystąpił niezany błąd podczas tworzenia konta. Spróbuj ponownie później.");
+		}
 	}
 
 	function fetchUser() {
+		setUserLoading(true);
 		backend.get_active_user().then(response => {
 			if (Array.isArray(response) && response.length === 0) {
 				createEmptyUser();

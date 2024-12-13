@@ -15,8 +15,17 @@ import "./Profile.scss";
 
 function Profile() {
 	const user = useStore(state => state.user);
+	const loadingUser = useStore(state => state.loadingUser);
 
 	if (useProtectRoute()) return null;
+	if (loadingUser) {
+		return (
+			<div class="ball-clip-rotate">
+				<div></div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="profile-page">
 			<section className="profile-page__header">
