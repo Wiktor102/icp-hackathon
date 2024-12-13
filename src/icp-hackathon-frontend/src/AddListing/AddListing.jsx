@@ -1,23 +1,24 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { useIdentity } from "@nfid/identitykit/react";
 import imageCompression from "browser-image-compression";
 import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
-import Button from "../common/Button";
+// hooks
+import useProtectRoute from "../common/hooks/useProtectRoute.js";
 
-import "./AddListing.scss";
+// components
+import Button from "../common/Button";
 import LoadingOverlay from "../common/components/LoadingOverlay/LoadingOverlay.jsx";
 
+import "./AddListing.scss";
+
 function AddListing() {
-	const identity = useIdentity();
-	const navigate = useNavigate();
-
 	const [photoPaths, setPhotoPaths] = useState([]);
-
 	const [base64Photos, setBase64Photos] = useState([]);
 	const [category, setCategory] = useState([]);
 	const [loading, setLoading] = useState(false);
+
+	const navigate = useNavigate();
 
 	function deletePhoto(i) {
 		setPhotoPaths(p => p.filter((_, j) => i !== j));
@@ -122,11 +123,7 @@ function AddListing() {
 		}
 	}
 
-	// if (!identity) {
-	// 	navigate("/");
-	// 	return null;
-	// }
-
+	if (useProtectRoute()) return null;
 	return (
 		<main className="add-listing">
 			<h1>Dodaj ogłoszenie</h1>

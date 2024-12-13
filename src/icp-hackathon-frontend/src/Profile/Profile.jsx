@@ -1,8 +1,8 @@
-import { useIdentity } from "@nfid/identitykit/react";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 
 // hooks
 import useStore from "../store/store.js";
+import useProtectRoute from "../common/hooks/useProtectRoute.js";
 
 // components
 import ContactInfo from "../common/components/ContactInfo/ContactInfo";
@@ -14,15 +14,9 @@ import avatarImg from "../assets/avatar.png";
 import "./Profile.scss";
 
 function Profile() {
-	const identity = useIdentity();
-	const navigate = useNavigate();
 	const user = useStore(state => state.user);
 
-	if (!identity) {
-		navigate("/");
-		return null;
-	}
-
+	if (useProtectRoute()) return null;
 	return (
 		<div className="profile-page">
 			<section className="profile-page__header">
@@ -33,7 +27,7 @@ function Profile() {
 					<ContactInfo editButton />
 				</div>
 				<Link to="/add">
-					<Button onClick={() => navigate("/add")}>
+					<Button>
 						<i className="fas fa-plus"></i> Dodaj ogłoszenie
 					</Button>
 				</Link>
