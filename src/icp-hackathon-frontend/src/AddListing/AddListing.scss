@@ -6,6 +6,8 @@
 	form {
 		@include elevated-container;
 		padding: 1.5rem 2rem;
+		position: relative;
+		overflow: hidden;
 
 		& > button {
 			margin-block-start: 2rem;

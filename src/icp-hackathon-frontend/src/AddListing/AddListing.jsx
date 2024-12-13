@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
-import { useIdentity } from "@nfid/identitykit/react";
 import { useNavigate } from "react-router";
+import { useIdentity } from "@nfid/identitykit/react";
 import imageCompression from "browser-image-compression";
+import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
 import Button from "../common/Button";
 
 import "./AddListing.scss";
+import LoadingOverlay from "../common/components/LoadingOverlay/LoadingOverlay.jsx";
 
 function AddListing() {
 	const identity = useIdentity();
@@ -15,6 +17,7 @@ function AddListing() {
 
 	const [base64Photos, setBase64Photos] = useState([]);
 	const [category, setCategory] = useState([]);
+	const [loading, setLoading] = useState(false);
 
 	function deletePhoto(i) {
 		setPhotoPaths(p => p.filter((_, j) => i !== j));
@@ -56,6 +59,69 @@ function AddListing() {
 		}
 	}
 
+	async function saveListing(e) {
+		e.preventDefault();
+		const formData = new FormData(e.target);
+		const title = formData.get("title");
+		const description = formData.get("description");
+		const price = +formData.get("price");
+		const amount = +formData.get("amount");
+		const images = base64Photos;
+
+		if (isNaN(price) || isNaN(amount)) {
+			alert("Cena i ilość muszą być liczbami");
+			return;
+		}
+
+		if (price <= 0) {
+			alert("Cena musi być większa od 0");
+			return;
+		}
+
+		if (amount <= 0) {
+			alert("Ilość musi być większa od 0");
+			return;
+		}
+
+		if (images.length === 0) {
+			alert("Dodaj co najmniej 1 zdjęcie produktu");
+			return;
+		}
+
+		if (category.length === 0) {
+			alert("Wybierz kategorię");
+			return;
+		}
+
+		setLoading(true);
+
+		try {
+			const { Ok, Err } = await backend.add_listing(
+				title,
+				description,
+				category.at(-1),
+				price,
+				amount,
+				images,
+				category.join("/")
+			);
+			if (Ok) {
+				alert("Ogłoszenie zostało dodane");
+				console.log("Listing added:", Ok);
+				navigate("/");
+			}
+
+			if (Err) {
+				alert("Wystąpił błąd podczas dodawania ogłoszenia: " + Err);
+			}
+		} catch (error) {
+			alert("Wystąpił nieznany błąd podczas dodawania ogłoszenia. Prosimy spróbować ponownie później.");
+			console.error(error);
+		} finally {
+			setLoading(false);
+		}
+	}
+
 	// if (!identity) {
 	// 	navigate("/");
 	// 	return null;
@@ -64,7 +130,7 @@ function AddListing() {
 	return (
 		<main className="add-listing">
 			<h1>Dodaj ogłoszenie</h1>
-			<form className="add-listing-form">
+			<form className="add-listing-form" onSubmit={saveListing}>
 				<div className="form-group" id="title-group">
 					<i className="fas fa-heading"></i>
 					<label htmlFor="title">Tytuł</label>
@@ -115,6 +181,12 @@ function AddListing() {
 							<input type="number" id="price" name="price" min="0" step="0.01" />
 						</div>
 
+						<div className="form-group">
+							<i className="fas fa-scale-unbalanced"></i>
+							<label htmlFor="amount">Dostępna ilość (szt.)</label>
+							<input type="number" id="amount" name="amount" min="0" step="1" />
+						</div>
+
 						<div className="form-group" id="category-group">
 							<i className="fas fa-icons"></i>
 							<label htmlFor="category">Kategoria</label>
@@ -123,10 +195,11 @@ function AddListing() {
 					</div>
 				</div>
 
-				<Button>
+				<Button type="submit">
 					<i className="fas fa-check"></i>
 					Dodaj ogłoszenie
 				</Button>
+				{loading && <LoadingOverlay />}
 			</form>
 		</main>
 	);

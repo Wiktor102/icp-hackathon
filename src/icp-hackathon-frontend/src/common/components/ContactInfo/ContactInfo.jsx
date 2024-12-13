@@ -133,13 +133,7 @@ function ContactInfo({ editButton = false }) {
 							<span>{user.initialised ? user.phone : "???"}</span>
 						)}
 					</div>
-					{loading && (
-						<div className="contact-info__loading-container">
-							<div class="ball-clip-rotate">
-								<div></div>
-							</div>
-						</div>
-					)}
+					{loading && <LoadingOverlay />}
 				</Wrapper>
 				{editButton && (
 					<OutlinedButton onClick={onClick}>
