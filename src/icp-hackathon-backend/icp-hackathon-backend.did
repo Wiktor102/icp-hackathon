@@ -14,6 +14,7 @@ type Icrc28TrustedOriginsResponse = record { trusted_origins : vec text };
 type Listing = record {
   id : nat64;
   title : text;
+  reviews : opt vec Review;
   owner : User;
   date : nat64;
   description : text;
@@ -26,6 +27,8 @@ type Listing = record {
 type Result = variant { Ok : User; Err : text };
 type Result_1 = variant { Ok : Listing; Err : text };
 type Result_2 = variant { Ok : text; Err : text };
+type Result_3 = variant { Ok : vec Review; Err : text };
+type Review = record { comment : text; owner_id : principal; rating : nat8 };
 type SupportedStandard = record { url : text; name : text };
 type User = record {
   id : principal;
@@ -43,18 +46,22 @@ service : {
   add_listing : (text, text, text, float64, nat32, vec text, text) -> (
       Result_1,
     );
+  add_review : (nat64, nat8, text) -> (opt text);
   add_user : (text, text, text, text) -> (Result);
-  delete_listing : (nat64) -> (Result_2);
+  delete_listing : (nat64) -> (opt text);
+  delete_review : (nat64) -> (opt text);
   edit_active_user : (text, text, text, text) -> (opt text);
   edit_listing : (nat64, text, text, text, float64, nat32, vec text, text) -> (
       Result_2,
     );
+  edit_review : (nat64, nat8, text) -> (opt text);
   get_active_user : () -> (opt User) query;
   get_active_user_favorite_listings : () -> (vec Listing) query;
   get_categories : () -> (vec Category) query;
   get_config : () -> (Config) query;
   get_listings : () -> (vec Listing) query;
   get_listings_by_category : (text) -> (vec Listing) query;
+  get_reviews_of_listing : (nat64) -> (Result_3) query;
   get_users : () -> (vec User) query;
   icrc10_supported_standards : () -> (vec SupportedStandard);
   icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);

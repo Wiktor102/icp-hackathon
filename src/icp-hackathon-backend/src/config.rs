@@ -26,53 +26,54 @@ impl Config {
             min_company_name_len: 5,
             max_company_name_len: 50,
             categories: vec![
-                Category::new("Electronics".to_string(), Some(vec![
-                    Category::new("Mobile Phones".to_string(), None),
-                    Category::new("Laptops".to_string(), None),
-                    Category::new("Television".to_string(), None),
-                    Category::new("Cameras".to_string(), None),
-                    Category::new("Other".to_string(), None),
+                Category::new("Elektronika".to_string(), Some(vec![
+                    Category::new("Telefony komórkowe".to_string(), None),
+                    Category::new("Laptopy".to_string(), None),
+                    Category::new("Telewizory".to_string(), None),
+                    Category::new("Kamery".to_string(), None),
+                    Category::new("Inne".to_string(), None),
                 ])),
                 
-                Category::new("Home & Garden".to_string(), Some(vec![
-                    Category::new("Furniture".to_string(), None),
-                    Category::new("Appliances".to_string(), None),
-                    Category::new("Gardening Tools".to_string(), None),
-                    Category::new("Other".to_string(), None),
+                Category::new("Dom i ogród".to_string(), Some(vec![
+                    Category::new("Meble".to_string(), None),
+                    Category::new("Sprzęt AGD".to_string(), None),
+                    Category::new("Narzędzia ogrodowe".to_string(), None),
+                    Category::new("Inne".to_string(), None),
                 ])),
-
-                Category::new("Fashion".to_string(), Some(vec![
-                    Category::new("Clothing".to_string(), None),
-                    Category::new("Shoes".to_string(), None),
-                    Category::new("Accessories".to_string(), None),
-                    Category::new("Other".to_string(), None),
+                
+                Category::new("Moda".to_string(), Some(vec![
+                    Category::new("Odzież".to_string(), None),
+                    Category::new("Obuwie".to_string(), None),
+                    Category::new("Akcesoria".to_string(), None),
+                    Category::new("Inne".to_string(), None),
                 ])),
-
-                Category::new("Vehicles".to_string(), Some(vec![
-                    Category::new("Cars".to_string(), None),
-                    Category::new("Motorcycles".to_string(), None),
-                    Category::new("Bicycles".to_string(), None),
-                    Category::new("Other".to_string(), None),
+                
+                Category::new("Pojazdy".to_string(), Some(vec![
+                    Category::new("Samochody".to_string(), None),
+                    Category::new("Motocykle".to_string(), None),
+                    Category::new("Rowery".to_string(), None),
+                    Category::new("Inne".to_string(), None),
                 ])),
-
-                Category::new("Agriculture".to_string(), Some(vec![
-                    Category::new("Crops".to_string(), None),
-                    Category::new("Animal Farming".to_string(), None),
-                    Category::new("Other".to_string(), None),
+                
+                Category::new("Rolnictwo".to_string(), Some(vec![
+                    Category::new("Uprawy".to_string(), None),
+                    Category::new("Hodowla zwierząt".to_string(), None),
+                    Category::new("Inne".to_string(), None),
                 ])),
-
-                Category::new("Hand-Made".to_string(), Some(vec![
-                    Category::new("Jewelry".to_string(), None),
-                    Category::new("Home Decor".to_string(), None),
-                    Category::new("Other".to_string(), None),
+                
+                Category::new("Rękodzieło".to_string(), Some(vec![
+                    Category::new("Biżuteria".to_string(), None),
+                    Category::new("Dekoracje do domu".to_string(), None),
+                    Category::new("Inne".to_string(), None),
                 ])),
-
-                Category::new("Books".to_string(), Some(vec![
-                    Category::new("Fiction".to_string(), None),
-                    Category::new("Non-Fiction".to_string(), None),
-                    Category::new("Comics".to_string(), None),
-                    Category::new("Other ".to_string(), None),
+                
+                Category::new("Książki".to_string(), Some(vec![
+                    Category::new("Fikcja".to_string(), None),
+                    Category::new("Literatura faktu".to_string(), None),
+                    Category::new("Komiksy".to_string(), None),
+                    Category::new("Inne".to_string(), None),
                 ])),
+                
             ],
         }
     }

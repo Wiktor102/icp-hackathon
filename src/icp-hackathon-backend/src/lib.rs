@@ -3,12 +3,15 @@ use crate::listing::Listing;
 use crate::config::Config;
 use crate::user::User;
 use crate::category::Category;
+use crate::review::Review;
 use regex::Regex;
 use candid::{self, CandidType, Deserialize};
+
 mod category;
 mod listing;
 mod config;
 mod user;
+mod review;
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug)]
 pub struct SupportedStandard {
@@ -166,7 +169,7 @@ fn get_listings_by_category(category: String) -> Vec<Listing> {
     })
 }
 #[ic_cdk::update]
-fn delete_listing(id: u64) -> Result<String, String> {
+fn delete_listing(id: u64) -> Option<String> {
     let caller = ic_cdk::caller(); // Get the Principal of the caller
 
     LISTINGS.with(|listings| {
@@ -176,14 +179,14 @@ fn delete_listing(id: u64) -> Result<String, String> {
         if let Some(index) = listings.iter().position(|listing| listing.id == id) {
             // Check if the caller is the owner
             if listings[index].owner.id != caller {
-                return Err("Permission denied: You are not the owner of this listing.".to_string());
+                return Some("Permission denied: You are not the owner of this listing.".to_string());
             }
 
             // Remove the listing
             listings.remove(index);
-            Ok("Listing deleted successfully!".to_string())
+            return None; // No response if the listing is deleted successfully
         } else {
-            Err("Listing not found!".to_string())
+            return Some("Listing not found!".to_string());
         }
     })
 }
@@ -357,6 +360,119 @@ fn get_active_user_favorite_listings() -> Vec<Listing> {
     }
     return favorites;
 }
+#[ic_cdk::query]
+fn get_reviews_of_listing(listing_id: u64) -> Result<Vec<Review>, String> {
+    LISTINGS.with(|listings| {
+        let listings = listings.borrow();
+        
+        if let Some(listing) = listings.iter().find(|listing| listing.id == listing_id) {
+            if let Some(reviews) = &listing.reviews {
+                Ok(reviews.clone())
+            } else {
+                Err("No reviews for this listing.".to_string())
+            }
+        } else {
+            Err("Listing not found.".to_string())
+        }
+    })
+}
+
+#[ic_cdk::update]
+fn add_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
+    let caller = ic_cdk::caller();
+
+    if rating > 5 {
+        return Some("Rating must be between 0 and 5.".to_string());
+    }
+
+    let owner = USERS.with(|users| {
+        users.borrow().iter().find(|user| user.id == caller).cloned()
+    });
+
+    if owner.is_none() {
+        return Some("User not found!".to_string());
+    }
+
+    LISTINGS.with(|listings| {
+        let mut listings = listings.borrow_mut();
+
+        if let Some(listing) = listings.iter_mut().find(|listing| listing.id == listing_id) {
+           
+            if let Some(reviews) = &listing.reviews {
+                if reviews.iter().any(|review| review.owner_id == caller) {
+                    return Some("You have already added a review for this listing.".to_string());
+                }
+            }
+
+            let review = Review::new(caller, rating, comment);
+
+            if let Some(ref mut reviews) = listing.reviews {
+                reviews.push(review);
+            } else {
+                listing.reviews = Some(vec![review]);
+            }
+
+            None // Success, no response
+        } else {
+            Some("Listing not found.".to_string()) // Error: listing not found
+        }
+    })
+}
+
+
+
+#[ic_cdk::update]
+fn edit_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
+    let caller = ic_cdk::caller();
+
+    if rating > 5 {
+        return Some("Rating must be between 0 and 5.".to_string());
+    }
+
+    let owner = USERS.with(|users| {
+        users.borrow().iter().find(|user| user.id == caller).cloned()
+    });
+
+    if owner.is_none() {
+        return Some("User not found!".to_string());
+    }
+
+    LISTINGS.with(|listings| {
+        let mut listings = listings.borrow_mut();
+        if let Some(listing) = listings.iter_mut().find(|listing| listing.id == listing_id) {
+            if let Some(ref mut reviews) = listing.reviews {
+                if let Some(review) = reviews.iter_mut().find(|review| review.owner_id == caller) {
+                    review.rating = rating;
+                    review.comment = comment;
+                    return None; // Success, no response
+                }
+            }
+            Some("Review not found.".to_string()) // Error: review not found
+        } else {
+            Some("Listing not found.".to_string()) // Error: listing not found
+        }
+    })
+}
+
+#[ic_cdk::update]
+fn delete_review(listing_id: u64) -> Option<String> {
+    let caller = ic_cdk::caller();
+    LISTINGS.with(|listings| {
+        let mut listings = listings.borrow_mut();
+        if let Some(listing) = listings.iter_mut().find(|listing| listing.id == listing_id) {
+            if let Some(ref mut reviews) = listing.reviews {
+                if let Some(index) = reviews.iter().position(|review| review.owner_id == caller) {
+                    reviews.remove(index);
+                    return None; // Success, no response
+                }
+            }
+            Some("Review not found.".to_string()) // Error: review not found
+        } else {
+            Some("Listing not found.".to_string()) // Error: listing not found
+        }
+    })
+}
+
 
 ic_cdk::export_candid!();
 

@@ -3,6 +3,7 @@ use ic_cdk::api::{time};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::User;
+use crate::review::Review;
 static AMOUNT_OF_LISTINGS: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone, CandidType, Deserialize, Debug)]
@@ -17,6 +18,7 @@ pub struct Listing {
     pub owner: User,
     pub images: Vec<u64>,
     pub categories_path: String,
+    pub reviews: Option<Vec<Review>>,
 }
 
 impl Listing {
@@ -41,6 +43,7 @@ impl Listing {
             owner,
             images: images_strings.iter().map(|s| s.len() as u64).collect(),
             categories_path,
+            reviews: None,
         }
     }
 }
