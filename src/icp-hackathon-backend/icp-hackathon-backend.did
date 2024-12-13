@@ -22,12 +22,13 @@ type Listing = record {
   price : float64;
   amount : nat32;
   categories_path : text;
-  images : vec nat64;
+  images : vec blob;
 };
 type Result = variant { Ok : User; Err : text };
 type Result_1 = variant { Ok : Listing; Err : text };
 type Result_2 = variant { Ok : text; Err : text };
-type Result_3 = variant { Ok : vec Review; Err : text };
+type Result_3 = variant { Ok : vec Listing; Err : text };
+type Result_4 = variant { Ok : vec Review; Err : text };
 type Review = record { comment : text; owner_id : principal; rating : nat8 };
 type SupportedStandard = record { url : text; name : text };
 type User = record {
@@ -59,9 +60,11 @@ service : {
   get_active_user_favorite_listings : () -> (vec Listing) query;
   get_categories : () -> (vec Category) query;
   get_config : () -> (Config) query;
+  get_listing_by_id : (nat64) -> (opt Listing) query;
   get_listings : () -> (vec Listing) query;
+  get_listings_by_active_user : () -> (Result_3) query;
   get_listings_by_category : (text) -> (vec Listing) query;
-  get_reviews_of_listing : (nat64) -> (Result_3) query;
+  get_reviews_of_listing : (nat64) -> (Result_4) query;
   get_users : () -> (vec User) query;
   icrc10_supported_standards : () -> (vec SupportedStandard);
   icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);

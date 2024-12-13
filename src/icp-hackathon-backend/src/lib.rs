@@ -6,6 +6,7 @@ use crate::category::Category;
 use crate::review::Review;
 use regex::Regex;
 use candid::{self, CandidType, Deserialize};
+use base64;
 
 mod category;
 mod listing;
@@ -133,7 +134,9 @@ fn edit_listing(
             listing.category = category;
             listing.price = price;
             listing.amount = amount;
-            listing.images = images_strings;
+            listing.images = images_strings.iter()
+            .map(|s| base64::decode(s).expect("Invalid Base64 image"))
+            .collect();
             listing.categories_path = categories_path;
 
             Ok("Listing updated successfully!".to_string())
@@ -195,6 +198,18 @@ fn delete_listing(id: u64) -> Option<String> {
 fn get_listings() -> Vec<Listing> {
     LISTINGS.with(|listings| listings.borrow().clone())
 }
+
+#[ic_cdk::query]
+fn get_listing_by_id(id: u64) -> Option<Listing> {
+    LISTINGS.with(|listings| {
+        listings
+            .borrow()
+            .iter()
+            .find(|listing| listing.id == id)
+            .cloned() // Klonowanie, aby zwrócić pełny obiekt Listing
+    })
+}
+
 #[ic_cdk::query]
 fn get_config() -> Config {
     CONFIG.with(|config| config.borrow().clone())
@@ -360,6 +375,30 @@ fn get_active_user_favorite_listings() -> Vec<Listing> {
     }
     return favorites;
 }
+
+#[ic_cdk::query]
+fn get_listings_by_active_user() -> Result<Vec<Listing>, String> {
+    let caller = ic_cdk::caller();
+
+    let owner = USERS.with(|users| {
+        users.borrow().iter().find(|user| user.id == caller).cloned()
+    });
+
+    if owner.is_none() {
+        return Err("User not found!".to_string());
+    }
+
+    let user_listings = LISTINGS.with(|listings| {
+        listings
+            .borrow()
+            .iter()
+            .filter(|listing| listing.owner.id == caller)
+            .cloned() // Klonowanie wyników
+            .collect() // Zwracanie wyników jako wektor
+    });
+    Ok(user_listings)
+}
+
 #[ic_cdk::query]
 fn get_reviews_of_listing(listing_id: u64) -> Result<Vec<Review>, String> {
     LISTINGS.with(|listings| {

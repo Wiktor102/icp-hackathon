@@ -1,6 +1,7 @@
 use candid::{CandidType, Deserialize};
 use ic_cdk::api::{time};
 use std::sync::atomic::{AtomicU64, Ordering};
+use base64;
 
 use crate::User;
 use crate::review::Review;
@@ -16,7 +17,7 @@ pub struct Listing {
     pub price: f64,
     pub amount: u32,
     pub owner: User,
-    pub images: Vec<String>,
+    pub images: Vec<Vec<u8>>,
     pub categories_path: String,
     pub reviews: Option<Vec<Review>>,
 }
@@ -29,9 +30,13 @@ impl Listing {
         price: f64,
         amount: u32,
         owner: User,
-        images_strings: Vec<String>, // Pełne dane Base64
+        images_strings: Vec<String>,
         categories_path: String,
     ) -> Self {
+        let images = images_strings
+            .iter()
+            .map(|s| base64::decode(s).expect("Invalid Base64 image"))
+            .collect();
         Self {
             id: AMOUNT_OF_LISTINGS.fetch_add(1, Ordering::SeqCst),
             title,
@@ -41,10 +46,11 @@ impl Listing {
             price,
             amount,
             owner,
-            images: images_strings,
+            images,
             categories_path,
             reviews: None,
         }
     }
 }
+
 
