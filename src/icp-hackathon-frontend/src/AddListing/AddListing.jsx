@@ -16,12 +16,13 @@ import LoadingOverlay from "../common/components/LoadingOverlay/LoadingOverlay.j
 import "./AddListing.scss";
 
 function AddListing() {
-	const [photoPaths, setPhotoPaths] = useState([]);
-	const [base64Photos, setBase64Photos] = useState([]);
 	const [category, setCategory] = useState([]);
 	const [loading, setLoading] = useState(false);
+	const [photoPaths, setPhotoPaths] = useState([]);
+	const [base64Photos, setBase64Photos] = useState([]);
 
 	const navigate = useNavigate();
+	const categories = useStore(state => state.categories);
 
 	function deletePhoto(i) {
 		setPhotoPaths(p => p.filter((_, j) => i !== j));
@@ -126,7 +127,15 @@ function AddListing() {
 		}
 	}
 
-	if (useProtectRoute() !== "ok") return null;
+	const protection = useProtectRoute();
+	if (protection === "error") return null;
+	if (protection === "loading" || !categories) {
+		return (
+			<div className="ball-clip-rotate">
+				<div></div>
+			</div>
+		);
+	}
 	return (
 		<main className="add-listing">
 			<PageHeader>
@@ -192,7 +201,7 @@ function AddListing() {
 						<div className="form-group" id="category-group">
 							<i className="fas fa-icons"></i>
 							<label htmlFor="category">Kategoria</label>
-							<CategorySelector value={category} onSelect={setCategory} />
+							<CategorySelector categories={categories} value={category} onSelect={setCategory} />
 						</div>
 					</div>
 				</div>
@@ -207,26 +216,7 @@ function AddListing() {
 	);
 }
 
-function CategorySelector({ value, onSelect }) {
-	const [categories] = useState([
-		{ name: "Electronics", children: [{ name: "Computers" }, { name: "Phones" }, { name: "Accessories" }] },
-		{
-			name: "Clothing",
-			children: [
-				{ name: "Men's", children: [{ name: "underware" }, { name: "shirts" }] },
-				{ name: "Women's" },
-				{ name: "Children's" }
-			]
-		},
-		{ name: "Books" },
-		{ name: "Home & Garden" },
-		{ name: "Toys" },
-		{ name: "Sports" },
-		{ name: "Health & Beauty" },
-		{ name: "Music" },
-		{ name: "Other" }
-	]);
-
+function CategorySelector({ categories, value, onSelect }) {
 	const [selectedPath, setSelectedPath] = useState([]);
 
 	const currentLevel = useMemo(() => {
