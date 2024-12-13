@@ -1,0 +1,5 @@
+@use ".././common/scss/mixins.scss" as *;
+
+.favorites-page {
+	@include page-container;
+}
