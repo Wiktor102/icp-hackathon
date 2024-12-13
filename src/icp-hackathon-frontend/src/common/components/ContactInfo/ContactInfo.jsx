@@ -5,6 +5,7 @@ import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-bac
 import useStore from "../../../store/store.js";
 
 // components
+import LoadingOverlay from "../LoadingOverlay/LoadingOverlay.jsx";
 import OutlinedButton from "../../OutlinedButton/OutlinedButton.jsx";
 
 import "./ContactInfo.scss";

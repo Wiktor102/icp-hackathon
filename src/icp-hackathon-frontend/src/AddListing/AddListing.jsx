@@ -5,13 +5,15 @@ import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-bac
 
 // hooks
 import useProtectRoute from "../common/hooks/useProtectRoute.js";
+import useStore from "../store/store.js";
 
 // components
 import Button from "../common/Button";
+import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
 import LoadingOverlay from "../common/components/LoadingOverlay/LoadingOverlay.jsx";
 
+// styles
 import "./AddListing.scss";
-import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
 
 function AddListing() {
 	const [photoPaths, setPhotoPaths] = useState([]);
@@ -124,7 +126,7 @@ function AddListing() {
 		}
 	}
 
-	if (useProtectRoute()) return null;
+	if (useProtectRoute() !== "ok") return null;
 	return (
 		<main className="add-listing">
 			<PageHeader>

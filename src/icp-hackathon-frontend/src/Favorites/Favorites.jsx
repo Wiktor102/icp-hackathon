@@ -8,7 +8,7 @@ import List from "../Home/List/List.jsx";
 import "./Favorites.scss";
 
 function Favorites() {
-	// if (useProtectRoute()) return null;
+	if (useProtectRoute() !== "ok") return null;
 	return (
 		<div className="favorites-page">
 			<PageHeader>

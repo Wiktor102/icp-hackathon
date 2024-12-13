@@ -1,16 +1,17 @@
-import { useIdentity } from "@nfid/identitykit/react";
+import { useIdentity, useIsInitializing } from "@nfid/identitykit/react";
 import { useNavigate } from "react-router";
 
 function useProtectRoute() {
 	const identity = useIdentity();
 	const navigate = useNavigate();
+	const isInitializing = useIsInitializing();
 
-	if (!identity) {
+	if (!identity && !isInitializing) {
 		navigate("/");
-		return true;
+		return "error";
 	}
 
-	return false;
+	return isInitializing ? "loading" : "ok";
 }
 
 export default useProtectRoute;

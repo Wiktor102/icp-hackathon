@@ -18,8 +18,8 @@ function Profile() {
 	const user = useStore(state => state.user);
 	const loadingUser = useStore(state => state.loadingUser);
 
-	if (useProtectRoute()) return null;
-	if (loadingUser) {
+	if (useProtectRoute() === "error") return null;
+	if (useProtectRoute() === "loading" || loadingUser) {
 		return (
 			<div class="ball-clip-rotate">
 				<div></div>
