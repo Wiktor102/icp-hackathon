@@ -11,16 +11,18 @@ import "./CategoryNav.scss";
 
 function CategoryNav() {
 	const categories = useStore(state => state.categories);
+	// const categories = null;
 
-	if (!categories) {
-		return <Loader />;
-	}
 	return (
 		<section className="main-page__category-selector">
 			<h4>Kategorie produktów</h4>
-			{!categories && <Loader />}
-			{categories && (
-				<nav className="main-page__category-selector__nav">
+			<nav className="main-page__category-selector__nav">
+				{!categories && (
+					<div className="main-page__category-selector__loader-container">
+						<Loader />
+					</div>
+				)}
+				{categories && (
 					<ul>
 						{categories.map(({ name, children }, i) => (
 							<li key={i} className="category-item">
@@ -37,8 +39,8 @@ function CategoryNav() {
 							</li>
 						))}
 					</ul>
-				</nav>
-			)}
+				)}
+			</nav>
 		</section>
 	);
 }

@@ -5,6 +5,13 @@
 		font-size: 1.25rem;
 	}
 
+	&__loader-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 3.25rem;
+	}
+
 	button {
 		all: unset;
 	}
@@ -12,6 +19,7 @@
 	ul {
 		list-style-type: none;
 		padding: 0;
+		margin: 0;
 
 		li {
 			transition: background-color 200ms;
