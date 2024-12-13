@@ -16,7 +16,7 @@ pub struct Listing {
     pub price: f64,
     pub amount: u32,
     pub owner: User,
-    pub images: Vec<u64>,
+    pub images: Vec<String>,
     pub categories_path: String,
     pub reviews: Option<Vec<Review>>,
 }
@@ -29,8 +29,8 @@ impl Listing {
         price: f64,
         amount: u32,
         owner: User,
-        images_strings: Vec<String>,
-        categories_path: String
+        images_strings: Vec<String>, // Pełne dane Base64
+        categories_path: String,
     ) -> Self {
         Self {
             id: AMOUNT_OF_LISTINGS.fetch_add(1, Ordering::SeqCst),
@@ -41,9 +41,10 @@ impl Listing {
             price,
             amount,
             owner,
-            images: images_strings.iter().map(|s| s.len() as u64).collect(),
+            images: images_strings,
             categories_path,
             reviews: None,
         }
     }
 }
+
