@@ -1,10 +1,10 @@
-use candid::{CandidType, Deserialize};
-use ic_cdk::api::{time};
-use std::sync::atomic::{AtomicU64, Ordering};
 use base64;
-
-use crate::User;
+use candid::{CandidType, Deserialize};
+use ic_cdk::api::time;
+use std::sync::atomic::{AtomicU64, Ordering};
 use crate::review::Review;
+use crate::user::User;
+
 static AMOUNT_OF_LISTINGS: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone, CandidType, Deserialize, Debug)]
@@ -17,7 +17,7 @@ pub struct Listing {
     pub price: f64,
     pub amount: u32,
     pub owner: User,
-    pub images: Vec<Vec<u8>>,
+    pub images: Vec<String>, // Zmieniamy na Vec<String> przechowujący Base64
     pub categories_path: String,
     pub reviews: Option<Vec<Review>>,
 }
@@ -33,10 +33,12 @@ impl Listing {
         images_strings: Vec<String>,
         categories_path: String,
     ) -> Self {
+        // Zakodowanie Base64 dla każdego obrazu
         let images = images_strings
             .iter()
-            .map(|s| base64::decode(s).expect("Invalid Base64 image"))
-            .collect();
+            .map(|s| base64::encode(s)) // Zakodowanie w Base64
+            .collect(); // Kolekcjonowanie do Vec<String>
+        
         Self {
             id: AMOUNT_OF_LISTINGS.fetch_add(1, Ordering::SeqCst),
             title,
@@ -52,5 +54,3 @@ impl Listing {
         }
     }
 }
-
-

@@ -61,7 +61,6 @@ thread_local! {
     static LISTINGS: RefCell<Vec<Listing>> = RefCell::new(Vec::new());
     static USERS: RefCell<Vec<User>> = RefCell::new(Vec::new());
 }
-
 #[ic_cdk::update]
 fn add_listing(
     title: String,
@@ -69,33 +68,50 @@ fn add_listing(
     category: String,
     price: f64,
     amount: u32,
-    images: Vec<String>,
+    images: Vec<String>, // Zakłada się, że obrazy są już w formacie Base64
     categories_path: String,
 ) -> Result<Listing, String> {
     let caller = ic_cdk::caller();
+    
+    // Sprawdzenie, czy użytkownik istnieje
     let owner = USERS.with(|users| {
         users.borrow().iter().find(|user| user.id == caller).cloned()
     });
 
-    if owner.is_none() {
-        return Err("User not found!".to_string());
-    }
-    let config = CONFIG.with(|config| config.borrow().clone());
+    if let Some(owner) = owner {
+        let config = CONFIG.with(|config| config.borrow().clone());
 
-    if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
-        return Err("Title len is wrong!".to_string());
-    }
-    if description.len() > config.max_description_len as usize
-        || description.len() < config.min_description_len as usize
-    {
-        return Err("Desc len is wrong!".to_string());
-    }
+        // Walidacja długości tytułu i opisu
+        if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
+            return Err("Title length is out of range!".to_string());
+        }
+        if description.len() > config.max_description_len as usize || description.len() < config.min_description_len as usize {
+            return Err("Description length is out of range!".to_string());
+        }
 
-    let listing = Listing::new(title, description, category, price, amount, owner.unwrap(), images, categories_path);
-    LISTINGS.with(|listings| listings.borrow_mut().push(listing.clone()));
+        // Tworzenie ogłoszenia
+        let listing = Listing::new(
+            title,
+            description,
+            category,
+            price,
+            amount,
+            owner,
+            images, // Zakodowane obrazy w Base64
+            categories_path,
+        );
 
-    Ok(listing)
+        // Dodanie ogłoszenia do listy
+        LISTINGS.with(|listings| listings.borrow_mut().push(listing.clone()));
+
+        Ok(listing)
+    } else {
+        Err("User not found!".to_string())
+    }
 }
+
+
+
 #[ic_cdk::update]
 fn edit_listing(
     id: u64,
@@ -104,12 +120,12 @@ fn edit_listing(
     category: String,
     price: f64,
     amount: u32,
-    images_strings: Vec<String>,
+    images_strings: Vec<String>, // Zakodowane obrazy w Base64
     categories_path: String,
 ) -> Result<String, String> {
     let caller = ic_cdk::caller(); // Get the Principal of the caller
 
-    // Check config limits
+    // Sprawdzenie ustawień konfiguracyjnych
     let config = CONFIG.with(|config| config.borrow().clone());
     if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
         return Err("Title length is invalid!".to_string());
@@ -121,23 +137,23 @@ fn edit_listing(
     LISTINGS.with(|listings| {
         let mut listings = listings.borrow_mut();
 
-        // Find the listing by id
+        // Znalezienie ogłoszenia po ID
         if let Some(listing) = listings.iter_mut().find(|listing| listing.id == id) {
-            // Check if the caller is the owner
+            // Sprawdzenie, czy dzwoniący jest właścicielem ogłoszenia
             if listing.owner.id != caller {
                 return Err("Permission denied: You are not the owner of this listing.".to_string());
             }
 
-            // Update the listing fields
+            // Zaktualizowanie pól ogłoszenia
             listing.title = title;
             listing.description = description;
             listing.category = category;
             listing.price = price;
             listing.amount = amount;
-            listing.images = images_strings.iter()
-            .map(|s| base64::decode(s).expect("Invalid Base64 image"))
-            .collect();
             listing.categories_path = categories_path;
+
+            // Zakodowanie nowych obrazów w Base64
+            listing.images = images_strings; // Używamy już zakodowanych obrazów Base64
 
             Ok("Listing updated successfully!".to_string())
         } else {
@@ -145,6 +161,8 @@ fn edit_listing(
         }
     })
 }
+
+
 
 #[ic_cdk::query]
 fn search_listings_by_keyword(keyword: String) -> Vec<Listing> {
@@ -336,6 +354,9 @@ fn add_favorite_listing(listing_id: u64)
 {
     let caller = ic_cdk::caller();
     let config = CONFIG.with(|config| config.borrow().clone());
+    if caller == USERS.with(|users| users.borrow().iter().find(|user| user.id == caller).unwrap().id) {
+        return;
+    }
 
     // Pobieramy mutowalną referencję do USERS
     USERS.with(|users| {
@@ -346,12 +367,15 @@ fn add_favorite_listing(listing_id: u64)
             // Znajdź ogłoszenie na podstawie 'listing_id'
             LISTINGS.with(|listings| {
                 if let Some(listing) = listings.borrow().iter().find(|listing| listing.id == listing_id) {
+                    if caller == listing.owner.id {
+                        return
+                    }
                     if user.favorites_id.is_none() {
                         user.favorites_id = Some(vec![listing.id]);
                     } else {
                         user.favorites_id.as_mut().unwrap().push(listing.id);
                     }
-                }                
+                }
             });
         }
 
