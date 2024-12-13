@@ -5,17 +5,21 @@ import Header from "./Header/Header";
 import Home from "./Home/Home";
 import ListingDetails from "./ListingDetails/ListingDetails";
 import AddListing from "./AddListing/AddListing";
+import Favorites from "./Favorites/Favorites.jsx";
 import Profile from "./Profile/Profile";
 import Cart from "./Cart/Cart";
 
 import { IdentityKitAuthType, InternetIdentity } from "@nfid/identitykit";
 import { IdentityKitProvider } from "@nfid/identitykit/react";
 
+import useFetchCategories from "./common/hooks/useFetchCategories.js";
+
 // styles
 import "@nfid/identitykit/react/styles.css";
 import "./common/scss/loaders.min.css";
 
 function App() {
+	useFetchCategories();
 	return (
 		<IdentityKitProvider
 			className="identity-kit-provider"
@@ -28,6 +32,7 @@ function App() {
 					<Route element={<Header />}>
 						<Route path="/" element={<Home />} />
 						<Route path="/profile" element={<Profile />} />
+						<Route path="/favorites" element={<Favorites />} />
 						<Route path="/add" element={<AddListing />} />
 						<Route path="/product/:productId" element={<ListingDetails />} />
 						<Route path="/cart" element={<Cart />} />
