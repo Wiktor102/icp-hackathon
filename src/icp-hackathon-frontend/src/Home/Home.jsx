@@ -7,7 +7,9 @@ import useStore from "../store/store.js";
 // components
 import Grid from "./Grid/Grid";
 import List from "./List/List";
+import CategoryNav from "./CategoryNav/CategoryNav.jsx";
 
+// styles
 import "./Home.scss";
 
 function Home() {
@@ -32,6 +34,7 @@ function Home() {
 					<i className="fas fa-search"></i>
 				</button>
 			</form>
+			<CategoryNav />
 			<section className="main-page__toolbar">
 				<div className="main-page__toolbar__sort">
 					<span>
