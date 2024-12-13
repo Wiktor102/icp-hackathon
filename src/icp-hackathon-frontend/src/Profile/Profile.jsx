@@ -7,6 +7,7 @@ import useProtectRoute from "../common/hooks/useProtectRoute.js";
 // components
 import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
 import ContactInfo from "../common/components/ContactInfo/ContactInfo";
+import Loader from "../common/components/Loader/Loader.jsx";
 import Grid from "../Home/Grid/Grid";
 import Button from "../common/Button";
 
@@ -21,11 +22,7 @@ function Profile() {
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
 	if (protection === "loading" || loadingUser || !user) {
-		return (
-			<div class="ball-clip-rotate">
-				<div></div>
-			</div>
-		);
+		return <Loader />;
 	}
 
 	return (

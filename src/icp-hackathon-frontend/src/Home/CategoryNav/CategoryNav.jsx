@@ -3,6 +3,9 @@ import { NavLink } from "react-router";
 // hooks
 import useStore from "../../store/store.js";
 
+// components
+import Loader from "../../common/components/Loader/Loader.jsx";
+
 // styles
 import "./CategoryNav.scss";
 
@@ -10,20 +13,12 @@ function CategoryNav() {
 	const categories = useStore(state => state.categories);
 
 	if (!categories) {
-		return (
-			<div className="ball-clip-rotate">
-				<div></div>
-			</div>
-		);
+		return <Loader />;
 	}
 	return (
 		<section className="main-page__category-selector">
 			<h4>Kategorie produktów</h4>
-			{!categories && (
-				<div className="ball-clip-rotate">
-					<div></div>
-				</div>
-			)}
+			{!categories && <Loader />}
 			{categories && (
 				<nav className="main-page__category-selector__nav">
 					<ul>

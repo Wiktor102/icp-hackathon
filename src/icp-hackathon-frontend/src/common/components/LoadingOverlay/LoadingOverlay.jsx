@@ -1,11 +1,11 @@
+import Loader from "../Loader/Loader.jsx";
+
 import "./LoadingOverlay.scss";
 
 function LoadingOverlay() {
 	return (
 		<div className="loading-overlay">
-			<div className="ball-clip-rotate">
-				<div></div>
-			</div>
+			<Loader />
 		</div>
 	);
 }

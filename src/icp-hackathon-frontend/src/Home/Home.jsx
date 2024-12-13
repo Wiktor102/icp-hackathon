@@ -9,6 +9,7 @@ import { useFetchCategoryListings } from "../common/hooks/useFetchListings.js";
 import Grid from "./Grid/Grid";
 import List from "./List/List";
 import CategoryNav from "./CategoryNav/CategoryNav.jsx";
+import Loader from "../common/components/Loader/Loader.jsx";
 
 // styles
 import "./Home.scss";
@@ -77,11 +78,7 @@ function Home() {
 					<i className={`fas fa-${isList ? "border-all" : "list"}`}></i>
 				</button>
 			</section>
-			{isPending && (
-				<div className="ball-clip-rotate">
-					<div></div>
-				</div>
-			)}
+			{isPending && <Loader />}
 			{!isPending && <>{isList ? <List listings={listingsToDisplay} /> : <Grid listings={listingsToDisplay} />}</>}
 		</main>
 	);
