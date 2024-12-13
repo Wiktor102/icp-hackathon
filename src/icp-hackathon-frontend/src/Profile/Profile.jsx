@@ -5,6 +5,7 @@ import useStore from "../store/store.js";
 import useProtectRoute from "../common/hooks/useProtectRoute.js";
 
 // components
+import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
 import ContactInfo from "../common/components/ContactInfo/ContactInfo";
 import Grid from "../Home/Grid/Grid";
 import Button from "../common/Button";
@@ -31,8 +32,11 @@ function Profile() {
 			<section className="profile-page__header">
 				<img src={avatarImg} alt="zdjęcie profilowe" />
 				<div className="profile-page__header__panel-right">
-					{user.initialised && <h1>Witaj, {user.name.split(" ")[0]}!</h1>}
-					{!user.initialised && <h1>Uzupełnij swój profil poniżej</h1>}
+					<PageHeader>
+						{user.initialised && <h1>Witaj, {user.name.split(" ")[0]}!</h1>}
+						{!user.initialised && <h1>Uzupełnij swój profil poniżej</h1>}
+					</PageHeader>
+
 					<ContactInfo editButton />
 				</div>
 				<Link to="/add">

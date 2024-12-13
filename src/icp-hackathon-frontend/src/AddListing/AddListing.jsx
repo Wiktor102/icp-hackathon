@@ -11,6 +11,7 @@ import Button from "../common/Button";
 import LoadingOverlay from "../common/components/LoadingOverlay/LoadingOverlay.jsx";
 
 import "./AddListing.scss";
+import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
 
 function AddListing() {
 	const [photoPaths, setPhotoPaths] = useState([]);
@@ -126,7 +127,9 @@ function AddListing() {
 	if (useProtectRoute()) return null;
 	return (
 		<main className="add-listing">
-			<h1>Dodaj ogłoszenie</h1>
+			<PageHeader>
+				<h1>Dodaj ogłoszenie</h1>
+			</PageHeader>
 			<form className="add-listing-form" onSubmit={saveListing}>
 				<div className="form-group" id="title-group">
 					<i className="fas fa-heading"></i>
