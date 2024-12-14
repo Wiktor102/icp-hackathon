@@ -6,7 +6,7 @@ import {
 	ConnectWalletDropdownMenuItems,
 	useIdentity
 } from "@nfid/identitykit/react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
 import Button from "../common/Button";
@@ -17,7 +17,6 @@ import usePrevious from "../common/hooks/usePrevious.js";
 import "./Header.scss";
 
 function Header() {
-	const { pathname: location } = useLocation();
 	const navigate = useNavigate();
 
 	const identity = useIdentity();
@@ -91,11 +90,6 @@ function Header() {
 						connectButtonComponent={props => <Button {...props}>Zaloguj się</Button>}
 						dropdownMenuComponent={ProfileDropdown}
 					/>
-					{!location.includes("cart") && (
-						<Link to="/cart" className="page-header__cart">
-							<i className="fas fa-cart-shopping"></i>
-						</Link>
-					)}
 				</div>
 			</header>
 			<Outlet />

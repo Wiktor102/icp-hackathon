@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes } from "react-router";
 
 // components
 import Home from "./Home/Home";
-import Cart from "./Cart/Cart";
 import Header from "./Header/Header";
 import Profile from "./Profile/Profile";
 import AddListing from "./AddListing/AddListing";
@@ -39,7 +38,6 @@ function App() {
 						<Route path="/favorites" element={<Favorites />} />
 						<Route path="/add" element={<AddListing />} />
 						<Route path="/product/:productId" element={<ListingDetails />} />
-						<Route path="/cart" element={<Cart />} />
 					</Route>
 				</Routes>
 			</BrowserRouter>

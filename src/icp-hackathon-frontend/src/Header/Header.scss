@@ -12,17 +12,6 @@ header.page-header {
 		align-items: center;
 		gap: 2rem;
 	}
-
-	.page-header__cart {
-		all: unset;
-		font-size: 1.75rem;
-		transition: color 200ms;
-		cursor: pointer;
-
-		&:hover {
-			color: #6aa527;
-		}
-	}
 }
 
 .profile-dropdown-item {
