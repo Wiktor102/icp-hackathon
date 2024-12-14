@@ -43,7 +43,7 @@ function Header() {
 
 	async function createEmptyUser() {
 		try {
-			const { Ok, Err } = backend.add_empty_user();
+			const { Ok, Err } = await backend.add_empty_user();
 			if (Err) {
 				console.log(Err);
 				alert("Wystąpił błąd podczas tworzenia użytkownika");
@@ -52,7 +52,8 @@ function Header() {
 
 			parseBackendUser(Ok);
 			navigate("/profile");
-		} catch {
+		} catch (err) {
+			console.log("(creating user) backend error:" + err);
 			alert("Wystąpił niezany błąd podczas tworzenia konta. Spróbuj ponownie później.");
 		}
 	}
