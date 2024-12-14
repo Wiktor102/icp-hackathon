@@ -7,6 +7,9 @@ import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-bac
 import useProtectRoute from "../../common/hooks/useProtectRoute.js";
 import useStore from "../../store/store.js";
 
+// utilities
+import { parseBackendListing } from "../../common/hooks/useFetchListings.js";
+
 // components
 import Button from "../../common/Button";
 import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
@@ -110,7 +113,7 @@ function AddListing() {
 				category.join("/")
 			);
 			if (Ok) {
-				addListings(Ok);
+				addListings(parseBackendListing(Ok));
 				navigate("/");
 			}
 
