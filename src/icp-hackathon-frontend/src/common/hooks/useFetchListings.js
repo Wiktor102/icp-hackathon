@@ -52,5 +52,5 @@ function useFetchCategoryListings() {
 	return fetchListings;
 }
 
-export { useFetchListings, useFetchCategoryListings };
+export { useFetchListings, useFetchCategoryListings, parseBackendListing };
 export default useFetchListings;

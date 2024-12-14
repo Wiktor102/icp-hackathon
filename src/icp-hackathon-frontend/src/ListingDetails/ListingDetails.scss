@@ -4,22 +4,8 @@
 	@include page-container;
 }
 
-.listing-details__header {
-	display: flex;
-	gap: 2rem;
-	align-items: center;
-	margin-block-end: 1rem;
-
-	button {
-		all: unset;
-		font-size: 1.5rem;
-		cursor: pointer;
-		transition: color 200ms;
-
-		&:hover {
-			color: #6aa527;
-		}
-	}
+.page-header {
+	margin-block-end: 0.5rem;
 
 	.category {
 		opacity: 0.85;
@@ -29,21 +15,21 @@
 .listing-details__layout {
 	display: grid;
 
-	&__image-container {
-		grid-row: 1 / 3;
-	}
-
-	img {
-		width: 100%;
-		border-radius: 1rem;
+	.image-carousel {
+		grid-row: 1 / span 4;
 	}
 
 	.price {
 		font-size: 2rem;
 	}
 
+	.contact-info {
+		align-self: flex-start;
+	}
+
 	@media (min-width: 40rem) {
 		grid-template-columns: 1fr 1fr;
+		grid-template-rows: max-content max-content max-content 1fr;
 		gap: 2rem;
 	}
 }

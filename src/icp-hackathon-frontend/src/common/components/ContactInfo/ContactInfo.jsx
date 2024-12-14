@@ -20,8 +20,7 @@ const Wrapper = forwardRef(({ condition, children, ...props }, ref) =>
 	)
 );
 
-function ContactInfo({ editButton = false }) {
-	const user = useStore(state => state.user);
+function ContactInfo({ editButton = false, user }) {
 	const setUser = useStore(state => state.setUser);
 
 	const [editable, setEditable] = useState(editButton && !user?.initialised);

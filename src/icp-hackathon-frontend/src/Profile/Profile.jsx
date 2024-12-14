@@ -35,7 +35,7 @@ function Profile() {
 						{!user.initialised && <h1>Uzupełnij swój profil poniżej</h1>}
 					</PageHeader>
 
-					<ContactInfo editButton />
+					<ContactInfo user={user} editButton />
 				</div>
 				<Link to="/add">
 					<Button>
