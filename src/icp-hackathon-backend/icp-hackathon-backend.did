@@ -26,14 +26,15 @@ type Listing = record {
 };
 type Result = variant { Ok : User; Err : text };
 type Result_1 = variant { Ok : Listing; Err : text };
-type Result_2 = variant { Ok : float64; Err : text };
-type Result_3 = variant { Ok : text; Err : text };
-type Result_4 = variant { Ok : vec Listing; Err : text };
-type Result_5 = variant { Ok : vec Review; Err : text };
-type Review = record { comment : text; owner_id : principal; rating : nat8 };
+type Result_2 = variant { Ok : Review; Err : text };
+type Result_3 = variant { Ok : float64; Err : text };
+type Result_4 = variant { Ok : text; Err : text };
+type Result_5 = variant { Ok : vec Listing; Err : text };
+type Result_6 = variant { Ok : vec Review; Err : text };
+type Review = record { comment : text; owner_id : text; rating : nat8 };
 type SupportedStandard = record { url : text; name : text };
 type User = record {
-  id : principal;
+  id : text;
   name : text;
   company_name : text;
   email : text;
@@ -48,14 +49,14 @@ service : {
   add_listing : (text, text, text, float64, nat32, vec text, text) -> (
       Result_1,
     );
-  add_review : (nat64, nat8, text) -> (opt text);
+  add_review : (nat64, nat8, text) -> (Result_2);
   add_user : (text, text, text, text) -> (Result);
-  calculate_average_rating_of_listing : (nat64) -> (Result_2) query;
+  calculate_average_rating_of_listing : (nat64) -> (Result_3) query;
   delete_listing : (nat64) -> (opt text);
   delete_review : (nat64) -> (opt text);
   edit_active_user : (text, text, text, text) -> (opt text);
   edit_listing : (nat64, text, text, text, float64, nat32, vec text, text) -> (
-      Result_3,
+      Result_4,
     );
   edit_review : (nat64, nat8, text) -> (opt text);
   get_active_user : () -> (opt User) query;
@@ -64,11 +65,11 @@ service : {
   get_config : () -> (Config) query;
   get_listing_by_id : (nat64) -> (opt Listing) query;
   get_listings : () -> (vec Listing) query;
-  get_listings_by_active_user : () -> (Result_4) query;
-  get_listings_by_category : (text) -> (vec Listing) query;
-  get_reviews_of_listing : (nat64) -> (Result_5) query;
+  get_listings_by_active_user : () -> (Result_5) query;
+  get_listings_by_id : (vec nat64) -> (vec Listing) query;
+  get_listings_id_by_category : (text) -> (vec nat64) query;
+  get_reviews_of_listing : (nat64) -> (Result_6) query;
   get_users : () -> (vec User) query;
   icrc10_supported_standards : () -> (vec SupportedStandard);
   icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);
-  search_listings_by_keyword : (text) -> (vec Listing) query;
 }
