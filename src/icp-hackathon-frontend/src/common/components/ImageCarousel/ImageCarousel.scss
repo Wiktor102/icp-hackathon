@@ -1,0 +1,45 @@
+.image-carousel {
+	overflow: hidden;
+	overflow: clip;
+	border-radius: 1rem;
+	position: relative;
+
+	&__track {
+		display: flex;
+	}
+
+	img {
+		width: 100%;
+	}
+
+	button {
+		position: absolute;
+		top: 50%;
+		z-index: 3;
+		padding: 1rem;
+		background-color: var(--accent);
+		opacity: 0.4;
+		font-size: 2rem;
+		translate: 0 -50%;
+		transition: opacity 200ms;
+		cursor: pointer;
+		border: 0;
+
+		&:hover,
+		&:focus-visible {
+			opacity: 1;
+		}
+	}
+
+	button:first-child {
+		left: 0;
+		border-top-right-radius: 1rem;
+		border-bottom-right-radius: 1rem;
+	}
+
+	button:last-child {
+		right: 0;
+		border-top-left-radius: 1rem;
+		border-bottom-left-radius: 1rem;
+	}
+}
