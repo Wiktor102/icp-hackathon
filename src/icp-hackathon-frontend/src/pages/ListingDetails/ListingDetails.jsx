@@ -3,8 +3,9 @@ import { useParams } from "react-router";
 import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
-import useListing from "../../common/hooks/useListing.js";
 import useStore from "../../store/store.js";
+import useListing from "../../common/hooks/useListing.js";
+import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
 
 // components
 import Button from "../../common/Button";
@@ -26,12 +27,7 @@ function ListingDetails() {
 	const img = useMemo(() => images.map(i => "data:image/jpeg;base64," + atob(i)), [images]);
 	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
 	const favorite = false;
-
-	const avgRating = useMemo(() => {
-		if (!reviews?.length) return "-";
-		const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
-		return (sum / reviews.length).toFixed(1);
-	}, [reviews]);
+	const avgRating = useCalculateAvgReview(+productId);
 
 	if (loading || error || reviews == null) return <Loader />;
 	return (

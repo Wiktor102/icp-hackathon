@@ -1,5 +1,10 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
+
+// hooks
+import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
+
+// components
 import Button from "../../common/Button";
 
 import "./List.scss";
@@ -31,6 +36,7 @@ function ListItem({ id, images, title, description, price, reviews, favorite }) 
 	const img = useMemo(() => "data:image/jpeg;base64," + atob(images[0]), [images]);
 	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
 	const shortDescription = description.split(" ").slice(0, 20).join(" ") + "...";
+	const avgRating = useCalculateAvgReview(id);
 
 	return (
 		<Link to={`/product/${id}`}>
@@ -39,7 +45,7 @@ function ListItem({ id, images, title, description, price, reviews, favorite }) 
 				<div className="main-page__list__item__middle-collumn">
 					<h4>{title}</h4>
 					<p className="rating">
-						{reviews.length === 0 ? "-" : (5).toFixed(1)} <i className="fas fa-star"></i>
+						{avgRating} <i className="fas fa-star"></i>
 					</p>
 					<p className="reviews">{reviews.length} opinii</p>
 					<p className="description">{shortDescription}</p>
