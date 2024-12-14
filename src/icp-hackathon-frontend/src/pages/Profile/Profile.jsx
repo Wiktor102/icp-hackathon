@@ -1,17 +1,17 @@
 import { Link } from "react-router";
 
 // hooks
-import useStore from "../store/store.js";
-import useProtectRoute from "../common/hooks/useProtectRoute.js";
+import useStore from "../../store/store.js";
+import useProtectRoute from "../../common/hooks/useProtectRoute.js";
 
 // components
-import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
-import ContactInfo from "../common/components/ContactInfo/ContactInfo";
-import Loader from "../common/components/Loader/Loader.jsx";
-import Grid from "../Home/Grid/Grid";
-import Button from "../common/Button";
+import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
+import ContactInfo from "../../common/components/ContactInfo/ContactInfo";
+import Loader from "../../common/components/Loader/Loader.jsx";
+import Grid from "../../Home/Grid/Grid";
+import Button from "../../common/Button";
 
-import avatarImg from "../assets/avatar.png";
+import avatarImg from "../../assets/avatar.png";
 
 import "./Profile.scss";
 

@@ -4,13 +4,13 @@ import imageCompression from "browser-image-compression";
 import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
 // hooks
-import useProtectRoute from "../common/hooks/useProtectRoute.js";
-import useStore from "../store/store.js";
+import useProtectRoute from "../../common/hooks/useProtectRoute.js";
+import useStore from "../../store/store.js";
 
 // components
-import Button from "../common/Button";
-import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
-import LoadingOverlay from "../common/components/LoadingOverlay/LoadingOverlay.jsx";
+import Button from "../../common/Button";
+import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
+import LoadingOverlay from "../../common/components/LoadingOverlay/LoadingOverlay.jsx";
 
 // styles
 import "./AddListing.scss";

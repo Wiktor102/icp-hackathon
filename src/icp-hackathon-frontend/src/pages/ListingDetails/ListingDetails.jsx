@@ -2,15 +2,15 @@ import { useMemo } from "react";
 import { useParams } from "react-router";
 
 // hooks
-import useListing from "../common/hooks/useListing.js";
-import useStore from "../store/store.js";
+import useListing from "../../common/hooks/useListing.js";
+import useStore from "../../store/store.js";
 
 // components
-import Button from "../common/Button";
-import Loader from "../common/components/Loader/Loader.jsx";
-import ContactInfo from "../common/components/ContactInfo/ContactInfo";
-import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
-import ImageCarousel from "../common/components/ImageCarousel/ImageCarousel.jsx";
+import Button from "../../common/Button";
+import Loader from "../../common/components/Loader/Loader.jsx";
+import ContactInfo from "../../common/components/ContactInfo/ContactInfo";
+import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
+import ImageCarousel from "../../common/components/ImageCarousel/ImageCarousel.jsx";
 
 import "./ListingDetails.scss";
 

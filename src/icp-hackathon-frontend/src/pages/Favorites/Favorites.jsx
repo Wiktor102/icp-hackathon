@@ -1,9 +1,9 @@
 // hooks
-import useProtectRoute from "../common/hooks/useProtectRoute.js";
+import useProtectRoute from "../../common/hooks/useProtectRoute.js";
 
 // components
-import PageHeader from "../common/components/PageHeader/PageHeader.jsx";
-import List from "../Home/List/List.jsx";
+import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
+import List from "../../Home/List/List.jsx";
 
 import "./Favorites.scss";
 
