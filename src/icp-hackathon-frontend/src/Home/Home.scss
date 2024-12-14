@@ -2,6 +2,7 @@
 
 .main-page {
 	@include page-container;
+	container-type: inline-size;
 
 	&__search-container {
 		display: flex;
@@ -76,6 +77,38 @@
 		&__sort span {
 			margin-inline-end: 1rem;
 			opacity: 0.85;
+		}
+	}
+
+	&__empty-indicator {
+		@include elevated-container;
+		display: grid;
+		place-content: center;
+		min-height: 15rem;
+
+		i {
+			font-size: 2.5rem;
+			text-align: center;
+		}
+
+		.label {
+			margin-block-end: 0;
+			font-size: 1.25rem;
+		}
+	}
+
+	&__add-listing-btn-container {
+		padding-block: 2rem;
+		position: sticky;
+		bottom: 0;
+		background-color: var(--surface);
+
+		a {
+			text-align: center;
+		}
+
+		button {
+			width: calc(100cqi - 3rem);
 		}
 	}
 }

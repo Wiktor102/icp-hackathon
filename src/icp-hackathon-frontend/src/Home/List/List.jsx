@@ -28,7 +28,6 @@ function List({ listings }) {
 }
 
 function ListItem({ id, images, title, description, price, reviews, favorite }) {
-	// const img = useMemo(() => images.map(i => "data:image/jpeg;base64," + atob(i)), [images]);
 	const img = useMemo(() => "data:image/jpeg;base64," + atob(images[0]), [images]);
 	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
 	const shortDescription = description.split(" ").slice(0, 20).join(" ") + "...";

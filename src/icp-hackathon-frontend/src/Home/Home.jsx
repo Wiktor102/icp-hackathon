@@ -8,6 +8,7 @@ import { useFetchCategoryListings } from "../common/hooks/useFetchListings.js";
 // components
 import Grid from "./Grid/Grid";
 import List from "./List/List";
+import Button from "../common/Button.jsx";
 import CategoryNav from "./CategoryNav/CategoryNav.jsx";
 import Loader from "../common/components/Loader/Loader.jsx";
 
@@ -15,7 +16,7 @@ import Loader from "../common/components/Loader/Loader.jsx";
 import "./Home.scss";
 
 function Home() {
-	const userInitialised = useStore(state => state.user)?.initialised;
+	const user = useStore(state => state.user);
 	const allListings = useStore(state => state.listings);
 
 	const [listingsToDisplay, setListingsToDisplay] = useState(Object.values(allListings));
@@ -48,7 +49,7 @@ function Home() {
 
 	return (
 		<main className="main-page">
-			{userInitialised === false && (
+			{user?.initialised === false && (
 				<WarningCard>
 					Uzupełnij swój profil, aby móc dodawać ogłoszenia <NavLink to="/profile">Przejdź do profilu</NavLink>
 				</WarningCard>
@@ -79,7 +80,25 @@ function Home() {
 				</button>
 			</section>
 			{isPending && <Loader />}
-			{!isPending && <>{isList ? <List listings={listingsToDisplay} /> : <Grid listings={listingsToDisplay} />}</>}
+			{!isPending && listingsToDisplay.length > 0 && (
+				<>{isList ? <List listings={listingsToDisplay} /> : <Grid listings={listingsToDisplay} />}</>
+			)}
+			{!isPending && listingsToDisplay.length === 0 && (
+				<div className="main-page__empty-indicator">
+					<i className="fas fa-folder-minus"></i>
+					<p className="label">Brak ogłoszeń w tej kategori</p>
+				</div>
+			)}
+			{user && user.initialised && (
+				<div className="main-page__add-listing-btn-container">
+					<NavLink to="/add">
+						<Button tabIndex={-1}>
+							<i className="fas fa-plus"></i>
+							Dodaj ogłoszenie
+						</Button>
+					</NavLink>
+				</div>
+			)}
 		</main>
 	);
 }
