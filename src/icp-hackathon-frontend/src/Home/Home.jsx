@@ -11,6 +11,7 @@ import List from "./List/List";
 import Button from "../common/Button.jsx";
 import CategoryNav from "./CategoryNav/CategoryNav.jsx";
 import Loader from "../common/components/Loader/Loader.jsx";
+import SubtleButton from "../common/components/SubtleButton/SubtleButton.jsx";
 
 // styles
 import "./Home.scss";
@@ -75,9 +76,11 @@ function Home() {
 						<option value="">Cana: rosnąco</option>
 					</select>
 				</div>
-				<button className="main-page__toolbar__view" onClick={switchDisplayMode}>
-					<i className={`fas fa-${isList ? "border-all" : "list"}`}></i>
-				</button>
+				<SubtleButton
+					icon={<i className={`fas fa-${isList ? "border-all" : "list"}`}></i>}
+					text={isList ? "Widok siatki" : "Widok listy"}
+					onClick={switchDisplayMode}
+				/>
 			</section>
 			{isPending && <Loader />}
 			{!isPending && listingsToDisplay.length > 0 && (

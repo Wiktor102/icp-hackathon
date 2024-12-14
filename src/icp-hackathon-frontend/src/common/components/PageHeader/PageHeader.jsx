@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router";
 
+// components
+import SubtleButton from "../SubtleButton/SubtleButton.jsx";
+
 import "./PageHeader.scss";
 
 function PageHeader({ implyLeading = true, children }) {
@@ -7,11 +10,7 @@ function PageHeader({ implyLeading = true, children }) {
 
 	return (
 		<div className="page-header">
-			{implyLeading && (
-				<button onClick={() => navigate(-1)}>
-					<i className="fas fa-arrow-left"></i>
-				</button>
-			)}
+			{implyLeading && <SubtleButton icon={<i className="fas fa-arrow-left"></i>} onClick={() => navigate(-1)} />}
 			{children}
 		</div>
 	);
