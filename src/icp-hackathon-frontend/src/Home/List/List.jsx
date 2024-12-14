@@ -1,44 +1,55 @@
+import { useMemo } from "react";
 import { Link } from "react-router";
 import Button from "../../common/Button";
 
 import "./List.scss";
 
-function List() {
+function List({ listings }) {
 	return (
 		<section className="main-page__list">
-			{new Array(5).fill(0).map((_, i) => (
+			{listings.map(listing => (
 				<ListItem
-					key={i}
-					id={i}
-					name={"Testowy długi tytuł ogłoszenia bo tak"}
-					img={"https://picsum.photos/300/200"}
-					price={32.76}
-					rating={3.8}
-					reviewsCount={321}
+					key={listing.id}
+					{...{
+						id: listing.id,
+						title: listing.title,
+						price: listing.price,
+						images: listing.images,
+						description: listing.description,
+						// category: listing.category,
+						// categoryPath: listing.categories_path,
+						reviews: listing.reviews,
+						date: listing.date
+					}}
 				/>
 			))}
 		</section>
 	);
 }
 
-function ListItem({ id, name, img, price, rating, reviewsCount }) {
+function ListItem({ id, images, title, description, price, reviews, favorite }) {
+	// const img = useMemo(() => images.map(i => "data:image/jpeg;base64," + atob(i)), [images]);
+	const img = useMemo(() => "data:image/jpeg;base64," + atob(images[0]), [images]);
 	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
+	const shortDescription = description.split(" ").slice(0, 20).join(" ") + "...";
 
 	return (
 		<Link to={`/product/${id}`}>
 			<div className="main-page__list__item">
-				<img src={img} alt={name} />
+				<img src={img} alt={title} />
 				<div className="main-page__list__item__middle-collumn">
-					<h4>{name}</h4>
+					<h4>{title}</h4>
 					<p className="rating">
-						{rating} <i className="fas fa-star"></i>
+						{reviews.length === 0 ? "-" : (5).toFixed(1)} <i className="fas fa-star"></i>
 					</p>
-					<p className="reviews">{reviewsCount} opinii</p>
+					<p className="reviews">{reviews.length} opinii</p>
+					<p className="description">{shortDescription}</p>
 				</div>
 				<div className="main-page__list__item__last-collumn">
 					<p className="price">{formattedPrice}</p>
 					<Button>
-						Dodaj do koszyka <i className="fas fa-cart-plus"></i>
+						{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
+						{favorite ? "Usuń z" : "Dodaj do"} ulubionych
 					</Button>
 				</div>
 			</div>

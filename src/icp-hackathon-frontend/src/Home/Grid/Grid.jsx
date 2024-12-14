@@ -4,9 +4,6 @@ import { Link } from "react-router";
 // components
 import Button from "../../common/Button";
 
-// utils
-// import { bigIntToImage } from "../../common/utils.js";
-
 // styles
 import "./Grid.scss";
 

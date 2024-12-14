@@ -57,8 +57,6 @@ function AddListing() {
 
 		try {
 			const compressedFile = await imageCompression(file, options);
-			// console.log("Original File:", file.size / 1024, "KB");
-			// console.log("Compressed File:", compressedFile.size / 1024, "KB");
 			return compressedFile;
 		} catch (error) {
 			console.error("Error compressing image:", error);
@@ -108,7 +106,7 @@ function AddListing() {
 				category.at(-1),
 				price,
 				amount,
-				images,
+				images.map(img => img.substring(img.indexOf(",") + 1)),
 				category.join("/")
 			);
 			if (Ok) {
@@ -121,7 +119,7 @@ function AddListing() {
 			}
 		} catch (error) {
 			alert("Wystąpił nieznany błąd podczas dodawania ogłoszenia. Prosimy spróbować ponownie później.");
-			console.error(error);
+			console.error("(listing upload) Backend error: " + error);
 		} finally {
 			setLoading(false);
 		}
