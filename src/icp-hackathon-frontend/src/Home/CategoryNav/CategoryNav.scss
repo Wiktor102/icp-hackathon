@@ -25,7 +25,7 @@
 			transition: background-color 200ms;
 		}
 
-		li:hover {
+		li:is(:hover, :focus-visible, :focus-within) {
 			background-color: var(--accent-highlight);
 		}
 
@@ -81,7 +81,7 @@
 		}
 	}
 
-	nav > ul > li:hover > ul {
+	nav > ul > li:is(:hover, :focus-visible, :focus-within) > ul {
 		display: block;
 	}
 }

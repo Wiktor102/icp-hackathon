@@ -7,11 +7,23 @@
 	cursor: pointer;
 	transition: background-color 0.2s;
 
-	&:hover {
+	&:hover,
+	&:focus-visible {
 		background-color: var(--accent-highlight);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--elevated-surface);
+		outline-offset: 2px;
 	}
 
 	i:first-child {
 		margin-inline-end: 1rem;
 	}
+}
+
+a:focus > .pill-button {
+	background-color: var(--accent-highlight);
+	outline: 2px solid var(--elevated-surface);
+	outline-offset: 2px;
 }
