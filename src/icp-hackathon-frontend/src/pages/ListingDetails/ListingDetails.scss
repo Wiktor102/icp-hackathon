@@ -96,3 +96,112 @@
 		text-align: center;
 	}
 }
+
+.listing-details__reviews-summary {
+	display: grid;
+	grid-template-columns: 1fr max-content;
+	align-items: center;
+	column-gap: 3rem;
+	margin-block-start: 2rem;
+
+	& > h2 {
+		grid-column: 1 / span 2;
+	}
+
+	.rating-bar {
+		display: flex;
+		font-size: 1.25rem;
+
+		span i {
+			margin-inline-start: 0.5rem;
+		}
+
+		.bar {
+			flex-grow: 1;
+			margin-inline: 1rem;
+			background-color: var(--surface-variant);
+			border-radius: 10rem;
+		}
+
+		.fill {
+			height: 100%;
+			width: 0;
+			background-color: var(--warning-pale);
+			border-radius: 10rem;
+		}
+	}
+
+	.rating-bar + .rating-bar {
+		margin-block-start: 0.5rem;
+	}
+
+	.right-panel {
+		font-size: 5rem;
+
+		i {
+			margin-inline-start: 2rem;
+		}
+	}
+}
+
+.listing-details__add-review {
+	@include elevated-container;
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	column-gap: 2rem;
+	margin-block-start: 2rem;
+	accent-color: var(--accent);
+	position: relative;
+
+	h2 {
+		grid-column: 1 / span 2;
+		margin-block-start: 0;
+	}
+
+	label,
+	textarea {
+		display: block;
+	}
+
+	.rating-buttons label {
+		display: flex;
+		gap: 0.5rem;
+		padding: 0.5rem;
+		background-color: var(--surface);
+		border-radius: 10rem;
+	}
+
+	.rating-buttons input {
+		margin-inline-end: 1rem;
+	}
+
+	.rating-buttons label {
+		margin-block-start: 1rem;
+	}
+
+	.rating-buttons label:has(input:checked) i {
+		color: var(--warning-pale);
+	}
+
+	.right-panel {
+		display: flex;
+		flex-direction: column;
+	}
+
+	textarea {
+		width: 100%;
+		flex-grow: 1;
+		margin-block-start: 1rem;
+		padding: 1rem;
+		border: 0;
+		border-radius: 1rem;
+		resize: vertical;
+		font: inherit;
+	}
+
+	button {
+		grid-column: 1 / span 2;
+		margin-block-start: 2rem;
+		text-align: center;
+	}
+}

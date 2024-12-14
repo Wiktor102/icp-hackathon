@@ -18,6 +18,13 @@ const useStore = create(set => ({
 		}, {});
 
 		return set(state => ({ listings: { ...state.listings, ...newListings } }));
+	},
+	addReview: (listingId, review) => {
+		set(state => {
+			const listing = state.listings[listingId];
+			listing.reviews = [...listing.reviews, review];
+			return { listings: { ...state.listings, [listingId]: listing } };
+		});
 	}
 }));
 
