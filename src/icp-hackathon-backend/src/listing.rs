@@ -33,11 +33,10 @@ impl Listing {
         images_strings: Vec<String>,
         categories_path: String,
     ) -> Self {
-        // Zakodowanie Base64 dla każdego obrazu
         let images = images_strings
             .iter()
-            .map(|s| base64::encode(s)) // Zakodowanie w Base64
-            .collect(); // Kolekcjonowanie do Vec<String>
+            .map(|s| base64::encode(s))
+            .collect();
         
         Self {
             id: AMOUNT_OF_LISTINGS.fetch_add(1, Ordering::SeqCst),

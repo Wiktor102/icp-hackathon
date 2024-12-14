@@ -6,13 +6,14 @@ use crate::category::Category;
 use crate::review::Review;
 use regex::Regex;
 use candid::{self, CandidType, Deserialize};
-use base64;
 
 mod category;
 mod listing;
 mod config;
 mod user;
 mod review;
+
+// This code is from docs.identitykit
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug)]
 pub struct SupportedStandard {
@@ -56,6 +57,8 @@ fn icrc28_trusted_origins() -> Icrc28TrustedOriginsResponse {
     return Icrc28TrustedOriginsResponse { trusted_origins }
 }
 
+// end of code from docs.identitykit
+
 thread_local! {
     static CONFIG: RefCell<Config> = RefCell::new(Config::new());
     static LISTINGS: RefCell<Vec<Listing>> = RefCell::new(Vec::new());
@@ -68,12 +71,11 @@ fn add_listing(
     category: String,
     price: f64,
     amount: u32,
-    images: Vec<String>, // Zakłada się, że obrazy są już w formacie Base64
+    images: Vec<String>,
     categories_path: String,
 ) -> Result<Listing, String> {
     let caller = ic_cdk::caller();
     
-    // Sprawdzenie, czy użytkownik istnieje
     let owner = USERS.with(|users| {
         users.borrow().iter().find(|user| user.id == caller).cloned()
     });
@@ -81,15 +83,13 @@ fn add_listing(
     if let Some(owner) = owner {
         let config = CONFIG.with(|config| config.borrow().clone());
 
-        // Walidacja długości tytułu i opisu
         if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
-            return Err("Title length is out of range!".to_string());
+            return Err("Długość tytułu jest poza zakresem!".to_string());
         }
         if description.len() > config.max_description_len as usize || description.len() < config.min_description_len as usize {
-            return Err("Description length is out of range!".to_string());
+            return Err("Długość opisu jest poza zakresem!".to_string());
         }
 
-        // Tworzenie ogłoszenia
         let listing = Listing::new(
             title,
             description,
@@ -97,20 +97,18 @@ fn add_listing(
             price,
             amount,
             owner,
-            images, // Zakodowane obrazy w Base64
+            images, 
             categories_path,
         );
 
-        // Dodanie ogłoszenia do listy
+        
         LISTINGS.with(|listings| listings.borrow_mut().push(listing.clone()));
 
         Ok(listing)
     } else {
-        Err("User not found!".to_string())
+        Err("Nie znaleziono użytkownika!".to_string())
     }
 }
-
-
 
 #[ic_cdk::update]
 fn edit_listing(
@@ -120,31 +118,28 @@ fn edit_listing(
     category: String,
     price: f64,
     amount: u32,
-    images_strings: Vec<String>, // Zakodowane obrazy w Base64
+    images_strings: Vec<String>, 
     categories_path: String,
 ) -> Result<String, String> {
-    let caller = ic_cdk::caller(); // Get the Principal of the caller
+    let caller = ic_cdk::caller();
 
-    // Sprawdzenie ustawień konfiguracyjnych
     let config = CONFIG.with(|config| config.borrow().clone());
     if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
-        return Err("Title length is invalid!".to_string());
+        return Err("Długość tytułu jest nieprawidłowa!".to_string());
     }
     if description.len() > config.max_description_len as usize || description.len() < config.min_description_len as usize {
-        return Err("Description length is invalid!".to_string());
+        return Err("Długość opisu jest nieprawidłowa!".to_string());
     }
 
     LISTINGS.with(|listings| {
         let mut listings = listings.borrow_mut();
 
-        // Znalezienie ogłoszenia po ID
         if let Some(listing) = listings.iter_mut().find(|listing| listing.id == id) {
-            // Sprawdzenie, czy dzwoniący jest właścicielem ogłoszenia
+
             if listing.owner.id != caller {
-                return Err("Permission denied: You are not the owner of this listing.".to_string());
+                return Err("Brak uprawnień: Nie jesteś właścicielem tego ogłoszenia.".to_string());
             }
 
-            // Zaktualizowanie pól ogłoszenia
             listing.title = title;
             listing.description = description;
             listing.category = category;
@@ -152,12 +147,11 @@ fn edit_listing(
             listing.amount = amount;
             listing.categories_path = categories_path;
 
-            // Zakodowanie nowych obrazów w Base64
-            listing.images = images_strings; // Używamy już zakodowanych obrazów Base64
+            listing.images = images_strings;
 
-            Ok("Listing updated successfully!".to_string())
+            Ok("Ogłoszenie zostało pomyślnie zaktualizowane!".to_string())
         } else {
-            Err("Listing not found!".to_string())
+            Err("Nie znaleziono ogłoszenia!".to_string())
         }
     })
 }
@@ -189,25 +183,23 @@ fn get_listings_by_category(category: String) -> Vec<Listing> {
             .collect()
     })
 }
+
 #[ic_cdk::update]
 fn delete_listing(id: u64) -> Option<String> {
-    let caller = ic_cdk::caller(); // Get the Principal of the caller
+    let caller = ic_cdk::caller();
 
     LISTINGS.with(|listings| {
         let mut listings = listings.borrow_mut();
 
-        // Find the index of the listing by id
         if let Some(index) = listings.iter().position(|listing| listing.id == id) {
-            // Check if the caller is the owner
             if listings[index].owner.id != caller {
-                return Some("Permission denied: You are not the owner of this listing.".to_string());
+                return Some("Brak uprawnień: Nie jesteś właścicielem tego ogłoszenia.".to_string());
             }
 
-            // Remove the listing
             listings.remove(index);
-            return None; // No response if the listing is deleted successfully
+            return None;
         } else {
-            return Some("Listing not found!".to_string());
+            return Some("Nie znaleziono ogłoszenia.".to_string());
         }
     })
 }
@@ -224,7 +216,7 @@ fn get_listing_by_id(id: u64) -> Option<Listing> {
             .borrow()
             .iter()
             .find(|listing| listing.id == id)
-            .cloned() // Klonowanie, aby zwrócić pełny obiekt Listing
+            .cloned()
     })
 }
 
@@ -238,12 +230,13 @@ fn get_categories() -> Vec<Category> {
     let config = CONFIG.with(|config| config.borrow().clone());
     config.categories
 }
+
 #[ic_cdk::update]
 fn add_user(name: String, email: String, phone_number: String, company_name: String) -> Result<User, String> {
     let caller = ic_cdk::caller();
     
     if USERS.with(|users| users.borrow().iter().any(|user| user.id == caller)) {
-        return Err("User already exists!".to_string());
+        return Err("Użytkownik już istnieje!".to_string());
     }
 
     let user = User::new(caller, name.clone(), email.clone(), phone_number.clone(), company_name.clone());
@@ -251,21 +244,21 @@ fn add_user(name: String, email: String, phone_number: String, company_name: Str
     let config = CONFIG.with(|config| config.borrow().clone());
 
     if name.len() < config.min_user_name_len as usize || name.len() > config.max_user_name_len as usize {
-        return Err("Name length is wrong!".to_string());
+        return Err("Długość nazwy jest nieprawidłowa!".to_string());
     }
 
     let email_regex = Regex::new(r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})").unwrap();
     if !email_regex.is_match(&email) {
-        return Err("Wrong email format!".to_string());
+        return Err("Nieprawidłowy format adresu e-mail!".to_string());
     }
 
     let phone_number_regex = Regex::new(r"^\d{9}$").unwrap();
     if !phone_number_regex.is_match(&phone_number) {
-        return Err("Wrong phone number format!".to_string());
+        return Err("Nieprawidłowy format numeru telefonu!".to_string());
     }
 
     if company_name.len() < config.min_company_name_len as usize || company_name.len() > config.max_company_name_len as usize {
-        return Err("Company name length is wrong!".to_string());
+        return Err("Długość nazwy firmy jest nieprawidłowa!".to_string());
     }
 
     USERS.with(|users| users.borrow_mut().push(user.clone()));
@@ -274,12 +267,11 @@ fn add_user(name: String, email: String, phone_number: String, company_name: Str
 }
 
 #[ic_cdk::update]
-fn add_empty_user() -> Result<User, String>
-{
+fn add_empty_user() -> Result<User, String> {
     let caller = ic_cdk::caller();
 
     if USERS.with(|users| users.borrow().iter().any(|user| user.id == caller)) {
-        return Err("User already exists!".to_string());
+        return Err("Użytkownik już istnieje!".to_string());
     }
 
     let user = User::new(caller, "".to_string(), "".to_string(), "".to_string(), "".to_string());
@@ -305,70 +297,53 @@ fn edit_active_user(name: String, email: String, phone_number: String, company_n
     let caller = ic_cdk::caller();
     let config = CONFIG.with(|config| config.borrow().clone());
 
-    // Pobieramy mutowalną referencję do USERS
     USERS.with(|users| {
         let mut users = users.borrow_mut();
 
-        // Znajdź użytkownika na podstawie 'caller'
         if let Some(user) = users.iter_mut().find(|user| user.id == caller) {
-            // Walidacja danych
 
-            // Walidacja długości imienia
             if name.len() < config.min_user_name_len as usize || name.len() > config.max_user_name_len as usize {
-                Some( "Name length is wrong!".to_string() );
+                return Some("Długość nazwy jest nieprawidłowa!".to_string());
             }
 
-            // Walidacja formatu emaila
             let email_regex = Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
             if !email_regex.is_match(&email) {
-                Some( "Wrong email format!".to_string());
+                return Some("Nieprawidłowy format adresu e-mail!".to_string());
             }
 
-            // Walidacja formatu numeru telefonu
             let phone_number_regex = Regex::new(r"^\d{9}$").unwrap();
             if !phone_number_regex.is_match(&phone_number) {
-                Some( "Wrong phone number format!".to_string());
+                return Some("Nieprawidłowy format numeru telefonu!".to_string());
             }
 
-            // Walidacja długości nazwy firmy
             if company_name.len() < config.min_company_name_len as usize || company_name.len() > config.max_company_name_len as usize {
-                Some( "Company name length is wrong!".to_string());
+                return Some("Długość nazwy firmy jest nieprawidłowa!".to_string());
             }
 
-            // Zalogowanie przed aktualizacją
-            // Aktualizacja danych użytkownika
             user.name = name;
             user.email = email;
             user.phone_number = phone_number;
             user.company_name = company_name;
 
-            return None
+            return None;
         }
 
-        // Jeśli użytkownik nie został znaleziony
-        Some("User not found!".to_string())
+        Some("Nie znaleziono użytkownika!".to_string())
     })
 }
-#[ic_cdk::update]
-fn add_favorite_listing(listing_id: u64)
-{
-    let caller = ic_cdk::caller();
-    let config = CONFIG.with(|config| config.borrow().clone());
-    if caller == USERS.with(|users| users.borrow().iter().find(|user| user.id == caller).unwrap().id) {
-        return;
-    }
 
-    // Pobieramy mutowalną referencję do USERS
+#[ic_cdk::update]
+fn add_favorite_listing(listing_id: u64) {
+    let caller = ic_cdk::caller();
+
     USERS.with(|users| {
         let mut users = users.borrow_mut();
 
-        // Znajdź użytkownika na podstawie 'caller'
         if let Some(user) = users.iter_mut().find(|user| user.id == caller) {
-            // Znajdź ogłoszenie na podstawie 'listing_id'
             LISTINGS.with(|listings| {
                 if let Some(listing) = listings.borrow().iter().find(|listing| listing.id == listing_id) {
                     if caller == listing.owner.id {
-                        return
+                        return;
                     }
                     if user.favorites_id.is_none() {
                         user.favorites_id = Some(vec![listing.id]);
@@ -378,7 +353,6 @@ fn add_favorite_listing(listing_id: u64)
                 }
             });
         }
-
     });
 }
 
@@ -397,7 +371,7 @@ fn get_active_user_favorite_listings() -> Vec<Listing> {
             });
         }
     }
-    return favorites;
+    favorites
 }
 
 #[ic_cdk::query]
@@ -409,7 +383,7 @@ fn get_listings_by_active_user() -> Result<Vec<Listing>, String> {
     });
 
     if owner.is_none() {
-        return Err("User not found!".to_string());
+        return Err("Nie znaleziono użytkownika!".to_string());
     }
 
     let user_listings = LISTINGS.with(|listings| {
@@ -417,8 +391,8 @@ fn get_listings_by_active_user() -> Result<Vec<Listing>, String> {
             .borrow()
             .iter()
             .filter(|listing| listing.owner.id == caller)
-            .cloned() // Klonowanie wyników
-            .collect() // Zwracanie wyników jako wektor
+            .cloned()
+            .collect()
     });
     Ok(user_listings)
 }
@@ -432,10 +406,33 @@ fn get_reviews_of_listing(listing_id: u64) -> Result<Vec<Review>, String> {
             if let Some(reviews) = &listing.reviews {
                 Ok(reviews.clone())
             } else {
-                Err("No reviews for this listing.".to_string())
+                Err("Brak opinii dla tego ogłoszenia.".to_string())
             }
         } else {
-            Err("Listing not found.".to_string())
+            Err("Nie znaleziono ogłoszenia.".to_string())
+        }
+    })
+}
+#[ic_cdk::query]
+fn calculate_average_rating_of_listing(listing_id: u64) -> Result<f64, String> {
+    LISTINGS.with(|listings| {
+        let listings = listings.borrow();
+
+        if let Some(listing) = listings.iter().find(|listing| listing.id == listing_id) {
+            if let Some(reviews) = &listing.reviews {
+                if reviews.is_empty() {
+                    return Err("Brak opinii dla tego ogłoszenia.".to_string());
+                }
+
+                let total_rating: u32 = reviews.iter().map(|review| review.rating as u32).sum();
+                let average_rating = total_rating as f64 / reviews.len() as f64;
+
+                Ok(average_rating)
+            } else {
+                Err("Brak opinii dla tego ogłoszenia.".to_string())
+            }
+        } else {
+            Err("Nie znaleziono ogłoszenia.".to_string())
         }
     })
 }
@@ -445,7 +442,7 @@ fn add_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
     let caller = ic_cdk::caller();
 
     if rating > 5 {
-        return Some("Rating must be between 0 and 5.".to_string());
+        return Some("Ocena musi być w zakresie od 0 do 5.".to_string());
     }
 
     let owner = USERS.with(|users| {
@@ -453,7 +450,7 @@ fn add_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
     });
 
     if owner.is_none() {
-        return Some("User not found!".to_string());
+        return Some("Nie znaleziono użytkownika!".to_string());
     }
 
     LISTINGS.with(|listings| {
@@ -463,7 +460,7 @@ fn add_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
            
             if let Some(reviews) = &listing.reviews {
                 if reviews.iter().any(|review| review.owner_id == caller) {
-                    return Some("You have already added a review for this listing.".to_string());
+                    return Some("Już dodałeś opinię dla tego ogłoszenia.".to_string());
                 }
             }
 
@@ -475,21 +472,19 @@ fn add_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
                 listing.reviews = Some(vec![review]);
             }
 
-            None // Success, no response
+            None
         } else {
-            Some("Listing not found.".to_string()) // Error: listing not found
+            Some("Nie znaleziono ogłoszenia.".to_string())
         }
     })
 }
-
-
 
 #[ic_cdk::update]
 fn edit_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
     let caller = ic_cdk::caller();
 
     if rating > 5 {
-        return Some("Rating must be between 0 and 5.".to_string());
+        return Some("Ocena musi być w zakresie od 0 do 5.".to_string());
     }
 
     let owner = USERS.with(|users| {
@@ -497,7 +492,7 @@ fn edit_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
     });
 
     if owner.is_none() {
-        return Some("User not found!".to_string());
+        return Some("Nie znaleziono użytkownika!".to_string());
     }
 
     LISTINGS.with(|listings| {
@@ -507,12 +502,12 @@ fn edit_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
                 if let Some(review) = reviews.iter_mut().find(|review| review.owner_id == caller) {
                     review.rating = rating;
                     review.comment = comment;
-                    return None; // Success, no response
+                    return None;
                 }
             }
-            Some("Review not found.".to_string()) // Error: review not found
+            Some("Nie znaleziono opinii.".to_string())
         } else {
-            Some("Listing not found.".to_string()) // Error: listing not found
+            Some("Nie znaleziono ogłoszenia.".to_string())
         }
     })
 }
@@ -526,15 +521,16 @@ fn delete_review(listing_id: u64) -> Option<String> {
             if let Some(ref mut reviews) = listing.reviews {
                 if let Some(index) = reviews.iter().position(|review| review.owner_id == caller) {
                     reviews.remove(index);
-                    return None; // Success, no response
+                    return None;
                 }
             }
-            Some("Review not found.".to_string()) // Error: review not found
+            Some("Nie znaleziono opinii.".to_string())
         } else {
-            Some("Listing not found.".to_string()) // Error: listing not found
+            Some("Nie znaleziono ogłoszenia.".to_string())
         }
     })
 }
+
 
 
 ic_cdk::export_candid!();
