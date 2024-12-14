@@ -135,20 +135,20 @@ function AddReview() {
 		setLoading(true);
 
 		try {
-			const response = await backend.add_review(+productId, +rating, message);
-			if (response.length !== 0) {
-				alert("Wystąpił błąd podczas dodawania opinii: " + response[0]);
+			const { Ok, Err } = await backend.add_review(+productId, +rating, message);
+			if (Err) {
+				alert("Wystąpił błąd podczas dodawania opinii: " + Err);
 				return;
 			}
 
-			addReview(+productId, response);
+			addReview(+productId, Ok);
 			e.target.reset();
 		} catch (err) {
 			console.error("(adding review) backend error: " + err);
 			alert("Wystąpił błąd podczas dodawania opinii. Prosimy spróbować ponownie później.");
+		} finally {
+			setLoading(false);
 		}
-
-		setLoading(false);
 	}
 
 	return (

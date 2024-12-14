@@ -152,6 +152,7 @@
 	margin-block-start: 2rem;
 	accent-color: var(--accent);
 	position: relative;
+	overflow: clip;
 
 	h2 {
 		grid-column: 1 / span 2;
