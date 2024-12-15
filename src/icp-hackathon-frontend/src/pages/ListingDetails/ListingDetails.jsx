@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useParams } from "react-router";
+import { NavLink, useParams } from "react-router";
 import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
@@ -9,6 +9,7 @@ import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
 
 // components
 import Button from "../../common/Button";
+import Empty from "../../common/components/Empty/Empty.jsx";
 import Loader from "../../common/components/Loader/Loader.jsx";
 import ContactInfo from "../../common/components/ContactInfo/ContactInfo";
 import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
@@ -29,7 +30,17 @@ function ListingDetails() {
 	const favorite = false;
 	const avgRating = useCalculateAvgReview(+productId);
 
-	if (loading || error || reviews == null) return <Loader />;
+	if (error)
+		return (
+			<main className="listing-details">
+				<Empty icon={<i className="fa-solid fa-exclamation-circle"></i>}>
+					Wystąpił błąd podczas ładowania ogłoszenia. Możliwe, że ogłoszenie nie istnieje.
+					<br />
+					<NavLink to="/">Powrót do strony głównej</NavLink>
+				</Empty>
+			</main>
+		);
+	if (loading || reviews == null) return <Loader />;
 	return (
 		<main className="listing-details">
 			<PageHeader>
@@ -64,7 +75,7 @@ function ListingDetails() {
 			</section>
 			<ListingReviewSummary reviews={reviews} avgRating={avgRating} />
 			<AddReview />
-			<section className="listing-details__reviews"></section>
+			<ListingReviews reviews={reviews} />
 		</main>
 	);
 }
@@ -177,6 +188,32 @@ function AddReview() {
 			</Button>
 			{loading && <LoadingOverlay />}
 		</form>
+	);
+}
+
+function ListingReviews({ reviews }) {
+	return (
+		<section className="listing-details__reviews">
+			{reviews.length === 0 && <Empty icon={<i className="fa-solid fa-comment-slash"></i>}>Brak opinii</Empty>}
+			<ul>
+				{reviews.map(({ id, owner_id, rating, comment }) => (
+					<li key={id} className="listing-details__review">
+						<div className="review-header">
+							<div className="user">
+								{/* <img src={review.user.avatar} alt={review.user.name} /> */}
+								<span>{owner_id}</span>
+							</div>
+							<div className="rating">
+								{new Array(rating).fill(null).map((_, i) => (
+									<i className="fas fa-star" key={i}></i>
+								))}
+							</div>
+						</div>
+						<p>{comment}</p>
+					</li>
+				))}
+			</ul>
+		</section>
 	);
 }
 

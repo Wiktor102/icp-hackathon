@@ -206,3 +206,40 @@
 		text-align: center;
 	}
 }
+
+.listing-details__reviews {
+	margin-block-start: 2rem;
+
+	ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	li {
+		@include elevated-container;
+
+		.review-header {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			margin-block-end: 1rem;
+		}
+
+		.review-header .user span {
+			font-weight: bold;
+		}
+
+		i {
+			color: var(--warning-pale);
+		}
+
+		i + i {
+			margin-inline-start: 0.5rem;
+		}
+	}
+
+	li + li {
+		margin-block-start: 1rem;
+	}
+}

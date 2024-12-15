@@ -69,7 +69,6 @@ function ContactInfo({ editButton = false, user }) {
 		const company = formData.get("company");
 
 		const error = await backend.edit_active_user(name, email, phone, company);
-		console.log(error);
 		if (error != "") {
 			alert("Wystąpił błąd podczas zapisywania danych: " + error);
 			return false;
