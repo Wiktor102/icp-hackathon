@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
 	ConnectWallet,
 	ConnectWalletDropdownMenu,
@@ -7,6 +7,7 @@ import {
 	useIdentity
 } from "@nfid/identitykit/react";
 import { Link, Outlet, useNavigate } from "react-router";
+import { AuthDialog } from "../Auth/AuthDialog";
 
 // components
 import Button from "../common/Button";
@@ -20,6 +21,7 @@ import "./Header.scss";
 
 function Header() {
 	const navigate = useNavigate();
+	const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
 
 	const identity = useIdentity();
 	const setUser = useStore(state => state.setUser);
@@ -95,12 +97,10 @@ function Header() {
 					<h1>HurtChain</h1>
 				</Link>
 				<div>
-					<ConnectWallet
-						connectButtonComponent={props => <Button {...props}>Zaloguj się</Button>}
-						dropdownMenuComponent={ProfileDropdown}
-					/>
+					<Button onClick={() => setIsAuthDialogOpen(true)}>Zaloguj się</Button>
 				</div>
 			</header>
+			<AuthDialog isOpen={isAuthDialogOpen} onClose={() => setIsAuthDialogOpen(false)} />
 			<Outlet />
 		</>
 	);

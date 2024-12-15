@@ -1,0 +1,100 @@
+.auth {
+	&__overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+	}
+
+	&__dialog {
+		background: var(--surface-variant);
+		padding: 2rem;
+		border-radius: 1rem;
+		width: 100%;
+		max-width: 400px;
+		position: relative;
+	}
+
+	&__close {
+		position: absolute;
+		right: 1rem;
+		top: 1rem;
+		border: none;
+		background: none;
+		font-size: 1.5rem;
+		transition: color 200ms;
+		cursor: pointer;
+
+		&:hover {
+			color: var(--emphasis);
+		}
+	}
+
+	&__tabs {
+		display: flex;
+		margin-bottom: 1.5rem;
+		font-size: 1.25rem;
+		border-bottom: 2px solid var(--surface);
+	}
+
+	&__tab {
+		flex: 1;
+		padding: 0.5rem;
+		border: none;
+		background: none;
+		cursor: pointer;
+
+		&--active {
+			border-bottom: 2px solid var(--emphasis);
+		}
+	}
+
+	&__form {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+
+		&-group {
+			display: flex;
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+
+		&-label {
+			font-size: 0.9rem;
+		}
+
+		&-input-wrapper {
+			position: relative;
+			display: flex;
+			align-items: center;
+
+			i {
+				position: absolute;
+				left: 0.75rem;
+			}
+		}
+
+		&-input {
+			width: 100%;
+			padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+			background-color: var(--surface);
+			border: 0;
+			border-radius: 4px;
+
+			&:focus {
+				outline: 2px solid var(--accent);
+			}
+		}
+
+		button {
+			text-align: center;
+		}
+	}
+}
