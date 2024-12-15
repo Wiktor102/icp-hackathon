@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useIdentity } from "@nfid/identitykit/react";
-import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks and utilities
 import useStore from "../../store/store.js";
 import { parseBackendListing } from "./useFetchListings.js";
+import { useAuthenticatedActor } from "./useActor.js";
 
 export function useFetchUserListings() {
 	const identity = useIdentity();
@@ -12,6 +12,7 @@ export function useFetchUserListings() {
 	const setUserListingsLoading = useStore(state => state.setUserListingsLoading);
 	const setUserListingsError = useStore(state => state.setUserListingsError);
 	const addListings = useStore(state => state.addListings);
+	const [actorLoading, actor] = useAuthenticatedActor();
 
 	useEffect(() => {
 		const fetchUserListings = async () => {
@@ -23,7 +24,7 @@ export function useFetchUserListings() {
 			setUserListingsLoading();
 
 			try {
-				const { Ok, Err } = await backend.get_listings_by_active_user();
+				const { Ok, Err } = await actor.get_listings_by_active_user();
 
 				if (Err) {
 					setUserListingsError(Err);
@@ -39,6 +40,7 @@ export function useFetchUserListings() {
 			}
 		};
 
+		if (actorLoading) return;
 		fetchUserListings();
-	}, [identity, setUserListings, setUserListingsLoading, setUserListingsError, addListings]);
+	}, [identity, setUserListings, setUserListingsLoading, setUserListingsError, addListings, actor, actorLoading]);
 }

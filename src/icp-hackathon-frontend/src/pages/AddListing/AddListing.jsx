@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import imageCompression from "browser-image-compression";
-import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
 // hooks
+import { useAuthenticatedActor } from "../../common/hooks/useActor.js";
 import useProtectRoute from "../../common/hooks/useProtectRoute.js";
 import useStore from "../../store/store.js";
 
@@ -28,6 +28,7 @@ function AddListing() {
 	const categories = useStore(state => state.categories);
 	const addListings = useStore(state => state.addListings);
 	const addUserListings = useStore(state => state.addUserListings);
+	const [actorLoading, actor] = useAuthenticatedActor();
 
 	function deletePhoto(i) {
 		setPhotoPaths(p => p.filter((_, j) => i !== j));
@@ -104,7 +105,7 @@ function AddListing() {
 		setLoading(true);
 
 		try {
-			const { Ok, Err } = await backend.add_listing(
+			const { Ok, Err } = await actor.add_listing(
 				title,
 				description,
 				category.at(-1),
@@ -133,7 +134,7 @@ function AddListing() {
 
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
-	if (protection === "loading" || !categories) {
+	if (protection === "loading" || !categories || actorLoading) {
 		return (
 			<div className="ball-clip-rotate">
 				<div></div>

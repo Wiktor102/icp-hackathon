@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { NavLink, useParams, useNavigate } from "react-router";
-import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
 import useStore from "../../store/store.js";
 import useListing from "../../common/hooks/useListing.js";
+import { useAuthenticatedActor } from "../../common/hooks/useActor.js";
 import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
 
 // components
@@ -35,6 +35,7 @@ function ListingDetails() {
 	const avgRating = useCalculateAvgReview(+productId);
 
 	const isOwner = useMemo(() => userListings.some(listing => listing.id == +productId), [userListings, productId]);
+	const [actorLoading, actor] = useAuthenticatedActor();
 
 	function handleEdit() {
 		alert("Funkcja edycji ogłoszenia jest niedostępna w prototypowej wersji aplikacji.");
@@ -47,7 +48,7 @@ function ListingDetails() {
 
 		setDeleting(true);
 		try {
-			const [errors] = await backend.delete_listing(+productId);
+			const [errors] = await actor.delete_listing(+productId);
 			if (errors) {
 				alert("Wystąpił błąd podczas usuwania ogłoszenia: " + Err);
 				return;
@@ -74,7 +75,7 @@ function ListingDetails() {
 			</main>
 		);
 	}
-	if (loading || reviews == null) return <Loader />;
+	if (loading || reviews == null || actorLoading) return <Loader />;
 	return (
 		<main className="listing-details">
 			<PageHeader>
@@ -177,6 +178,7 @@ function AddReview() {
 	const addReview = useStore(state => state.addReview);
 	const [loading, setLoading] = useState(false);
 	const { productId } = useParams();
+	const [actorLoading, actor] = useAuthenticatedActor();
 
 	async function saveReview(e) {
 		e.preventDefault();
@@ -186,7 +188,7 @@ function AddReview() {
 		setLoading(true);
 
 		try {
-			const { Ok, Err } = await backend.add_review(+productId, +rating, message);
+			const { Ok, Err } = await actor.add_review(+productId, +rating, message);
 			if (Err) {
 				alert("Wystąpił błąd podczas dodawania opinii: " + Err);
 				return;
@@ -226,7 +228,7 @@ function AddReview() {
 				<i className="fas fa-envelope"></i>
 				Wyślij
 			</Button>
-			{loading && <LoadingOverlay />}
+			{(loading || actorLoading) && <LoadingOverlay />}
 		</form>
 	);
 }

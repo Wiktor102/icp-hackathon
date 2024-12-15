@@ -7,13 +7,13 @@ import {
 	useIdentity
 } from "@nfid/identitykit/react";
 import { Link, Outlet, useNavigate } from "react-router";
-import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
 // components
 import Button from "../common/Button";
 
 // hookjs
 import useStore from "../store/store.js";
+import { useAuthenticatedActor } from "../common/hooks/useActor.js";
 import { useFetchUserListings } from "../common/hooks/useFetchUserListings.js";
 
 import "./Header.scss";
@@ -24,11 +24,14 @@ function Header() {
 	const identity = useIdentity();
 	const setUser = useStore(state => state.setUser);
 	const setUserLoading = useStore(state => state.setUserLoading);
+	const [actorLoading, actor] = useAuthenticatedActor();
+
 	useFetchUserListings();
 	console.log(identity?.getPrincipal().toText());
 
 	function parseBackendUser(user) {
 		var user = {
+			id: user.id,
 			name: user.name,
 			email: user.email,
 			phone: user.phone_number,
@@ -39,13 +42,14 @@ function Header() {
 
 		user.initialised = !(user.name === "" && user.email === "" && user.phone === "" && user.company === "");
 
+		console.log(user);
 		setUser(user);
 		return user;
 	}
 
 	async function createEmptyUser() {
 		try {
-			const { Ok, Err } = await backend.add_empty_user();
+			const { Ok, Err } = await actor.add_empty_user();
 			if (Err) {
 				console.warn(Err);
 				alert("Wystąpił błąd podczas tworzenia użytkownika");
@@ -62,7 +66,7 @@ function Header() {
 
 	function fetchUser() {
 		setUserLoading(true);
-		backend.get_active_user().then(response => {
+		actor.get_active_user().then(response => {
 			if (Array.isArray(response) && response.length === 0) {
 				createEmptyUser();
 				return;
@@ -73,7 +77,7 @@ function Header() {
 	}
 
 	useEffect(() => {
-		if (identity == null) {
+		if (identity == null || actorLoading) {
 			setUser(null);
 			setUserLoading(false);
 			return;

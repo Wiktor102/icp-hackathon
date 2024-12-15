@@ -5,21 +5,23 @@ import { icp_hackathon_backend as backend } from "../../../../declarations/icp-h
 // hooks
 import useStore from "../../store/store.js";
 import useIsFavorite from "./useIsFavorite.js";
+import { useAuthenticatedActor } from "./useActor.js";
 
 function useFavorite(id) {
 	const identity = useIdentity();
 	const addFavorite = useStore(state => state.addFavorite);
 	const isFavorite = useIsFavorite(id);
 	const [loading, setLoading] = useState(false);
+	const [actorLoading, actor] = useAuthenticatedActor();
 
 	return {
 		isFavorite,
 		loading,
 		addFavorite: async () => {
-			if (isFavorite || loading || !identity) return;
+			if (isFavorite || loading || !identity || actorLoading) return;
 			setLoading(true);
 			try {
-				await backend.add_favorite_listing(id);
+				await actor.add_favorite_listing(id);
 				addFavorite(id);
 			} catch (error) {
 				console.error(error);
