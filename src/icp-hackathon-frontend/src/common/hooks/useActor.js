@@ -19,7 +19,7 @@ function useAuthenticatedActor() {
 		);
 	}, [authenticatedAgent, targetIdlFactory]);
 
-	// return [authenticatedActor == null, authenticatedActor];
+	return [authenticatedActor == null, authenticatedActor];
 	return [false, icp_hackathon_backend];
 }
 
