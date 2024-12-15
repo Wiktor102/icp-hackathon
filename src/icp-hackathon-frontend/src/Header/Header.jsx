@@ -9,10 +9,11 @@ import {
 import { Link, Outlet, useNavigate } from "react-router";
 import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
+// components
 import Button from "../common/Button";
 
+// hookjs
 import useStore from "../store/store.js";
-import usePrevious from "../common/hooks/usePrevious.js";
 
 import "./Header.scss";
 
@@ -20,10 +21,9 @@ function Header() {
 	const navigate = useNavigate();
 
 	const identity = useIdentity();
-	const previousIdentity = usePrevious(identity);
-	const user = useStore(state => state.user);
 	const setUser = useStore(state => state.setUser);
 	const setUserLoading = useStore(state => state.setUserLoading);
+	console.log(identity?.getPrincipal().toText());
 
 	function parseBackendUser(user) {
 		var user = {
@@ -45,7 +45,7 @@ function Header() {
 		try {
 			const { Ok, Err } = await backend.add_empty_user();
 			if (Err) {
-				console.log(Err);
+				console.warn(Err);
 				alert("Wystąpił błąd podczas tworzenia użytkownika");
 				return;
 			}
@@ -53,7 +53,7 @@ function Header() {
 			parseBackendUser(Ok);
 			navigate("/profile");
 		} catch (err) {
-			console.log("(creating user) backend error:" + err);
+			console.error("(creating user) backend error:" + err);
 			alert("Wystąpił niezany błąd podczas tworzenia konta. Spróbuj ponownie później.");
 		}
 	}
@@ -71,12 +71,13 @@ function Header() {
 	}
 
 	useEffect(() => {
-		if (identity === previousIdentity && user != null) return;
 		if (identity == null) {
 			setUser(null);
+			setUserLoading(false);
 			return;
 		}
 
+		// Always fetch user data when identity changes
 		fetchUser();
 	}, [identity]);
 
@@ -99,6 +100,13 @@ function Header() {
 }
 
 function ProfileDropdown({ connectedAccount, icpBalance, disconnect }) {
+	const setUser = useStore(state => state.setUser);
+
+	const handleDisconnect = () => {
+		setUser(null); // Clear user state before disconnecting
+		disconnect();
+	};
+
 	return (
 		<ConnectWalletDropdownMenu>
 			<ConnectWalletDropdownMenuButton connectedAccount={connectedAccount} icpBalance={icpBalance}>
@@ -120,7 +128,7 @@ function ProfileDropdown({ connectedAccount, icpBalance, disconnect }) {
 						<div className="profile-dropdown-item__label">Ulubione</div>
 					</div>
 				</Link>
-				<div className="profile-dropdown-item" onClick={disconnect}>
+				<div className="profile-dropdown-item" onClick={handleDisconnect}>
 					<i className="fas fa-arrow-right-from-bracket"></i>
 					<div className="profile-dropdown-item__label">Wyloguj się</div>
 				</div>

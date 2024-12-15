@@ -26,7 +26,10 @@ const useStore = create(set => ({
 			listing.reviews = [...listing.reviews, review];
 			return { listings: { ...state.listings, [listingId]: listing } };
 		});
-	}
+	},
+
+	userListings: [],
+	setUserListings: listings => set({ userListings: listings })
 }));
 
 export default useStore;

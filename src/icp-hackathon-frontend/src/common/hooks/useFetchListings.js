@@ -3,7 +3,6 @@ import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-bac
 import useStore from "../../store/store.js";
 
 function parseBackendListing(l) {
-	console.log(l);
 	return {
 		...l,
 		reviews: l.reviews.flat(),

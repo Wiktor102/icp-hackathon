@@ -1,13 +1,19 @@
+import { useEffect } from "react";
 import { Link } from "react-router";
+import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
 import useStore from "../../store/store.js";
 import useProtectRoute from "../../common/hooks/useProtectRoute.js";
 
+// utilities
+import { parseBackendListing } from "../../common/hooks/useFetchListings.js";
+
 // components
 import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
 import ContactInfo from "../../common/components/ContactInfo/ContactInfo";
 import Loader from "../../common/components/Loader/Loader.jsx";
+import Empty from "../../common/components/Empty/Empty.jsx";
 import Grid from "../../Home/Grid/Grid";
 import Button from "../../common/Button";
 
@@ -18,6 +24,29 @@ import "./Profile.scss";
 function Profile() {
 	const user = useStore(state => state.user);
 	const loadingUser = useStore(state => state.loadingUser);
+	const setUserListings = useStore(state => state.setUserListings);
+	const addListings = useStore(state => state.addListings);
+	const userListings = useStore(state => state.userListings);
+
+	useEffect(() => {
+		const fetchUserListings = async () => {
+			try {
+				const { Ok, Err } = await backend.get_listings_by_active_user();
+
+				if (Err) {
+					alert("Wystąpił błąd podczas pobierania ogłoszeń użytkownika: " + Err);
+					return;
+				}
+
+				setUserListings(Ok.map(parseBackendListing));
+				addListings(Ok.map(parseBackendListing));
+			} catch (error) {
+				console.error("(fetch user listings) Backend error:", error);
+			}
+		};
+
+		fetchUserListings();
+	}, [setUserListings]);
 
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
@@ -44,7 +73,8 @@ function Profile() {
 				</Link>
 			</section>
 			<h2>Twoje ogłoszenia</h2>
-			<Grid listings={[]} />
+			{userListings.length > 0 && <Grid listings={userListings} />}
+			{userListings.length === 0 && <Empty>Nie dodałeś/aś jeszcze żadnego ogłoszenia</Empty>}
 		</div>
 	);
 }
