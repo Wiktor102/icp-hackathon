@@ -1,26 +1,34 @@
-import { useMemo } from "react";
-import { useAgent } from "@nfid/identitykit/react";
-import { Actor } from "@dfinity/agent";
+import { useEffect, useMemo, useState } from "react";
+import { HttpAgent } from "@dfinity/agent";
 import { idlFactory as targetIdlFactory } from "../../../../declarations/icp-hackathon-backend/icp-hackathon-backend.did.js";
 import { icp_hackathon_backend } from "../../../../declarations/icp-hackathon-backend/index.js";
+import { canisterId, createActor } from "../../../../declarations/icp-hackathon-backend/index.js";
+import useStore from "../../store/store.js";
 
 const TARGET_CANISTER_ID_TO_CALL = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
+const ICP_API_HOST = "http://localhost:4943/";
 
 function useAuthenticatedActor() {
-	const authenticatedAgent = useAgent();
+	const identity = useStore(state => state.identity);
+	const [unauthenticatedAgent, setUnauthenticatedAgent] = useState(null);
+
+	useEffect(() => {
+		HttpAgent.create({ host: ICP_API_HOST }).then(setUnauthenticatedAgent);
+	}, []);
 
 	const authenticatedActor = useMemo(() => {
 		return (
-			authenticatedAgent &&
-			Actor.createActor(targetIdlFactory, {
-				agent: authenticatedAgent,
-				canisterId: TARGET_CANISTER_ID_TO_CALL
+			identity &&
+			createActor(canisterId, {
+				agentOptions: {
+					identity
+				}
+				// canisterId: TARGET_CANISTER_ID_TO_CALL
 			})
 		);
-	}, [authenticatedAgent, targetIdlFactory]);
+	}, [identity, targetIdlFactory]);
 
 	return [authenticatedActor == null, authenticatedActor];
-	return [false, icp_hackathon_backend];
 }
 
 export { useAuthenticatedActor };

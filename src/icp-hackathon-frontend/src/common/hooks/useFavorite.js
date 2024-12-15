@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useIdentity } from "@nfid/identitykit/react";
-import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
 import useStore from "../../store/store.js";
@@ -8,7 +6,7 @@ import useIsFavorite from "./useIsFavorite.js";
 import { useAuthenticatedActor } from "./useActor.js";
 
 function useFavorite(id) {
-	const identity = useIdentity();
+	const identity = useStore(state => state.identity);
 	const addFavorite = useStore(state => state.addFavorite);
 	const isFavorite = useIsFavorite(id);
 	const [loading, setLoading] = useState(false);
@@ -35,7 +33,7 @@ function useFavorite(id) {
 			setLoading(true);
 			try {
 				// TODO: remove_favorite_listing is not implemented in the backend
-				await backend.remove_favorite_listing(id);
+				await actor.remove_favorite_listing(id);
 			} catch (error) {
 				console.error(error);
 				alert("Wystąpił nieznany błąd! Proszę spróbować ponownie.");

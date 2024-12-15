@@ -1,5 +1,4 @@
 import { forwardRef, useRef, useState } from "react";
-import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-backend";
 
 // hooks
 import useStore from "../../../store/store.js";
@@ -9,6 +8,7 @@ import LoadingOverlay from "../LoadingOverlay/LoadingOverlay.jsx";
 import OutlinedButton from "../../OutlinedButton/OutlinedButton.jsx";
 
 import "./ContactInfo.scss";
+import { useAuthenticatedActor } from "../../hooks/useActor.js";
 
 const Wrapper = forwardRef(({ condition, children, ...props }, ref) =>
 	condition ? (
@@ -22,6 +22,7 @@ const Wrapper = forwardRef(({ condition, children, ...props }, ref) =>
 
 function ContactInfo({ editButton = false, user }) {
 	const setUser = useStore(state => state.setUser);
+	const [actorLoading, actor] = useAuthenticatedActor();
 
 	const [editable, setEditable] = useState(editButton && !user?.initialised);
 	const [loading, setLoading] = useState(false || user == null);
@@ -68,7 +69,7 @@ function ContactInfo({ editButton = false, user }) {
 		const phone = formData.get("phone");
 		const company = formData.get("company");
 
-		const error = await backend.edit_active_user(name, email, phone, company);
+		const error = await actor.edit_active_user(name, email, phone, company);
 		if (error != "") {
 			alert("Wystąpił błąd podczas zapisywania danych: " + error);
 			return false;
@@ -132,7 +133,7 @@ function ContactInfo({ editButton = false, user }) {
 							<span>{user.initialised ? user.phone : "???"}</span>
 						)}
 					</div>
-					{loading && <LoadingOverlay />}
+					{(loading || actorLoading) && <LoadingOverlay />}
 				</Wrapper>
 				{editButton && (
 					<OutlinedButton onClick={onClick}>

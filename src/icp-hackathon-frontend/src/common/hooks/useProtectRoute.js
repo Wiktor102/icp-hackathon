@@ -1,8 +1,9 @@
 import { useIdentity, useIsInitializing } from "@nfid/identitykit/react";
 import { useNavigate } from "react-router";
+import useStore from "../../store/store.js";
 
 function useProtectRoute() {
-	const identity = useIdentity();
+	const identity = useStore(state => state.identity);
 	const navigate = useNavigate();
 	const isInitializing = useIsInitializing();
 

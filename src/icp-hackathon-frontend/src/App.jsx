@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
+import { AuthClient } from "@dfinity/auth-client";
 
 // components
 import Home from "./Home/Home";
@@ -13,16 +14,26 @@ import { IdentityKitAuthType, InternetIdentity } from "@nfid/identitykit";
 import { IdentityKitProvider } from "@nfid/identitykit/react";
 
 // hooks
+import useStore from "./store/store.js";
 import useFetchCategories from "./common/hooks/useFetchCategories.js";
 import useFetchListings from "./common/hooks/useFetchListings.js";
+import { useFetchUserListings } from "./common/hooks/useFetchUserListings.js";
 
 // styles
 import "@nfid/identitykit/react/styles.css";
 import "./common/scss/loaders.min.css";
 
 function App() {
-	useFetchCategories();
 	useFetchListings();
+	useFetchCategories();
+	useFetchUserListings();
+
+	const setAuthClient = useStore(state => state.setAuthClient);
+	useEffect(() => {
+		AuthClient.create({
+			/*options can go here */
+		}).then(setAuthClient);
+	}, []);
 
 	return (
 		<IdentityKitProvider
@@ -31,6 +42,9 @@ function App() {
 			featuredSigner={InternetIdentity}
 			signers={[InternetIdentity]}
 			signerClientOptions={{ targets: ["bkyz2-fmaaa-aaaaa-qaaaq-cai"] }}
+			authClientConfig={{
+				identityProvider: "http://bd3sg-teaaa-aaaaa-qaaba-cai.localhost:4943/"
+			}}
 		>
 			<BrowserRouter>
 				<Routes>

@@ -7,7 +7,7 @@ import { parseBackendListing } from "./useFetchListings.js";
 import { useAuthenticatedActor } from "./useActor.js";
 
 export function useFetchUserListings() {
-	const identity = useIdentity();
+	const identity = useStore(state => state.identity);
 	const setUserListings = useStore(state => state.setUserListings);
 	const setUserListingsLoading = useStore(state => state.setUserListingsLoading);
 	const setUserListingsError = useStore(state => state.setUserListingsError);

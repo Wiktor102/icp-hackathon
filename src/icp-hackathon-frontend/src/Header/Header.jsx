@@ -1,11 +1,4 @@
-import { useEffect } from "react";
-import {
-	ConnectWallet,
-	ConnectWalletDropdownMenu,
-	ConnectWalletDropdownMenuButton,
-	ConnectWalletDropdownMenuItems,
-	useIdentity
-} from "@nfid/identitykit/react";
+import { useEffect, useState, useRef } from "react";
 import { Link, Outlet, useNavigate } from "react-router";
 
 // components
@@ -14,20 +7,34 @@ import Button from "../common/Button";
 // hookjs
 import useStore from "../store/store.js";
 import { useAuthenticatedActor } from "../common/hooks/useActor.js";
-import { useFetchUserListings } from "../common/hooks/useFetchUserListings.js";
 
 import "./Header.scss";
 
 function Header() {
 	const navigate = useNavigate();
 
-	const identity = useIdentity();
+	const identity = useStore(state => state.identity);
 	const setUser = useStore(state => state.setUser);
 	const setUserLoading = useStore(state => state.setUserLoading);
 	const [actorLoading, actor] = useAuthenticatedActor();
 
-	useFetchUserListings();
-	console.log(identity?.getPrincipal().toText());
+	const authClient = useStore(state => state.authClient);
+	const setIdentity = useStore(state => state.setIdentity);
+
+	function login() {
+		authClient.login({
+			identityProvider:
+				process.env.DFX_NETWORK === "ic"
+					? "https://identity.ic0.app/#authorize"
+					: // : `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}#authorize`,
+					  //   `http://localhost:4943?canisterId=bw4dl-smaaa-aaaaa-qaacq-cai#authorize`,
+					  `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:4943/#authorize`,
+			onSuccess: async () => {
+				const identity = await authClient.getIdentity();
+				setIdentity(identity);
+			}
+		});
+	}
 
 	function parseBackendUser(user) {
 		var user = {
@@ -42,7 +49,7 @@ function Header() {
 
 		user.initialised = !(user.name === "" && user.email === "" && user.phone === "" && user.company === "");
 
-		console.log(user);
+		console.log("setting user", user);
 		setUser(user);
 		return user;
 	}
@@ -67,7 +74,6 @@ function Header() {
 	function fetchUser() {
 		setUserLoading(true);
 		actor.get_active_user().then(response => {
-			console.log(response);
 			if (Array.isArray(response) && response.length === 0) {
 				createEmptyUser();
 				return;
@@ -95,10 +101,16 @@ function Header() {
 					<h1>HurtChain</h1>
 				</Link>
 				<div>
-					<ConnectWallet
-						connectButtonComponent={props => <Button {...props}>Zaloguj się</Button>}
-						dropdownMenuComponent={ProfileDropdown}
-					/>
+					{identity ? (
+						<ProfileDropdown
+							onLogout={() => {
+								setUser(null);
+								setIdentity(null);
+							}}
+						/>
+					) : (
+						<Button onClick={login}>Zaloguj się</Button>
+					)}
 				</div>
 			</header>
 			<Outlet />
@@ -106,41 +118,55 @@ function Header() {
 	);
 }
 
-function ProfileDropdown({ connectedAccount, icpBalance, disconnect }) {
-	const setUser = useStore(state => state.setUser);
+function ProfileDropdown({ onLogout }) {
+	const [isOpen, setIsOpen] = useState(false);
+	const dropdownRef = useRef(null);
 
-	const handleDisconnect = () => {
-		setUser(null); // Clear user state before disconnecting
-		disconnect();
-	};
+	useEffect(() => {
+		function handleClickOutside(event) {
+			if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+				setIsOpen(false);
+			}
+		}
+
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, []);
 
 	return (
-		<ConnectWalletDropdownMenu>
-			<ConnectWalletDropdownMenuButton connectedAccount={connectedAccount} icpBalance={icpBalance}>
-				<Button>
-					<i className="fas fa-user"></i>
-					Profil
-				</Button>
-			</ConnectWalletDropdownMenuButton>
-			<ConnectWalletDropdownMenuItems>
-				<Link to="/profile">
-					<div className="profile-dropdown-item">
-						<i className="fas fa-circle-info"></i>
-						<div className="profile-dropdown-item__label">Szczegóły</div>
+		<div className="profile-dropdown" ref={dropdownRef}>
+			<Button onClick={() => setIsOpen(!isOpen)}>
+				<i className="fas fa-user"></i>
+				Profil
+			</Button>
+
+			{isOpen && (
+				<div className="profile-dropdown-menu">
+					<Link to="/profile" onClick={() => setIsOpen(false)}>
+						<div className="profile-dropdown-item">
+							<i className="fas fa-circle-info"></i>
+							<div className="profile-dropdown-item__label">Szczegóły</div>
+						</div>
+					</Link>
+					<Link to="/favorites" onClick={() => setIsOpen(false)}>
+						<div className="profile-dropdown-item">
+							<i className="fas fa-star"></i>
+							<div className="profile-dropdown-item__label">Ulubione</div>
+						</div>
+					</Link>
+					<div
+						className="profile-dropdown-item"
+						onClick={() => {
+							setIsOpen(false);
+							onLogout();
+						}}
+					>
+						<i className="fas fa-arrow-right-from-bracket"></i>
+						<div className="profile-dropdown-item__label">Wyloguj się</div>
 					</div>
-				</Link>
-				<Link to="/favorites">
-					<div className="profile-dropdown-item">
-						<i className="fas fa-star"></i>
-						<div className="profile-dropdown-item__label">Ulubione</div>
-					</div>
-				</Link>
-				<div className="profile-dropdown-item" onClick={handleDisconnect}>
-					<i className="fas fa-arrow-right-from-bracket"></i>
-					<div className="profile-dropdown-item__label">Wyloguj się</div>
 				</div>
-			</ConnectWalletDropdownMenuItems>
-		</ConnectWalletDropdownMenu>
+			)}
+		</div>
 	);
 }
 

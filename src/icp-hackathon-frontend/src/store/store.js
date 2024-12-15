@@ -54,7 +54,12 @@ const useStore = create(set => ({
 	getImageFromCache: id => {
 		const state = useStore.getState();
 		return state.imageCache[id];
-	}
+	},
+
+	authClient: null,
+	setAuthClient: authClient => set({ authClient }),
+	identity: null,
+	setIdentity: identity => set({ identity })
 }));
 
 export default useStore;

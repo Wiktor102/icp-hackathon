@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { useIdentity } from "@nfid/identitykit/react";
 
 // hooks
+import useStore from "../../store/store.js";
 import useImage from "../../common/hooks/useImage.js";
 import useFavorite from "../../common/hooks/useFavorite.js";
 import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
@@ -41,7 +42,7 @@ function ListItem({ id, images, title, description, price, reviews }) {
 	const shortDescription = description.split(" ").slice(0, 20).join(" ") + "...";
 	const avgRating = useCalculateAvgReview(id);
 
-	const identity = useIdentity();
+	const identity = useStore(state => state.identity);
 	const { isFavorite, loading, addFavorite, removeFavorite } = useFavorite(id);
 	function toggleFavorite(e) {
 		e.stopPropagation();

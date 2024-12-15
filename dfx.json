@@ -1,27 +1,39 @@
 {
-  "canisters": {
-    "icp-hackathon-backend": {
-      "candid": "src/icp-hackathon-backend/icp-hackathon-backend.did",
-      "package": "icp-hackathon-backend",
-      "type": "rust"
+    "canisters": {
+        "icp-hackathon-backend": {
+            "candid": "src/icp-hackathon-backend/icp-hackathon-backend.did",
+            "package": "icp-hackathon-backend",
+            "type": "rust"
+        },
+        "icp-hackathon-frontend": {
+            "dependencies": [
+                "icp-hackathon-backend"
+            ],
+            "source": [
+                "src/icp-hackathon-frontend/dist"
+            ],
+            "type": "assets",
+            "workspace": "icp-hackathon-frontend"
+        },
+        "internet_identity": {
+            "type": "custom",
+            "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+            "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+            "shrink": false,
+            "remote": {
+                "candid": "internet_identity.did",
+                "id": {
+                    "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+                }
+            }
+        }
     },
-    "icp-hackathon-frontend": {
-      "dependencies": [
-        "icp-hackathon-backend"
-      ],
-      "source": [
-        "src/icp-hackathon-frontend/dist"
-      ],
-      "type": "assets",
-      "workspace": "icp-hackathon-frontend"
-    }
-  },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
-    }
-  },
-  "output_env_file": ".env",
-  "version": 1
+    "defaults": {
+        "build": {
+            "args": "",
+            "packtool": ""
+        }
+    },
+    "output_env_file": ".env",
+    "version": 1
 }

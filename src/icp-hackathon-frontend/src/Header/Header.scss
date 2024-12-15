@@ -14,21 +14,37 @@ header.page-header {
 	}
 }
 
+.profile-dropdown {
+	position: relative;
+}
+
+.profile-dropdown-menu {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	background: var(--accent);
+	border-radius: 1rem;
+	margin-top: 0.5rem;
+	min-width: 200px;
+	z-index: 1000;
+}
+
 .profile-dropdown-item {
 	all: unset;
 	display: flex;
 	align-items: center;
 	gap: 1rem;
-	padding: 0.5rem 1rem;
+	padding: 12px 16px;
 	cursor: pointer;
-	transition: background-color 200ms;
+	transition: background-color 0.2s;
 	border-radius: 0.5rem;
 
 	&:hover {
-		background-color: var(--surface-variant);
+		background-color: var(--accent-highlight);
 	}
 
 	i {
 		font-size: 1.3rem;
+		margin-right: 12px;
 	}
 }
