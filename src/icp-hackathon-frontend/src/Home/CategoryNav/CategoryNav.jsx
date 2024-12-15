@@ -1,21 +1,32 @@
-import { NavLink } from "react-router";
+import { useMemo } from "react";
+import { NavLink, useSearchParams } from "react-router";
 
 // hooks
 import useStore from "../../store/store.js";
 
 // components
 import Loader from "../../common/components/Loader/Loader.jsx";
+import SubtleButton from "../../common/components/SubtleButton/SubtleButton.jsx";
 
 // styles
 import "./CategoryNav.scss";
 
 function CategoryNav() {
 	const categories = useStore(state => state.categories);
-	// const categories = null;
+
+	const [searchParams] = useSearchParams();
+	const category = useMemo(() => searchParams.get("category"), [searchParams]);
 
 	return (
 		<section className="main-page__category-selector">
-			<h4>Kategorie produktów</h4>
+			<h4>
+				{category && (
+					<NavLink to="">
+						<SubtleButton icon={<i className="fas fa-arrow-left"></i>} />
+					</NavLink>
+				)}{" "}
+				Kategorie produktów
+			</h4>
 			<nav className="main-page__category-selector__nav">
 				{!categories && (
 					<div className="main-page__category-selector__loader-container">
