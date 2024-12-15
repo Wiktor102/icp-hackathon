@@ -57,13 +57,13 @@ function Home() {
 					Uzupełnij swój profil, aby móc dodawać ogłoszenia <NavLink to="/profile">Przejdź do profilu</NavLink>
 				</WarningCard>
 			)}
-			<form className="main-page__search-container">
+			{/* <form className="main-page__search-container">
 				<label htmlFor="search">Szukaj produktów</label>
 				<input type="search" id="search" placeholder="np. Ozdoby świąteczne" />
 				<button>
 					<i className="fas fa-search"></i>
 				</button>
-			</form>
+			</form> */}
 			<CategoryNav />
 			<section className="main-page__toolbar">
 				<div className="main-page__toolbar__sort">
