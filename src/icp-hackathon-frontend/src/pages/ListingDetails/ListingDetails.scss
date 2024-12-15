@@ -17,6 +17,7 @@
 
 	.image-carousel {
 		grid-row: 1 / span 4;
+		margin-inline-end: 3rem;
 	}
 
 	.price {
@@ -25,12 +26,17 @@
 
 	.contact-info {
 		align-self: flex-start;
+		margin-block: 1rem;
 	}
 
 	@media (min-width: 40rem) {
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: auto 1fr;
 		grid-template-rows: max-content max-content max-content 1fr;
-		gap: 2rem;
+		gap: 1rem;
+
+		button {
+			align-self: flex-start;
+		}
 	}
 }
 
