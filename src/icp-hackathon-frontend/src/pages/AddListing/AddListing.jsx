@@ -27,7 +27,7 @@ function AddListing() {
 	const navigate = useNavigate();
 	const categories = useStore(state => state.categories);
 	const addListings = useStore(state => state.addListings);
-	const setUserListings = useStore(state => state.setUserListings);
+	const addUserListings = useStore(state => state.addUserListings);
 
 	function deletePhoto(i) {
 		setPhotoPaths(p => p.filter((_, j) => i !== j));
@@ -116,7 +116,7 @@ function AddListing() {
 			if (Ok) {
 				const parsedListing = parseBackendListing(Ok);
 				addListings(parsedListing);
-				setUserListings(prev => [...prev, parsedListing]);
+				addUserListings(parsedListing);
 				navigate("/");
 			}
 

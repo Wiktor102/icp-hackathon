@@ -20,6 +20,16 @@ const useStore = create(set => ({
 
 		return set(state => ({ listings: { ...state.listings, ...newListings } }));
 	},
+	deleteListing: listingId =>
+		set(state => {
+			const newListings = { ...state.listings };
+			delete newListings[listingId];
+
+			return {
+				listings: newListings,
+				userListings: state.userListings.filter(listing => listing.id != listingId)
+			};
+		}),
 	addReview: (listingId, review) => {
 		set(state => {
 			const listing = state.listings[listingId];
@@ -32,6 +42,7 @@ const useStore = create(set => ({
 	userListingsLoading: false,
 	userListingsError: null,
 	setUserListings: listings => set({ userListings: listings, userListingsLoading: false, userListingsError: null }),
+	addUserListings: (...newListings) => set(state => ({ userListings: [...state.userListings, ...newListings] })),
 	setUserListingsLoading: () => set({ userListingsLoading: true }),
 	setUserListingsError: error => set({ userListingsError: error, userListingsLoading: false })
 }));

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { NavLink, useParams } from "react-router";
+import { NavLink, useParams, useNavigate } from "react-router";
 import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
@@ -20,7 +20,11 @@ import "./ListingDetails.scss";
 
 function ListingDetails() {
 	const { productId } = useParams();
+	const navigate = useNavigate();
 	const user = useStore(state => state.user);
+	const userListings = useStore(state => state.userListings);
+	const deleteListing = useStore(state => state.deleteListing);
+	const [deleting, setDeleting] = useState(false);
 
 	const { listing, loading, error } = useListing(+productId);
 	const { title, description, price, images = [], reviews, ...rest } = listing ?? {};
@@ -30,7 +34,36 @@ function ListingDetails() {
 	const favorite = false;
 	const avgRating = useCalculateAvgReview(+productId);
 
-	if (error)
+	const isOwner = useMemo(() => userListings.some(listing => listing.id == +productId), [userListings, productId]);
+
+	function handleEdit() {
+		alert("Funkcja edycji ogłoszenia jest niedostępna w prototypowej wersji aplikacji.");
+	}
+
+	async function handleDelete() {
+		if (!window.confirm("Czy na pewno chcesz usunąć to ogłoszenie?")) {
+			return;
+		}
+
+		setDeleting(true);
+		try {
+			const [errors] = await backend.delete_listing(+productId);
+			if (errors) {
+				alert("Wystąpił błąd podczas usuwania ogłoszenia: " + Err);
+				return;
+			}
+
+			deleteListing(+productId);
+			navigate("/profile");
+		} catch (error) {
+			console.error("(delete listing) Backend error:", error);
+			alert("Wystąpił błąd podczas usuwania ogłoszenia. Spróbuj ponownie później.");
+		} finally {
+			setDeleting(false);
+		}
+	}
+
+	if (error) {
 		return (
 			<main className="listing-details">
 				<Empty icon={<i className="fa-solid fa-exclamation-circle"></i>}>
@@ -40,6 +73,7 @@ function ListingDetails() {
 				</Empty>
 			</main>
 		);
+	}
 	if (loading || reviews == null) return <Loader />;
 	return (
 		<main className="listing-details">
@@ -57,16 +91,22 @@ function ListingDetails() {
 				</div>
 				{/* <ListingContactForm /> */}
 				<ContactInfo user={rest.owner} />
-				{user && rest.owner.id !== user?.id && (
+				{user && !isOwner && (
 					<Button>
 						{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
 						{favorite ? "Usuń z" : "Dodaj do"} ulubionych
 					</Button>
 				)}
-				{rest.owner.id === user?.id && (
-					<Button>
-						<i className="fas fa-pencil"></i> Edytuj ogłoszenie
-					</Button>
+				{isOwner && (
+					<>
+						<Button onClick={handleEdit}>
+							<i className="fas fa-pencil"></i> Edytuj ogłoszenie
+						</Button>
+						<Button onClick={handleDelete} className="danger">
+							<i className="fas fa-trash"></i> Usuń ogłoszenie
+						</Button>
+						{deleting && <LoadingOverlay />}
+					</>
 				)}
 			</section>
 			<section className="listing-details__description">

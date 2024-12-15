@@ -1,14 +1,8 @@
-import { useEffect } from "react";
 import { Link } from "react-router";
-import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
 import useStore from "../../store/store.js";
 import useProtectRoute from "../../common/hooks/useProtectRoute.js";
-import { useFetchUserListings } from "../../common/hooks/useFetchUserListings";
-
-// utilities
-import { parseBackendListing } from "../../common/hooks/useFetchListings.js";
 
 // components
 import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
