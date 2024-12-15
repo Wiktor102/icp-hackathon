@@ -29,7 +29,11 @@ const useStore = create(set => ({
 	},
 
 	userListings: [],
-	setUserListings: listings => set({ userListings: listings })
+	userListingsLoading: false,
+	userListingsError: null,
+	setUserListings: listings => set({ userListings: listings, userListingsLoading: false, userListingsError: null }),
+	setUserListingsLoading: () => set({ userListingsLoading: true }),
+	setUserListingsError: error => set({ userListingsError: error, userListingsLoading: false })
 }));
 
 export default useStore;

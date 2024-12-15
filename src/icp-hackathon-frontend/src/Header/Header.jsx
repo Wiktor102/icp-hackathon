@@ -14,6 +14,7 @@ import Button from "../common/Button";
 
 // hookjs
 import useStore from "../store/store.js";
+import { useFetchUserListings } from "../common/hooks/useFetchUserListings.js";
 
 import "./Header.scss";
 
@@ -23,6 +24,7 @@ function Header() {
 	const identity = useIdentity();
 	const setUser = useStore(state => state.setUser);
 	const setUserLoading = useStore(state => state.setUserLoading);
+	useFetchUserListings();
 	console.log(identity?.getPrincipal().toText());
 
 	function parseBackendUser(user) {

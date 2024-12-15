@@ -23,6 +23,7 @@ import "./common/scss/loaders.min.css";
 function App() {
 	useFetchCategories();
 	useFetchListings();
+
 	return (
 		<IdentityKitProvider
 			className="identity-kit-provider"

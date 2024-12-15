@@ -5,6 +5,7 @@ import { icp_hackathon_backend as backend } from "../../../../declarations/icp-h
 // hooks
 import useStore from "../../store/store.js";
 import useProtectRoute from "../../common/hooks/useProtectRoute.js";
+import { useFetchUserListings } from "../../common/hooks/useFetchUserListings";
 
 // utilities
 import { parseBackendListing } from "../../common/hooks/useFetchListings.js";
@@ -24,34 +25,18 @@ import "./Profile.scss";
 function Profile() {
 	const user = useStore(state => state.user);
 	const loadingUser = useStore(state => state.loadingUser);
-	const setUserListings = useStore(state => state.setUserListings);
-	const addListings = useStore(state => state.addListings);
 	const userListings = useStore(state => state.userListings);
-
-	useEffect(() => {
-		const fetchUserListings = async () => {
-			try {
-				const { Ok, Err } = await backend.get_listings_by_active_user();
-
-				if (Err) {
-					alert("Wystąpił błąd podczas pobierania ogłoszeń użytkownika: " + Err);
-					return;
-				}
-
-				setUserListings(Ok.map(parseBackendListing));
-				addListings(Ok.map(parseBackendListing));
-			} catch (error) {
-				console.error("(fetch user listings) Backend error:", error);
-			}
-		};
-
-		fetchUserListings();
-	}, [setUserListings]);
+	const userListingsLoading = useStore(state => state.userListingsLoading);
+	const userListingsError = useStore(state => state.userListingsError);
 
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
-	if (protection === "loading" || loadingUser || !user) {
+	if (protection === "loading" || loadingUser || !user || userListingsLoading) {
 		return <Loader />;
+	}
+
+	if (userListingsError) {
+		return <Empty icon={<i className="fas fa-exclamation-triangle" />}>Wystąpił błąd: {userListingsError}</Empty>;
 	}
 
 	return (
