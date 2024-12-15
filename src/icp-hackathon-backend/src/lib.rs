@@ -63,6 +63,7 @@ thread_local! {
     static CONFIG: RefCell<Config> = RefCell::new(Config::new());
     static LISTINGS: RefCell<Vec<Listing>> = RefCell::new(Vec::new());
     static USERS: RefCell<Vec<User>> = RefCell::new(Vec::new());
+    static IMAGES: RefCell<Vec<String>> = RefCell::new(Vec::new());
 }
 
 
@@ -73,7 +74,7 @@ fn add_listing(
     category: String,
     price: f64,
     amount: u32,
-    images: Vec<String>,
+    images_strings: Vec<String>,
     categories_path: String,
 ) -> Result<Listing, String> {
     let caller = ic_cdk::caller().to_string();
@@ -84,6 +85,16 @@ fn add_listing(
     if let Some(owner) = owner {
         let config = CONFIG.with(|config| config.borrow().clone());
 
+        let images_id = IMAGES.with(|images| {
+            let mut images_ref = images.borrow_mut();
+            images_strings.iter().map(|s| {
+                images_ref.push(base64::encode(s));
+                (images_ref.len() - 1) as u64
+            }).collect::<Vec<u64>>()
+        });
+
+
+        
         if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
             return Err("Długość tytułu jest poza zakresem!".to_string());
         }
@@ -98,7 +109,7 @@ fn add_listing(
             price,
             amount,
             owner,
-            images, 
+            images_id, 
             categories_path,
         );
 
@@ -124,6 +135,14 @@ fn edit_listing(
     let caller = ic_cdk::caller().to_string();
     let config = CONFIG.with(|config| config.borrow().clone());
 
+    let images_id = IMAGES.with(|images| {
+        let mut images_ref = images.borrow_mut();
+        images_strings.iter().map(|s| {
+            images_ref.push(base64::encode(s));
+            (images_ref.len() - 1) as u64
+        }).collect::<Vec<u64>>()
+    });
+
     if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
         return Err("Długość tytułu jest nieprawidłowa!".to_string());
     }
@@ -145,7 +164,7 @@ fn edit_listing(
             listing.price = price;
             listing.amount = amount;
             listing.categories_path = categories_path;
-            listing.images = images_strings;
+            listing.images_id = images_id;
 
             Ok("Ogłoszenie zostało pomyślnie zaktualizowane!".to_string())
         } else {
@@ -153,6 +172,13 @@ fn edit_listing(
         }
     })
 }
+#[ic_cdk::query]
+fn get_image_by_id(image_id: u64) -> Option<String> {
+    IMAGES.with(|images| {
+        images.borrow().get(image_id as usize).cloned()
+    })
+}
+
 
 #[ic_cdk::query]
 fn get_listings_id_by_category(category: String) -> Vec<usize> {

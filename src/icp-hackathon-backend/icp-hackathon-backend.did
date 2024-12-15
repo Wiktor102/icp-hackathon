@@ -17,12 +17,12 @@ type Listing = record {
   reviews : opt vec Review;
   owner : User;
   date : nat64;
+  images_id : vec nat64;
   description : text;
   category : text;
   price : float64;
   amount : nat32;
   categories_path : text;
-  images : vec text;
 };
 type Result = variant { Ok : User; Err : text };
 type Result_1 = variant { Ok : Listing; Err : text };
@@ -63,6 +63,7 @@ service : {
   get_active_user_favorite_listings : () -> (vec Listing) query;
   get_categories : () -> (vec Category) query;
   get_config : () -> (Config) query;
+  get_image_by_id : (nat64) -> (opt text) query;
   get_listing_by_id : (nat64) -> (opt Listing) query;
   get_listings : () -> (vec Listing) query;
   get_listings_by_active_user : () -> (Result_5) query;

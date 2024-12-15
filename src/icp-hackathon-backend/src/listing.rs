@@ -17,7 +17,7 @@ pub struct Listing {
     pub price: f64,
     pub amount: u32,
     pub owner: User,
-    pub images: Vec<String>, // Zmieniamy na Vec<String> przechowujący Base64
+    pub images_id: Vec<u64>,
     pub categories_path: String,
     pub reviews: Option<Vec<Review>>,
 }
@@ -30,14 +30,9 @@ impl Listing {
         price: f64,
         amount: u32,
         owner: User,
-        images_strings: Vec<String>,
+        images_id: Vec<u64>,
         categories_path: String,
     ) -> Self {
-        let images = images_strings
-            .iter()
-            .map(|s| base64::encode(s))
-            .collect();
-        
         Self {
             id: AMOUNT_OF_LISTINGS.fetch_add(1, Ordering::SeqCst),
             title,
@@ -47,7 +42,7 @@ impl Listing {
             price,
             amount,
             owner,
-            images,
+            images_id,
             categories_path,
             reviews: None,
         }
