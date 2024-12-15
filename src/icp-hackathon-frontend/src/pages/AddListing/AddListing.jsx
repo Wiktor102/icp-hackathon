@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import imageCompression from "browser-image-compression";
 
@@ -18,6 +18,7 @@ import LoadingOverlay from "../../common/components/LoadingOverlay/LoadingOverla
 // styles
 import "./AddListing.scss";
 
+const MAX_PHOTOS = 1;
 function AddListing() {
 	const [category, setCategory] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -31,27 +32,18 @@ function AddListing() {
 	const [actorLoading, actor] = useAuthenticatedActor();
 
 	function deletePhoto(e, i) {
-		e.preventDefault();
 		setPhotoPaths(p => p.filter((_, j) => i !== j));
 	}
 
 	function uploadFile(e) {
-		if (photoPaths.length + e.target.files.length > 3) {
-			alert("Maksymalnie można dodać 3 zdjęcia");
+		if (photoPaths.length + e.target.files.length > MAX_PHOTOS) {
+			// alert("Maksymalnie można dodać 3 zdjęcia");
+			alert("W obecnej wersji aplikacji, można dodać tylko 1 zdjęcie.");
 			e.preventDefault();
 			return;
 		}
 
 		setPhotoPaths(p => [...p, ...e.target.files]);
-		Array.from(e.target.files).map(async img => {
-			const compressed = await compressImage(img);
-			const reader = new FileReader();
-			reader.readAsDataURL(compressed);
-			reader.onload = () => {
-				const base64 = reader.result;
-				setBase64Photos(prev => [...prev, base64]);
-			};
-		});
 	}
 
 	async function compressImage(file) {
@@ -133,6 +125,19 @@ function AddListing() {
 		}
 	}
 
+	useEffect(() => {
+		setBase64Photos([]);
+		photoPaths.map(async img => {
+			const compressed = await compressImage(img);
+			const reader = new FileReader();
+			reader.readAsDataURL(compressed);
+			reader.onload = () => {
+				const base64 = reader.result;
+				setBase64Photos(prev => [...prev, base64]);
+			};
+		});
+	}, [photoPaths]);
+
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
 	if (protection === "loading" || !categories || actorLoading) {
@@ -158,16 +163,16 @@ function AddListing() {
 					{base64Photos.map((photo, i) => (
 						<div className="image-container" key={i}>
 							<img src={photo} alt="Zdjęcie produktu" />
-							<button type="buton" onClick={e => deletePhoto(e, i)}>
+							<button type="button" onClick={e => deletePhoto(e, i)}>
 								<i className="fas fa-trash"></i>
 							</button>
 						</div>
 					))}
-					{base64Photos.length < 3 &&
-						new Array(3 - base64Photos.length).fill(null).map((_, i) => (
+					{base64Photos.length < MAX_PHOTOS &&
+						new Array(MAX_PHOTOS - base64Photos.length).fill(null).map((_, i) => (
 							<div className="image-placeholder" key={i}>
 								<i className="fa-regular fa-image"></i>
-								Nie dodałeś jeszcze zdjęcia
+								Nie dodałeś/aś jeszcze zdjęcia
 							</div>
 						))}
 					<label htmlFor="image" className={base64Photos.length >= 3 ? "disabled" : ""}>
