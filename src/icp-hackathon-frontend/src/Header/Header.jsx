@@ -87,7 +87,7 @@ function Header() {
 		<>
 			<header className="page-header">
 				<Link to="/">
-					<h1>SklepX</h1>
+					<h1>HurtChain</h1>
 				</Link>
 				<div>
 					<ConnectWallet
