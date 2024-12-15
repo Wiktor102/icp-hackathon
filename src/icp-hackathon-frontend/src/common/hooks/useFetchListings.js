@@ -6,14 +6,15 @@ function parseBackendListing(l) {
 	return {
 		...l,
 		reviews: l.reviews.flat(),
-		owner: {
-			...l.owner,
-			phone: l.owner.phone_number,
-			company: l.owner.company_name,
-			company_name: undefined,
-			phone_number: undefined,
-			initialised: true
-		}
+		images: l.images_id
+		// owner: {
+		// 	...l.owner,
+		// 	phone: l.owner.phone_number,
+		// 	company: l.owner.company_name,
+		// 	company_name: undefined,
+		// 	phone_number: undefined,
+		// 	initialised: true
+		// }
 	};
 }
 

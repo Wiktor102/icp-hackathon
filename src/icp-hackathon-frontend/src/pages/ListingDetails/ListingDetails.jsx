@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { act, useEffect, useMemo, useState } from "react";
 import { NavLink, useParams, useNavigate } from "react-router";
 
 // hooks
@@ -36,6 +36,13 @@ function ListingDetails() {
 
 	const isOwner = useMemo(() => userListings.some(listing => listing.id == +productId), [userListings, productId]);
 	const [actorLoading, actor] = useAuthenticatedActor();
+
+	const [owner, setOwner] = useState(null);
+
+	useEffect(() => {
+		if (actorLoading) return;
+		actor.get_user_by_principal(rest.owner).then(([response]) => setOwner(response));
+	}, [actorLoading]);
 
 	function handleEdit() {
 		alert("Funkcja edycji ogłoszenia jest niedostępna w prototypowej wersji aplikacji.");
@@ -91,7 +98,7 @@ function ListingDetails() {
 					<div className="price">{formattedPrice}</div>
 				</div>
 				{/* <ListingContactForm /> */}
-				<ContactInfo user={rest.owner} />
+				{owner && <ContactInfo user={owner} />}
 				{user && !isOwner && (
 					<Button>
 						{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}

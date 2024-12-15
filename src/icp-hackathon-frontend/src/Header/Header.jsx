@@ -67,6 +67,7 @@ function Header() {
 	function fetchUser() {
 		setUserLoading(true);
 		actor.get_active_user().then(response => {
+			console.log(response);
 			if (Array.isArray(response) && response.length === 0) {
 				createEmptyUser();
 				return;

@@ -30,7 +30,8 @@ function AddListing() {
 	const addUserListings = useStore(state => state.addUserListings);
 	const [actorLoading, actor] = useAuthenticatedActor();
 
-	function deletePhoto(i) {
+	function deletePhoto(e, i) {
+		e.preventDefault();
 		setPhotoPaths(p => p.filter((_, j) => i !== j));
 	}
 
@@ -157,7 +158,7 @@ function AddListing() {
 					{base64Photos.map((photo, i) => (
 						<div className="image-container" key={i}>
 							<img src={photo} alt="Zdjęcie produktu" />
-							<button type="buton" onClick={() => deletePhoto(i)}>
+							<button type="buton" onClick={e => deletePhoto(e, i)}>
 								<i className="fas fa-trash"></i>
 							</button>
 						</div>

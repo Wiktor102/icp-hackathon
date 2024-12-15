@@ -48,6 +48,7 @@ function Home() {
 			}
 		});
 	}, [category, allListings]);
+	console.log(listingsToDisplay);
 
 	return (
 		<main className="main-page">

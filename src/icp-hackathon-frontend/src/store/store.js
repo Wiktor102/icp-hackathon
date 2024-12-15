@@ -44,7 +44,17 @@ const useStore = create(set => ({
 	setUserListings: listings => set({ userListings: listings, userListingsLoading: false, userListingsError: null }),
 	addUserListings: (...newListings) => set(state => ({ userListings: [...state.userListings, ...newListings] })),
 	setUserListingsLoading: () => set({ userListingsLoading: true }),
-	setUserListingsError: error => set({ userListingsError: error, userListingsLoading: false })
+	setUserListingsError: error => set({ userListingsError: error, userListingsLoading: false }),
+
+	imageCache: {},
+	addImageToCache: (id, imageData) =>
+		set(state => ({
+			imageCache: { ...state.imageCache, [id]: imageData }
+		})),
+	getImageFromCache: id => {
+		const state = useStore.getState();
+		return state.imageCache[id];
+	}
 }));
 
 export default useStore;

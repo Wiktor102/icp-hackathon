@@ -1,8 +1,8 @@
-import { useMemo } from "react";
 import { Link } from "react-router";
 import { useIdentity } from "@nfid/identitykit/react";
 
 // hooks
+import useImage from "../../common/hooks/useImage.js";
 import useFavorite from "../../common/hooks/useFavorite.js";
 import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
 
@@ -36,7 +36,7 @@ function List({ listings }) {
 }
 
 function ListItem({ id, images, title, description, price, reviews }) {
-	const img = useMemo(() => "data:image/jpeg;base64," + atob(images[0]), [images]);
+	const [imgLoading, img] = useImage(images[0]);
 	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
 	const shortDescription = description.split(" ").slice(0, 20).join(" ") + "...";
 	const avgRating = useCalculateAvgReview(id);
