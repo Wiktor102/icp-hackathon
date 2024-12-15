@@ -3,7 +3,7 @@ use candid::{CandidType, Deserialize};
 use ic_cdk::api::time;
 use std::sync::atomic::{AtomicU64, Ordering};
 use crate::review::Review;
-use crate::user::User;
+use candid::Principal;
 
 static AMOUNT_OF_LISTINGS: AtomicU64 = AtomicU64::new(0);
 
@@ -16,7 +16,7 @@ pub struct Listing {
     pub category: String,
     pub price: f64,
     pub amount: u32,
-    pub owner: User,
+    pub owner_id: String,
     pub images_id: Vec<u64>,
     pub categories_path: String,
     pub reviews: Option<Vec<Review>>,
@@ -29,7 +29,7 @@ impl Listing {
         category: String,
         price: f64,
         amount: u32,
-        owner: User,
+        owner_id: String,
         images_id: Vec<u64>,
         categories_path: String,
     ) -> Self {
@@ -41,7 +41,7 @@ impl Listing {
             category,
             price,
             amount,
-            owner,
+            owner_id,
             images_id,
             categories_path,
             reviews: None,

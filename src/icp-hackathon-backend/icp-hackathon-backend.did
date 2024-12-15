@@ -15,10 +15,10 @@ type Listing = record {
   id : nat64;
   title : text;
   reviews : opt vec Review;
-  owner : User;
   date : nat64;
   images_id : vec nat64;
   description : text;
+  owner_id : text;
   category : text;
   price : float64;
   amount : nat32;
@@ -70,6 +70,7 @@ service : {
   get_listings_by_id : (vec nat64) -> (vec Listing) query;
   get_listings_id_by_category : (text) -> (vec nat64) query;
   get_reviews_of_listing : (nat64) -> (Result_6) query;
+  get_user_by_principal : (text) -> (opt User) query;
   get_users : () -> (vec User) query;
   icrc10_supported_standards : () -> (vec SupportedStandard);
   icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);

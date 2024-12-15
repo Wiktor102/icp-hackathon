@@ -4,7 +4,7 @@ use candid::Principal;
 
 #[derive(Clone, CandidType, Deserialize, Debug)]
 pub struct User {
-    pub id: String,  // Zmieniono z Principal na String
+    pub id: String,
     pub name: String,
     pub email: String,
     pub phone_number: String,

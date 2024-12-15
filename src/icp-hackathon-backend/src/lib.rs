@@ -108,7 +108,7 @@ fn add_listing(
             category,
             price,
             amount,
-            owner,
+            caller,
             images_id, 
             categories_path,
         );
@@ -154,7 +154,7 @@ fn edit_listing(
         let mut listings = listings.borrow_mut();
 
         if let Some(listing) = listings.iter_mut().find(|listing| listing.id == id) {
-            if listing.owner.id != caller {
+            if listing.owner_id != caller {
                 return Err("Brak uprawnień: Nie jesteś właścicielem tego ogłoszenia.".to_string());
             }
 
@@ -215,7 +215,7 @@ fn delete_listing(id: u64) -> Option<String> {
         let mut listings = listings.borrow_mut();
 
         if let Some(index) = listings.iter().position(|listing| listing.id == id) {
-            if listings[index].owner.id != caller {
+            if listings[index].owner_id != caller {
                 return Some("Brak uprawnień: Nie jesteś właścicielem tego ogłoszenia.".to_string());
             }
 
@@ -288,8 +288,15 @@ fn get_users() -> Vec<User> {
 }
 
 #[ic_cdk::query]
+fn get_user_by_principal(principal: String) -> Option<User> {
+    USERS.with(|users| {
+        users.borrow().iter().find(|user| user.id == principal).cloned()
+    })
+}
+
+#[ic_cdk::query]
 fn get_active_user() -> Option<User> {
-    let caller = ic_cdk::caller().to_string();  // Zamieniamy Principal na String
+    let caller = ic_cdk::caller().to_string();
     USERS.with(|users| {
         users.borrow().iter().find(|user| user.id == caller).cloned()
     })
@@ -325,7 +332,7 @@ fn add_favorite_listing(listing_id: u64) {
         if let Some(user) = users.iter_mut().find(|user| user.id == caller) {
             LISTINGS.with(|listings| {
                 if let Some(listing) = listings.borrow().iter().find(|listing| listing.id == listing_id) {
-                    if caller == listing.owner.id {
+                    if caller == listing.owner_id {
                         return;
                     }
                     if user.favorites_id.is_none() {
@@ -373,7 +380,7 @@ fn get_listings_by_active_user() -> Result<Vec<Listing>, String> {
         listings
             .borrow()
             .iter()
-            .filter(|listing| listing.owner.id == caller)
+            .filter(|listing| listing.owner_id == caller)
             .cloned()
             .collect()
     });
@@ -444,7 +451,7 @@ fn add_review(listing_id: u64, rating: u8, comment: String) -> Result<Review, St
         let listing = listings.iter_mut().find(|listing| listing.id == listing_id);
         if let Some(listing) = listing {
             // Sprawdzenie, czy użytkownik nie jest właścicielem ogłoszenia
-            if listing.owner.id == caller {
+            if listing.owner_id == caller {
                 return Err("Nie możesz wystawić opinii pod własnym ogłoszeniem.".to_string());
             }
 
