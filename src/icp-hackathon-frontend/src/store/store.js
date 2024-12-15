@@ -3,6 +3,7 @@ import { create } from "zustand";
 const useStore = create(set => ({
 	user: null,
 	setUser: user => set({ user, loadingUser: false }),
+	addFavorite: listingId => set(state => ({ user: { ...state.user, favorites: [...state.user.favorites, listingId] } })),
 
 	loadingUser: false,
 	setUserLoading: () => set({ loadingUser: true }),

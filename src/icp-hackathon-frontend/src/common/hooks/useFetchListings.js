@@ -19,7 +19,6 @@ function parseBackendListing(l) {
 }
 
 function useFetchListings() {
-	const listings = useStore(state => state.listings);
 	const addListings = useStore(state => state.addListings);
 	const fetched = useRef(false);
 
@@ -36,7 +35,7 @@ function useFetchListings() {
 		if (fetched.current) return;
 		fetched.current = true;
 		fetchListings();
-	}, [listings]);
+	}, []);
 }
 
 function useFetchCategoryListings() {
@@ -54,5 +53,25 @@ function useFetchCategoryListings() {
 	return fetchListings;
 }
 
-export { useFetchListings, useFetchCategoryListings, parseBackendListing };
+function useFetchListingsByIds(ids) {
+	const listings = useStore(state => state.listings);
+	const addListings = useStore(state => state.addListings);
+
+	async function fetchListings(ids) {
+		try {
+			const response = await backend.get_listings_by_id(ids);
+			addListings(...response.map(parseBackendListing));
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	useEffect(() => {
+		const idsToFetch = ids.filter(id => !listings[id]);
+		if (idsToFetch.length === 0) return;
+		fetchListings(ids);
+	}, [ids]);
+}
+
+export { useFetchListings, useFetchCategoryListings, parseBackendListing, useFetchListingsByIds };
 export default useFetchListings;

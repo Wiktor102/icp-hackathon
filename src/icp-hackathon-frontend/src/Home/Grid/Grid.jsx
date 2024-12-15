@@ -1,11 +1,14 @@
 import { useMemo } from "react";
 import { Link } from "react-router";
+import { useIdentity } from "@nfid/identitykit/react";
 
 // hooks
+import useFavorite from "../../common/hooks/useFavorite.js";
 import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
 
 // components
 import Button from "../../common/Button";
+import Loader from "../../common/components/Loader/Loader.jsx";
 
 // styles
 import "./Grid.scss";
@@ -33,10 +36,23 @@ function Grid({ listings }) {
 	);
 }
 
-function GridItem({ id, images, title, price, reviews, favorite }) {
+function GridItem({ id, images, title, price, reviews }) {
 	const img = useMemo(() => "data:image/jpeg;base64," + atob(images[0]), [images]);
 	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
 	const avgRating = useCalculateAvgReview(id);
+
+	const identity = useIdentity();
+	const { isFavorite, loading, addFavorite, removeFavorite } = useFavorite(id);
+	function toggleFavorite(e) {
+		e.stopPropagation();
+		e.preventDefault();
+
+		if (isFavorite) {
+			removeFavorite();
+		} else {
+			addFavorite();
+		}
+	}
 
 	return (
 		<Link to={`/product/${id}`}>
@@ -50,10 +66,17 @@ function GridItem({ id, images, title, price, reviews, favorite }) {
 					<p className="reviews">{reviews.length} opinii</p>
 				</div>
 				<h4>{title}</h4>
-				<Button>
-					{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
-					{favorite ? "Usuń z" : "Dodaj do"} ulubionych
-				</Button>
+				{identity && (
+					<Button onClick={toggleFavorite}>
+						{!loading && (
+							<>
+								{isFavorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
+								{isFavorite ? "Usuń z" : "Dodaj do"} ulubionych
+							</>
+						)}
+						{loading && <Loader />}
+					</Button>
+				)}
 			</div>
 		</Link>
 	);

@@ -31,6 +31,7 @@ function Header() {
 			email: user.email,
 			phone: user.phone_number,
 			company: user.company_name,
+			favorites: user.favorites_id ?? [],
 			initialised: user.initialised
 		};
 
@@ -111,6 +112,12 @@ function ProfileDropdown({ connectedAccount, icpBalance, disconnect }) {
 					<div className="profile-dropdown-item">
 						<i className="fas fa-circle-info"></i>
 						<div className="profile-dropdown-item__label">Szczegóły</div>
+					</div>
+				</Link>
+				<Link to="/favorites">
+					<div className="profile-dropdown-item">
+						<i className="fas fa-star"></i>
+						<div className="profile-dropdown-item__label">Ulubione</div>
 					</div>
 				</Link>
 				<div className="profile-dropdown-item" onClick={disconnect}>
