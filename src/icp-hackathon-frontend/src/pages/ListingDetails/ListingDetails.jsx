@@ -1,8 +1,9 @@
-import { act, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NavLink, useParams, useNavigate } from "react-router";
 
 // hooks
 import useStore from "../../store/store.js";
+import useImage from "../../common/hooks/useImage.js";
 import useListing from "../../common/hooks/useListing.js";
 import { useAuthenticatedActor } from "../../common/hooks/useActor.js";
 import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
@@ -27,9 +28,9 @@ function ListingDetails() {
 	const [deleting, setDeleting] = useState(false);
 
 	const { listing, loading, error } = useListing(+productId);
-	const { title, description, price, images = [], reviews, ...rest } = listing ?? {};
+	const { title, description, price, reviews, ...rest } = listing ?? {};
+	const [imagesLoading, ...images] = useImage(...(rest?.images ?? []));
 
-	const img = useMemo(() => images.map(i => "data:image/jpeg;base64," + atob(i)), [images]);
 	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
 	const favorite = false;
 	const avgRating = useCalculateAvgReview(+productId);
@@ -82,14 +83,14 @@ function ListingDetails() {
 			</main>
 		);
 	}
-	if (loading || reviews == null || actorLoading) return <Loader />;
+	if (loading || reviews == null || actorLoading || imagesLoading) return <Loader />;
 	return (
 		<main className="listing-details">
 			<PageHeader>
 				<div className="category">{rest.categories_path.split("/").join(" / ")}</div>
 			</PageHeader>
 			<section className="listing-details__layout">
-				<ImageCarousel images={img} title={title} />
+				<ImageCarousel images={images} title={title} />
 				<div className="listing-details__info">
 					<h1>{title}</h1>
 					<p className="rating">

@@ -2,36 +2,49 @@ import { useState, useEffect } from "react";
 import useStore from "../../store/store";
 import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
-function useImage(id) {
-	const [image, setImage] = useState(null);
-	const [loading, setLoading] = useState(true);
+function useImage(...ids) {
+	const [images, setImages] = useState({});
+	const [loading, setLoading] = useState(false);
 	const { getImageFromCache, addImageToCache } = useStore();
 
 	useEffect(() => {
-		if (!id) return;
+		if (!ids.length) return;
 
-		const cachedImage = getImageFromCache(id);
-		if (cachedImage) {
-			setImage(cachedImage);
-			setLoading(false);
-			return;
-		}
-
+		let pendingRequests = 0;
 		setLoading(true);
-		backend
-			.get_image_by_id(id)
-			.then(([response]) => {
-				if (response) {
-					const imageData = "data:image/jpeg;base64," + atob(response);
-					console.log(imageData);
-					setImage(imageData);
-					addImageToCache(id, imageData);
-				}
-			})
-			.finally(() => setLoading(false));
-	}, [id]);
 
-	return [loading, image];
+		ids.forEach(id => {
+			const cachedImage = getImageFromCache(id);
+			if (cachedImage) {
+				setImages(prev => ({ ...prev, [id]: cachedImage }));
+				return;
+			}
+
+			pendingRequests++;
+			backend
+				.get_image_by_id(id)
+				.then(([response]) => {
+					if (response) {
+						const imageData = "data:image/jpeg;base64," + atob(response);
+						setImages(prev => ({ ...prev, [id]: imageData }));
+						addImageToCache(id, imageData);
+					}
+				})
+				.finally(() => {
+					pendingRequests--;
+					if (pendingRequests === 0) {
+						setLoading(false);
+					}
+				});
+		});
+
+		// If all images were cached, set loading to false
+		if (pendingRequests === 0) {
+			setLoading(false);
+		}
+	}, [ids.join(",")]);
+
+	return [loading, ...Object.values(images)];
 }
 
 export default useImage;
