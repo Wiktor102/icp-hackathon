@@ -10,6 +10,7 @@ import Grid from "./Grid/Grid";
 import List from "./List/List";
 import Button from "../common/Button.jsx";
 import CategoryNav from "./CategoryNav/CategoryNav.jsx";
+import Empty from "../common/components/Empty/Empty.jsx";
 import Loader from "../common/components/Loader/Loader.jsx";
 import SubtleButton from "../common/components/SubtleButton/SubtleButton.jsx";
 
@@ -86,12 +87,7 @@ function Home() {
 			{!isPending && listingsToDisplay.length > 0 && (
 				<>{isList ? <List listings={listingsToDisplay} /> : <Grid listings={listingsToDisplay} />}</>
 			)}
-			{!isPending && listingsToDisplay.length === 0 && (
-				<div className="main-page__empty-indicator">
-					<i className="fas fa-folder-minus"></i>
-					<p className="label">Brak ogłoszeń w tej kategori</p>
-				</div>
-			)}
+			{!isPending && listingsToDisplay.length === 0 && <Empty>Brak ogłoszeń w tej kategori</Empty>}
 			{user && user.initialised && (
 				<div className="main-page__add-listing-btn-container">
 					<NavLink to="/add">
