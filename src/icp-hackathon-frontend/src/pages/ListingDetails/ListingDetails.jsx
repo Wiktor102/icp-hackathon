@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { NavLink, useParams, useNavigate } from "react-router";
+import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
 import useStore from "../../store/store.js";
@@ -28,7 +29,7 @@ function ListingDetails() {
 	const [deleting, setDeleting] = useState(false);
 
 	const { listing, loading, error } = useListing(+productId);
-	const { title, description, price, reviews, ...rest } = listing ?? {};
+	const { title, description, price, reviews, ownerId, category, ...rest } = listing ?? {};
 	const [imagesLoading, ...images] = useImage(...(rest?.images ?? []));
 
 	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
@@ -40,16 +41,34 @@ function ListingDetails() {
 
 	const [owner, setOwner] = useState(null);
 
+	function parseBackendUser(user) {
+		var user = {
+			id: user.id,
+			name: user.name,
+			email: user.email,
+			phone: user.phone_number,
+			company: user.company_name,
+			favorites: user.favorites_id ?? [],
+			initialised: user.initialised
+		};
+
+		user.initialised = !(user.name === "" && user.email === "" && user.phone === "" && user.company === "");
+		return user;
+	}
+
 	useEffect(() => {
-		if (actorLoading) return;
-		actor.get_user_by_principal(rest.owner).then(([response]) => setOwner(response));
-	}, [actorLoading]);
+		if (!ownerId) return;
+		backend.get_user_by_principal(ownerId).then(([response]) => {
+			setOwner(parseBackendUser(response));
+		});
+	}, [ownerId]);
 
 	function handleEdit() {
 		alert("Funkcja edycji ogłoszenia jest niedostępna w prototypowej wersji aplikacji.");
 	}
 
 	async function handleDelete() {
+		if (actorLoading) return;
 		if (!window.confirm("Czy na pewno chcesz usunąć to ogłoszenie?")) {
 			return;
 		}
@@ -83,11 +102,11 @@ function ListingDetails() {
 			</main>
 		);
 	}
-	if (loading || reviews == null || actorLoading || imagesLoading) return <Loader />;
+	if (loading || reviews == null || imagesLoading) return <Loader />;
 	return (
 		<main className="listing-details">
 			<PageHeader>
-				<div className="category">{rest.categories_path.split("/").join(" / ")}</div>
+				<div className="category">{category.path.split("/").join(" / ")}</div>
 			</PageHeader>
 			<section className="listing-details__layout">
 				<ImageCarousel images={images} title={title} />
@@ -99,7 +118,7 @@ function ListingDetails() {
 					<div className="price">{formattedPrice}</div>
 				</div>
 				{/* <ListingContactForm /> */}
-				{owner && <ContactInfo user={owner} />}
+				<ContactInfo user={owner} />
 				{user && !isOwner && (
 					<Button>
 						{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
@@ -123,7 +142,7 @@ function ListingDetails() {
 				{description}
 			</section>
 			<ListingReviewSummary reviews={reviews} avgRating={avgRating} />
-			<AddReview />
+			{user && <AddReview />}
 			<ListingReviews reviews={reviews} />
 		</main>
 	);

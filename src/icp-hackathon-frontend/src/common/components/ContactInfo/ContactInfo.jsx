@@ -103,7 +103,7 @@ function ContactInfo({ editButton = false, user }) {
 						{editable ? (
 							<input type="text" name="company" defaultValue={user.company} />
 						) : (
-							<span>{user.initialised ? user.company : "???"}</span>
+							<span>{user?.initialised ? user.company : "???"}</span>
 						)}
 					</div>
 					<div>
@@ -112,7 +112,7 @@ function ContactInfo({ editButton = false, user }) {
 						{editable ? (
 							<input type="text" name="name" defaultValue={user.name} />
 						) : (
-							<span>{user.initialised ? user.name : "???"}</span>
+							<span>{user?.initialised ? user.name : "???"}</span>
 						)}
 					</div>
 					<div>
@@ -121,7 +121,7 @@ function ContactInfo({ editButton = false, user }) {
 						{editable ? (
 							<input type="email" name="e-mail" defaultValue={user.email} />
 						) : (
-							<span>{user.initialised ? user.email : "???"}</span>
+							<span>{user?.initialised ? user.email : "???"}</span>
 						)}
 					</div>
 					<div>
@@ -130,10 +130,10 @@ function ContactInfo({ editButton = false, user }) {
 						{editable ? (
 							<input type="tel" name="phone" defaultValue={user.phone} />
 						) : (
-							<span>{user.initialised ? user.phone : "???"}</span>
+							<span>{user?.initialised ? user.phone : "???"}</span>
 						)}
 					</div>
-					{(loading || actorLoading) && <LoadingOverlay />}
+					{(loading || actorLoading) && editButton && <LoadingOverlay />}
 				</Wrapper>
 				{editButton && (
 					<OutlinedButton onClick={onClick}>

@@ -13,7 +13,9 @@ function useAuthenticatedActor() {
 	const [unauthenticatedAgent, setUnauthenticatedAgent] = useState(null);
 
 	useEffect(() => {
-		HttpAgent.create({ host: ICP_API_HOST }).then(setUnauthenticatedAgent);
+		HttpAgent.create({ host: process.env.DFX_NETWORK === "ic" ? undefined : ICP_API_HOST }).then(
+			setUnauthenticatedAgent
+		);
 	}, []);
 
 	const authenticatedActor = useMemo(() => {

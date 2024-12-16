@@ -6,7 +6,13 @@ function parseBackendListing(l) {
 	return {
 		...l,
 		reviews: l.reviews.flat(),
-		images: l.images_id
+		images: l.images_id,
+		ownerId: l.owner_id,
+		category: {
+			path: l.categories_path,
+			name: l.category
+		},
+		categories_path: undefined
 		// owner: {
 		// 	...l.owner,
 		// 	phone: l.owner.phone_number,
