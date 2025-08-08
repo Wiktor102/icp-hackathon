@@ -113,7 +113,7 @@ function ListingDetails() {
 				<div className="listing-details__info">
 					<h1>{title}</h1>
 					<p className="rating">
-						3.8 <i className="fas fa-star"></i> &nbsp;&nbsp;|&nbsp;&nbsp; {reviews.length} opinii
+						{avgRating} <i className="fas fa-star"></i> &nbsp;&nbsp;|&nbsp;&nbsp; {reviews.length} opinii
 					</p>
 					<div className="price">{formattedPrice}</div>
 				</div>
