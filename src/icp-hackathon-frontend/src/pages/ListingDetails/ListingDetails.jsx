@@ -64,12 +64,12 @@ function ListingDetails() {
 	}, [ownerId]);
 
 	function handleEdit() {
-		alert("Funkcja edycji ogłoszenia jest niedostępna w prototypowej wersji aplikacji.");
+		alert("Listing edit function is unavailable in the prototype version of the application.");
 	}
 
 	async function handleDelete() {
 		if (actorLoading) return;
-		if (!window.confirm("Czy na pewno chcesz usunąć to ogłoszenie?")) {
+		if (!window.confirm("Are you sure you want to delete this listing?")) {
 			return;
 		}
 
@@ -77,7 +77,7 @@ function ListingDetails() {
 		try {
 			const [errors] = await actor.delete_listing(+productId);
 			if (errors) {
-				alert("Wystąpił błąd podczas usuwania ogłoszenia: " + Err);
+				alert("An error occurred while deleting listing: " + Err);
 				return;
 			}
 
@@ -85,7 +85,7 @@ function ListingDetails() {
 			navigate("/profile");
 		} catch (error) {
 			console.error("(delete listing) Backend error:", error);
-			alert("Wystąpił błąd podczas usuwania ogłoszenia. Spróbuj ponownie później.");
+			alert("An error occurred while deleting listing. Try again later.");
 		} finally {
 			setDeleting(false);
 		}
@@ -95,9 +95,9 @@ function ListingDetails() {
 		return (
 			<main className="listing-details">
 				<Empty icon={<i className="fa-solid fa-exclamation-circle"></i>}>
-					Wystąpił błąd podczas ładowania ogłoszenia. Możliwe, że ogłoszenie nie istnieje.
+					An error occurred while loading listing. The listing may not exist.
 					<br />
-					<NavLink to="/">Powrót do strony głównej</NavLink>
+					<NavLink to="/">Return to homepage</NavLink>
 				</Empty>
 			</main>
 		);
@@ -113,7 +113,7 @@ function ListingDetails() {
 				<div className="listing-details__info">
 					<h1>{title}</h1>
 					<p className="rating">
-						{avgRating} <i className="fas fa-star"></i> &nbsp;&nbsp;|&nbsp;&nbsp; {reviews.length} opinii
+						{avgRating} <i className="fas fa-star"></i> &nbsp;&nbsp;|&nbsp;&nbsp; {reviews.length} reviews
 					</p>
 					<div className="price">{formattedPrice}</div>
 				</div>
@@ -122,7 +122,7 @@ function ListingDetails() {
 				{user && !isOwner && (
 					<Button>
 						{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
-						{favorite ? "Usuń z" : "Dodaj do"} ulubionych
+						{favorite ? "Remove from" : "Add to"} favorites
 					</Button>
 				)}
 				{isOwner && (
@@ -131,7 +131,7 @@ function ListingDetails() {
 							<i className="fas fa-pencil"></i> Edytuj ogłoszenie
 						</Button>
 						<Button onClick={handleDelete} className="danger">
-							<i className="fas fa-trash"></i> Usuń ogłoszenie
+							<i className="fas fa-trash"></i> Delete listing
 						</Button>
 						{deleting && <LoadingOverlay />}
 					</>
@@ -217,7 +217,7 @@ function AddReview() {
 		try {
 			const { Ok, Err } = await actor.add_review(+productId, +rating, message);
 			if (Err) {
-				alert("Wystąpił błąd podczas dodawania opinii: " + Err);
+				alert("An error occurred while adding review: " + Err);
 				return;
 			}
 
@@ -225,7 +225,7 @@ function AddReview() {
 			e.target.reset();
 		} catch (err) {
 			console.error("(adding review) backend error: " + err);
-			alert("Wystąpił błąd podczas dodawania opinii. Prosimy spróbować ponownie później.");
+			alert("An error occurred while adding review. Please try again later.");
 		} finally {
 			setLoading(false);
 		}
@@ -233,7 +233,7 @@ function AddReview() {
 
 	return (
 		<form className="listing-details__add-review" onSubmit={saveReview}>
-			<h2>Dodaj opinię</h2>
+			<h2>Add Review</h2>
 			<div className="left-panel">
 				<label htmlFor="rating">Ocena</label>
 				<div className="rating-buttons">
@@ -263,7 +263,7 @@ function AddReview() {
 function ListingReviews({ reviews }) {
 	return (
 		<section className="listing-details__reviews">
-			{reviews.length === 0 && <Empty icon={<i className="fa-solid fa-comment-slash"></i>}>Brak opinii</Empty>}
+			{reviews.length === 0 && <Empty icon={<i className="fa-solid fa-comment-slash"></i>}>No reviews</Empty>}
 			<ul>
 				{reviews.map(({ id, owner_id, rating, comment }) => (
 					<li key={id} className="listing-details__review">

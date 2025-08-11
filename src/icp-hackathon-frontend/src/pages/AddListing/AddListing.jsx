@@ -37,8 +37,8 @@ function AddListing() {
 
 	function uploadFile(e) {
 		if (photoPaths.length + e.target.files.length > MAX_PHOTOS) {
-			// alert("Maksymalnie można dodać 3 zdjęcia");
-			alert("W obecnej wersji aplikacji, można dodać tylko 1 zdjęcie.");
+			// alert("Maximum of 3 photos can be added");
+			alert("In the current version of the app, you can only add 1 photo.");
 			e.preventDefault();
 			return;
 		}
@@ -71,27 +71,27 @@ function AddListing() {
 		const images = base64Photos;
 
 		if (isNaN(price) || isNaN(amount)) {
-			alert("Cena i ilość muszą być liczbami");
+			alert("Price and quantity must be numbers");
 			return;
 		}
 
 		if (price <= 0) {
-			alert("Cena musi być większa od 0");
+			alert("Price must be greater than 0");
 			return;
 		}
 
 		if (amount <= 0) {
-			alert("Ilość musi być większa od 0");
+			alert("Quantity must be greater than 0");
 			return;
 		}
 
 		if (images.length === 0) {
-			alert("Dodaj co najmniej 1 zdjęcie produktu");
+			alert("Add at least 1 product photo");
 			return;
 		}
 
 		if (category.length === 0) {
-			alert("Wybierz kategorię");
+			alert("Select a category");
 			return;
 		}
 
@@ -115,10 +115,10 @@ function AddListing() {
 			}
 
 			if (Err) {
-				alert("Wystąpił błąd podczas dodawania ogłoszenia: " + Err);
+				alert("An error occurred while adding listing: " + Err);
 			}
 		} catch (error) {
-			alert("Wystąpił nieznany błąd podczas dodawania ogłoszenia. Prosimy spróbować ponownie później.");
+			alert("An unknown error occurred while adding listing. Please try again later.");
 			console.error("(listing upload) Backend error: " + error);
 		} finally {
 			setLoading(false);
@@ -150,19 +150,19 @@ function AddListing() {
 	return (
 		<main className="add-listing">
 			<PageHeader>
-				<h1>Dodaj ogłoszenie</h1>
+				<h1>Add Listing</h1>
 			</PageHeader>
 			<form className="add-listing-form" onSubmit={saveListing}>
 				<div className="form-group" id="title-group">
 					<i className="fas fa-heading"></i>
-					<label htmlFor="title">Tytuł</label>
+					<label htmlFor="title">Title</label>
 					<input type="text" id="title" name="title" />
 				</div>
 
 				<div className="form-image-container">
 					{base64Photos.map((photo, i) => (
 						<div className="image-container" key={i}>
-							<img src={photo} alt="Zdjęcie produktu" />
+							<img src={photo} alt="Product photo" />
 							<button type="button" onClick={e => deletePhoto(e, i)}>
 								<i className="fas fa-trash"></i>
 							</button>
@@ -172,12 +172,12 @@ function AddListing() {
 						new Array(MAX_PHOTOS - base64Photos.length).fill(null).map((_, i) => (
 							<div className="image-placeholder" key={i}>
 								<i className="fa-regular fa-image"></i>
-								Nie dodałeś/aś jeszcze zdjęcia
+								You haven't added a photo yet
 							</div>
 						))}
 					<label htmlFor="image" className={base64Photos.length >= 3 ? "disabled" : ""}>
 						<i className="fas fa-upload"></i>
-						Wybierz plik
+						Choose file
 						<input
 							type="file"
 							id="image"
@@ -193,25 +193,25 @@ function AddListing() {
 				<div className="grid">
 					<div className="form-group" id="decription-group">
 						<i className="fas fa-list"></i>
-						<label htmlFor="description">Opis</label>
+						<label htmlFor="description">Description</label>
 						<textarea id="description" name="description"></textarea>
 					</div>
 					<div id="right-group">
 						<div className="form-group">
 							<i className="fas fa-tag"></i>
-							<label htmlFor="price">Cena (zł)</label>
+							<label htmlFor="price">Price (PLN)</label>
 							<input type="number" id="price" name="price" min="0" step="0.01" />
 						</div>
 
 						<div className="form-group">
 							<i className="fas fa-scale-unbalanced"></i>
-							<label htmlFor="amount">Dostępna ilość (szt.)</label>
+							<label htmlFor="amount">Available quantity (pcs)</label>
 							<input type="number" id="amount" name="amount" min="0" step="1" />
 						</div>
 
 						<div className="form-group" id="category-group">
 							<i className="fas fa-icons"></i>
-							<label htmlFor="category">Kategoria</label>
+							<label htmlFor="category">Category</label>
 							<CategorySelector categories={categories} value={category} onSelect={setCategory} />
 						</div>
 					</div>
@@ -219,7 +219,7 @@ function AddListing() {
 
 				<Button type="submit">
 					<i className="fas fa-check"></i>
-					Dodaj ogłoszenie
+					Add Listing
 				</Button>
 				{loading && <LoadingOverlay />}
 			</form>

@@ -1,33 +1,33 @@
 # HurtChain
-HurtChain to platforma do wystawianie ogłoszeń przedmiotów do sprzedaży hurtowej dla __każdego przedsiębiorcy__. 
-Za jego pomocą, wszyscy zainteresowani, mogą dowiedzieć się najważniejszych informacji na temat sprzedawanych przedmiotów i otrzymać kontakt do ogłoszeniodawcy.
+HurtChain is a platform for posting wholesale product sale listings for **any entrepreneur**. 
+With its help, all interested parties can learn the most important information about the sold items and get contact information to the advertiser.
 
-## Dostępne funkcje
- - Przeglądanie ogłoszeń (bez konieczności tworzenia konta)
-	 - Dostępne są widok listy oraz widok siatki
-	 - W szczegółach każdego ogłoszenia w __czytelny sposób zamieszczone są informacje kontaktowe przedsiębiorcy__ co pozwala na łatwy kontakt w przypadku chęci zakupu. W kolejnych wersjach serwisu planujemy dodać funkcję czatu, która dodatkowo powiększy wygodę użytkowników, a także ich bezpieczeństwo za sprawą wykorzystania technologi blockchain.
-	 - Podział na kategorie pozwala na wygodne znalezienie szukanych ogłoszeń
-	 - W przyszłych wersjach zostanie także dodana możliwość swobodnego wyszukiwania ogłoszeń, jak i sortowanie oraz filtrowanie według różnych kryteriów 
-- Tworzenie konta
-	- Konto jest wymagane do tworzenia ogłoszeń oraz wystawiania opinii
-	- Zakładka "profil" umożliwia wprowadzenie swoich danych osobowych, które są następnie wyświetlane przy każdym ogłoszeniu. W przyszłości będzie także możliwość zamieszczenia swojego zdjęcia profilowego oraz większej liczby informacji o firmie (opis, lokalizacja, średnia opini wszystkich ogłoszeń).
- - Dodawanie i zarządzanie ogłoszeniami
-	 - Edycja ogłoszeń nie jest dostępna w obecnej __prototypowej__ wersji aplikacji, ale zostanie dodana w niedalekiej przyszłości
- - Przeglądanie oraz wystawianie opinii pod ogłoszeniami innych osób, w tym przejrzyste wyświetlanie średniej oceny każdego produktu
- - Ulubione: użytkownik ma możliwość zapisania ogłoszeń, które go interesują tak aby w przyszłości mieć do nich prosty dostęp.
- 
-## Design aplikacji
-HurtChain posiada przepiękny nowoczesny interfejs, który pozwala na wygodną nawigację po serwisie. Dodatkowo, aplikacja została przez nas od razu zaprojektowana w trybie ciemnym - żaden serwis o podobnym zastosowaniu nie posiada takiej funkcjonalności. Użycie zmiennych CSS pozwala na prostą implementację trybu jasnego w przyszłości.
+## Available Features
+- Browse listings (no account creation required)
+	- List view and grid view are available
+	- In the details of each listing, **contact information of the entrepreneur is clearly displayed** allowing for easy contact in case of purchase intent. In future versions of the service, we plan to add a chat feature, which will further increase user convenience and their security through the use of blockchain technology.
+	- Category division allows for convenient finding of searched listings
+	- In future versions, the ability to freely search listings will also be added, as well as sorting and filtering according to various criteria
+- Account creation
+	- Account is required to create listings and post reviews
+	- The "profile" tab allows entering personal data, which is then displayed with each listing. In the future, it will also be possible to post your profile picture and more information about the company (description, location, average rating of all listings).
+- Adding and managing listings
+	- Listing editing is not available in the current **prototype** version of the application, but will be added in the near future
+- Browsing and posting reviews under other people's listings, including transparent display of the average rating of each product
+- Favorites: user has the ability to save listings that interest them so they can have easy access to them in the future.
 
-### Zrzuty ekranu
-![Strona główna sklepu](https://drive.google.com/uc?export=view&id=1MoghyidcWlJ-j2ToUB7-DljTsA3JX6JK)
-![Strona szczegułów produktu](https://drive.google.com/uc?export=view&id=1aYWqWmgXY6r46B_X1bePoXk7KyUdf63W)
-![Strona profilu](https://drive.google.com/uc?export=view&id=14uC_Tdmrwm9KNvmoRnvBBZVNUJtkrNUW)
-![Widok listy oraz kategorie produktów](https://drive.google.com/uc?export=view&id=1jhrhDe7Ne9IHZ5xCpDHBzXnvQAFqubcy)
-![Zakładka ulubione](https://drive.google.com/uc?export=view&id=17HHEo5rgw8W-3vFya_YGj7ayJBQLR6n-)
-![Strona dodawania nowego ogłoszenia](https://drive.google.com/uc?export=view&id=1s7VNZGDoC57MnaLkxqZ6eJmb9N30Bdp9)
+## Application Design
+HurtChain has a beautiful modern interface that allows for convenient navigation through the service. Additionally, the application was immediately designed by us in dark mode - no service with similar purpose has such functionality. The use of CSS variables allows for simple implementation of light mode in the future.
 
-## Autorzy
+### Screenshots
+![Store homepage](https://drive.google.com/uc?export=view&id=1MoghyidcWlJ-j2ToUB7-DljTsA3JX6JK)
+![Product details page](https://drive.google.com/uc?export=view&id=1aYWqWmgXY6r46B_X1bePoXk7KyUdf63W)
+![Profile page](https://drive.google.com/uc?export=view&id=14uC_Tdmrwm9KNvmoRnvBBZVNUJtkrNUW)
+![List view and product categories](https://drive.google.com/uc?export=view&id=1jhrhDe7Ne9IHZ5xCpDHBzXnvQAFqubcy)
+![Favorites tab](https://drive.google.com/uc?export=view&id=17HHEo5rgw8W-3vFya_YGj7ayJBQLR6n-)
+![Add new listing page](https://drive.google.com/uc?export=view&id=1s7VNZGDoC57MnaLkxqZ6eJmb9N30Bdp9)
+
+## Authors
 - [@Wiktor Golicz](https://github.com/Wiktor102)
 - [@Justyn Odyjas](https://github.com/Reiv21)
 - Bartłomiej Golicz

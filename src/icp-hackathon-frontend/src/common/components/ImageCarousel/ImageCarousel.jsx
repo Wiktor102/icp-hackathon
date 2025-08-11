@@ -30,7 +30,7 @@ function ImageCarousel({ images, title }) {
 				}}
 			>
 				{images.map((image, index) => (
-					<img key={index} src={image} alt={`${title} - zdjęcie ${index + 1}`} />
+					<img key={index} src={image} alt={`${title} - photo ${index + 1}`} />
 				))}
 			</div>
 			{currentIndex !== images.length - 1 && (

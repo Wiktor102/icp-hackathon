@@ -26,10 +26,10 @@ function Favorites() {
 	return (
 		<div className="favorites-page">
 			<PageHeader>
-				<h1>Ulubione</h1>
+				<h1>Favorites</h1>
 			</PageHeader>
 			{favoritesListings.length === 0 && (
-				<Empty icon={<i className="fa-solid fa-heart-circle-minus"></i>}>Brak ulubionych ofert</Empty>
+				<Empty icon={<i className="fa-solid fa-heart-circle-minus"></i>}>No favorite offers</Empty>
 			)}
 			{favoritesListings.length > 0 && <List listings={favoritesListings} />}
 		</div>
