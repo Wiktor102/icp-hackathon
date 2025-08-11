@@ -53,7 +53,7 @@ function Home() {
 		<main className="main-page">
 			{user?.initialised === false && (
 				<WarningCard>
-					Uzupełnij swój profil, aby móc dodawać ogłoszenia <NavLink to="/profile">Przejdź do profilu</NavLink>
+					Complete your profile to be able to add listings <NavLink to="/profile">Go to profile</NavLink>
 				</WarningCard>
 			)}
 			{/* <form className="main-page__search-container">
@@ -67,19 +67,19 @@ function Home() {
 			<section className="main-page__toolbar">
 				<div className="main-page__toolbar__sort">
 					<span>
-						<i className="fas fa-arrow-down-wide-short"></i> Sortuj według:
+						<i className="fas fa-arrow-down-wide-short"></i> Sort by:
 					</span>
 					<select name="" id="">
-						<option value="">Najnowsze</option>
-						<option value="">Najstarsze</option>
-						<option value="">Popularność: największa</option>
-						<option value="">Cena: malejąco</option>
-						<option value="">Cana: rosnąco</option>
+						<option value="">Newest</option>
+						<option value="">Oldest</option>
+						<option value="">Popularity: Highest</option>
+						<option value="">Price: Descending</option>
+						<option value="">Price: Ascending</option>
 					</select>
 				</div>
 				<SubtleButton
 					icon={<i className={`fas fa-${isList ? "border-all" : "list"}`}></i>}
-					text={isList ? "Widok siatki" : "Widok listy"}
+					text={isList ? "Grid View" : "List View"}
 					onClick={switchDisplayMode}
 				/>
 			</section>
@@ -87,13 +87,13 @@ function Home() {
 			{!isPending && listingsToDisplay.length > 0 && (
 				<>{isList ? <List listings={listingsToDisplay} /> : <Grid listings={listingsToDisplay} />}</>
 			)}
-			{!isPending && listingsToDisplay.length === 0 && <Empty>Brak ogłoszeń w tej kategori</Empty>}
+			{!isPending && listingsToDisplay.length === 0 && <Empty>No listings in this category</Empty>}
 			{user && user.initialised && (
 				<div className="main-page__add-listing-btn-container">
 					<NavLink to="/add">
 						<Button tabIndex={-1}>
 							<i className="fas fa-plus"></i>
-							Dodaj ogłoszenie
+							Add Listing
 						</Button>
 					</NavLink>
 				</div>

@@ -37,12 +37,12 @@ function ContactInfo({ editButton = false, user }) {
 		const phonePattern = /^\d{9}$/;
 
 		if (!emailPattern.test(email)) {
-			alert("Nieprawidłowy adres e-mail");
+			alert("Invalid email address");
 			return false;
 		}
 
 		if (!phonePattern.test(phone)) {
-			alert("Niepoprawny numer telefonu");
+			alert("Invalid phone number");
 			return false;
 		}
 
@@ -50,12 +50,12 @@ function ContactInfo({ editButton = false, user }) {
 		const company = formData.get("company");
 
 		if (!name.includes(" ")) {
-			alert("Podaj pełne imię");
+			alert("Enter full name");
 			return false;
 		}
 
 		if (!company.trim()) {
-			alert("Nazwa firmy nie może być pusta");
+			alert("Company name cannot be empty");
 			return false;
 		}
 
@@ -71,7 +71,7 @@ function ContactInfo({ editButton = false, user }) {
 
 		const error = await actor.edit_active_user(name, email, phone, company);
 		if (error != "") {
-			alert("Wystąpił błąd podczas zapisywania danych: " + error);
+			alert("An error occurred while saving data: " + error);
 			return false;
 		}
 
@@ -95,11 +95,11 @@ function ContactInfo({ editButton = false, user }) {
 	return (
 		<div className="contact-info">
 			<div>
-				<h3>Dane kontaktowe</h3>
+				<h3>Contact Information</h3>
 				<Wrapper condition={editable} className="grid" ref={formRef}>
 					<div>
 						<i className="fas fa-building"></i>
-						<span className="label">Firma:</span>
+						<span className="label">Company:</span>
 						{editable ? (
 							<input type="text" name="company" defaultValue={user.company} />
 						) : (
@@ -108,7 +108,7 @@ function ContactInfo({ editButton = false, user }) {
 					</div>
 					<div>
 						<i className="fas fa-user"></i>
-						<span className="label">Imię i nazwisko:</span>
+						<span className="label">Full name:</span>
 						{editable ? (
 							<input type="text" name="name" defaultValue={user.name} />
 						) : (
@@ -117,7 +117,7 @@ function ContactInfo({ editButton = false, user }) {
 					</div>
 					<div>
 						<i className="fas fa-envelope"></i>
-						<span className="label">Adres e-mail:</span>
+						<span className="label">Email address:</span>
 						{editable ? (
 							<input type="email" name="e-mail" defaultValue={user.email} />
 						) : (
@@ -126,7 +126,7 @@ function ContactInfo({ editButton = false, user }) {
 					</div>
 					<div>
 						<i className="fa fa-phone"></i>
-						<span className="label">Telefon:</span>
+						<span className="label">Phone:</span>
 						{editable ? (
 							<input type="tel" name="phone" defaultValue={user.phone} />
 						) : (
@@ -137,7 +137,7 @@ function ContactInfo({ editButton = false, user }) {
 				</Wrapper>
 				{editButton && (
 					<OutlinedButton onClick={onClick}>
-						<i className="fas fa-pencil"></i> {editable ? "Zapisz zmiany" : "Edytuj dane kontaktowe"}
+						<i className="fas fa-pencil"></i> {editable ? "Save changes" : "Edit contact information"}
 					</OutlinedButton>
 				)}
 			</div>

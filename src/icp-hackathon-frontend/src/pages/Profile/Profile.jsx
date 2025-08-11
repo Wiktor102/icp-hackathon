@@ -30,30 +30,30 @@ function Profile() {
 	}
 
 	if (userListingsError) {
-		return <Empty icon={<i className="fas fa-exclamation-triangle" />}>Wystąpił błąd: {userListingsError}</Empty>;
+		return <Empty icon={<i className="fas fa-exclamation-triangle" />}>An error occurred: {userListingsError}</Empty>;
 	}
 
 	return (
 		<div className="profile-page">
 			<section className="profile-page__header">
-				<img src={avatarImg} alt="zdjęcie profilowe" />
+				<img src={avatarImg} alt="profile picture" />
 				<div className="profile-page__header__panel-right">
 					<PageHeader>
-						{user.initialised && <h1>Witaj, {user.name.split(" ")[0]}!</h1>}
-						{!user.initialised && <h1>Uzupełnij swój profil poniżej</h1>}
+						{user.initialised && <h1>Welcome, {user.name.split(" ")[0]}!</h1>}
+						{!user.initialised && <h1>Complete your profile below</h1>}
 					</PageHeader>
 
 					<ContactInfo user={user} editButton />
 				</div>
 				<Link to="/add">
 					<Button>
-						<i className="fas fa-plus"></i> Dodaj ogłoszenie
+						<i className="fas fa-plus"></i> Add Listing
 					</Button>
 				</Link>
 			</section>
-			<h2>Twoje ogłoszenia</h2>
+			<h2>Your Listings</h2>
 			{userListings.length > 0 && <Grid listings={userListings} />}
-			{userListings.length === 0 && <Empty>Nie dodałeś/aś jeszcze żadnego ogłoszenia</Empty>}
+			{userListings.length === 0 && <Empty>You haven't added any listings yet</Empty>}
 		</div>
 	);
 }

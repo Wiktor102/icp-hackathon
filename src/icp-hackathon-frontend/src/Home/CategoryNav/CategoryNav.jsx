@@ -25,7 +25,7 @@ function CategoryNav() {
 						<SubtleButton icon={<i className="fas fa-arrow-left"></i>} />
 					</NavLink>
 				)}{" "}
-				Kategorie produktów
+				Product Categories
 			</h4>
 			<nav className="main-page__category-selector__nav">
 				{!categories && (

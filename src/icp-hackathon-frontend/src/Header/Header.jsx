@@ -59,7 +59,7 @@ function Header() {
 			const { Ok, Err } = await actor.add_empty_user();
 			if (Err) {
 				console.warn(Err);
-				alert("Wystąpił błąd podczas tworzenia użytkownika");
+				alert("An error occurred while creating user");
 				return;
 			}
 
@@ -67,7 +67,7 @@ function Header() {
 			navigate("/profile");
 		} catch (err) {
 			console.error("(creating user) backend error:" + err);
-			alert("Wystąpił niezany błąd podczas tworzenia konta. Spróbuj ponownie później.");
+			alert("An unknown error occurred while creating account. Try again later.");
 		}
 	}
 
@@ -109,7 +109,7 @@ function Header() {
 							}}
 						/>
 					) : (
-						<Button onClick={login}>Zaloguj się</Button>
+						<Button onClick={login}>Log In</Button>
 					)}
 				</div>
 			</header>
@@ -137,7 +137,7 @@ function ProfileDropdown({ onLogout }) {
 		<div className="profile-dropdown" ref={dropdownRef}>
 			<Button onClick={() => setIsOpen(!isOpen)}>
 				<i className="fas fa-user"></i>
-				Profil
+				Profile
 			</Button>
 
 			{isOpen && (
@@ -145,13 +145,13 @@ function ProfileDropdown({ onLogout }) {
 					<Link to="/profile" onClick={() => setIsOpen(false)}>
 						<div className="profile-dropdown-item">
 							<i className="fas fa-circle-info"></i>
-							<div className="profile-dropdown-item__label">Szczegóły</div>
+							<div className="profile-dropdown-item__label">Details</div>
 						</div>
 					</Link>
 					<Link to="/favorites" onClick={() => setIsOpen(false)}>
 						<div className="profile-dropdown-item">
 							<i className="fas fa-star"></i>
-							<div className="profile-dropdown-item__label">Ulubione</div>
+							<div className="profile-dropdown-item__label">Favorites</div>
 						</div>
 					</Link>
 					<div
@@ -162,7 +162,7 @@ function ProfileDropdown({ onLogout }) {
 						}}
 					>
 						<i className="fas fa-arrow-right-from-bracket"></i>
-						<div className="profile-dropdown-item__label">Wyloguj się</div>
+						<div className="profile-dropdown-item__label">Log Out</div>
 					</div>
 				</div>
 			)}

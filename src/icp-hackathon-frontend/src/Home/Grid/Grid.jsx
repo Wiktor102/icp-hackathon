@@ -65,7 +65,7 @@ function GridItem({ id, images, title, price, reviews }) {
 					<p className="rating">
 						{avgRating} <i className="fas fa-star"></i>
 					</p>
-					<p className="reviews">{reviews.length} opinii</p>
+					<p className="reviews">{reviews.length} reviews</p>
 				</div>
 				<h4>{title}</h4>
 				{identity && (
@@ -73,7 +73,7 @@ function GridItem({ id, images, title, price, reviews }) {
 						{!loading && (
 							<>
 								{isFavorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
-								{isFavorite ? "Usuń z" : "Dodaj do"} ulubionych
+								{isFavorite ? "Remove from" : "Add to"} favorites
 							</>
 						)}
 						{loading && <Loader />}
