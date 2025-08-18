@@ -11,6 +11,9 @@ import Empty from "../../common/components/Empty/Empty.jsx";
 import ConversationList from "./ConversationList.jsx";
 import ChatWindow from "./ChatWindow.jsx";
 
+// sample data (remove when backend is ready)
+import { initializeSampleData } from "../../common/sampleChatData.js";
+
 import "./Chat.scss";
 
 function Chat() {
@@ -27,6 +30,13 @@ function Chat() {
 	if (protection === "loading" || !user) {
 		return <Loader />;
 	}
+
+	// Initialize sample data for testing (remove when backend is ready)
+	useEffect(() => {
+		if (Object.keys(conversations).length === 0) {
+			initializeSampleData();
+		}
+	}, [conversations]);
 
 	// Set active conversation from URL params
 	useEffect(() => {
