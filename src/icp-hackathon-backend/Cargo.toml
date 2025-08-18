@@ -12,6 +12,10 @@ crate-type = ["cdylib"]
 base64 = "0.22.1"
 candid = "0.10"
 ic-cdk = "0.16"
-ic-cdk-timers = "0.10" # Feel free to remove this dependency if you don't need timers
+ic-cdk-timers = "0.10"
 regex = "1.11.1"
 serde = { version = "1.0.215", features = ["derive"] }
+
+
+
+

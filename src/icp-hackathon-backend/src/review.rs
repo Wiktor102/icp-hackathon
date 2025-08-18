@@ -1,5 +1,4 @@
 use candid::{CandidType, Deserialize};
-use candid::Principal;
 
 #[derive(Clone, CandidType, Deserialize, Debug)]
 pub struct Review {

@@ -1,6 +1,5 @@
 use candid::{CandidType, Deserialize};
 use ic_cdk::api::{time};
-use candid::Principal;
 
 #[derive(Clone, CandidType, Deserialize, Debug)]
 pub struct User {
