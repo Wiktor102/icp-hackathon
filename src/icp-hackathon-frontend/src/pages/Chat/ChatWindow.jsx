@@ -4,6 +4,96 @@ import ChatInput from "./ChatInput.jsx";
 import avatarImg from "../../assets/avatar.png";
 import "./ChatWindow.scss";
 
+// Component for rendering message content based on message type
+function MessageBubble({ message }) {
+	return (
+		<div className="message-bubble">
+			{message.type === 'text' && (
+				<p>{message.content}</p>
+			)}
+			{message.type === 'image' && (
+				<div className="message-image">
+					<img src={message.content} alt="Shared image" />
+				</div>
+			)}
+			{message.type === 'file' && (
+				<div className="message-file">
+					<i className="fas fa-file"></i>
+					<span>{message.fileName || 'File'}</span>
+				</div>
+			)}
+		</div>
+	);
+}
+
+// Component for rendering individual message with optional date separator
+function MessageItem({ message, previousMessage, user, conversation, showTimestamps, formatMessageDate, formatMessageTime }) {
+	const isOwn = message.senderId === user?.id;
+	const shouldShowDateSeparator = (currentMessage, previousMessage) => {
+		if (!previousMessage) return true;
+		
+		const currentDate = new Date(currentMessage.timestamp).toDateString();
+		const previousDate = new Date(previousMessage.timestamp).toDateString();
+		
+		return currentDate !== previousDate;
+	};
+	const showDate = shouldShowDateSeparator(message, previousMessage);
+
+	return (
+		<div key={message.id}>
+			{showDate && (
+				<div className="date-separator">
+					<span>{formatMessageDate(message.timestamp)}</span>
+				</div>
+			)}
+			
+			<div className={`message ${isOwn ? "own" : "other"}`}>
+				{!isOwn && (
+					<img 
+						src={conversation.otherUser?.avatar || avatarImg} 
+						alt={conversation.otherUser?.name}
+						className="message-avatar"
+					/>
+				)}
+				
+				<div className="message-content">
+					<MessageBubble message={message} />
+					
+					{showTimestamps && (
+						<div className="message-time">
+							{formatMessageTime(message.timestamp)}
+							{isOwn && message.read && (
+								<i className="fas fa-check-double read-receipt"></i>
+							)}
+							{isOwn && !message.read && (
+								<i className="fas fa-check sent-receipt"></i>
+							)}
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	);
+}
+
+// Component for rendering typing indicator
+function TypingIndicator({ conversation }) {
+	return (
+		<div className="typing-indicator-message">
+			<img 
+				src={conversation.otherUser?.avatar || avatarImg} 
+				alt={conversation.otherUser?.name}
+				className="message-avatar"
+			/>
+			<div className="typing-dots">
+				<span></span>
+				<span></span>
+				<span></span>
+			</div>
+		</div>
+	);
+}
+
 function ChatWindow({ conversation }) {
 	const user = useStore(state => state.user);
 	const markConversationAsRead = useStore(state => state.markConversationAsRead);
@@ -47,15 +137,6 @@ function ChatWindow({ conversation }) {
 		}
 	};
 
-	const shouldShowDateSeparator = (currentMessage, previousMessage) => {
-		if (!previousMessage) return true;
-		
-		const currentDate = new Date(currentMessage.timestamp).toDateString();
-		const previousDate = new Date(previousMessage.timestamp).toDateString();
-		
-		return currentDate !== previousDate;
-	};
-
 	const typingUsers = Object.keys(conversation.typingUsers || {})
 		.filter(userId => userId !== user?.id);
 
@@ -89,74 +170,23 @@ function ChatWindow({ conversation }) {
 			<div className="chat-messages">
 				{conversation.messages?.map((message, index) => {
 					const previousMessage = index > 0 ? conversation.messages[index - 1] : null;
-					const isOwn = message.senderId === user?.id;
-					const showDate = shouldShowDateSeparator(message, previousMessage);
-
+					
 					return (
-						<div key={message.id}>
-							{showDate && (
-								<div className="date-separator">
-									<span>{formatMessageDate(message.timestamp)}</span>
-								</div>
-							)}
-							
-							<div className={`message ${isOwn ? "own" : "other"}`}>
-								{!isOwn && (
-									<img 
-										src={conversation.otherUser?.avatar || avatarImg} 
-										alt={conversation.otherUser?.name}
-										className="message-avatar"
-									/>
-								)}
-								
-								<div className="message-content">
-									<div className="message-bubble">
-										{message.type === 'text' && (
-											<p>{message.content}</p>
-										)}
-										{message.type === 'image' && (
-											<div className="message-image">
-												<img src={message.content} alt="Shared image" />
-											</div>
-										)}
-										{message.type === 'file' && (
-											<div className="message-file">
-												<i className="fas fa-file"></i>
-												<span>{message.fileName || 'File'}</span>
-											</div>
-										)}
-									</div>
-									
-									{showTimestamps && (
-										<div className="message-time">
-											{formatMessageTime(message.timestamp)}
-											{isOwn && message.read && (
-												<i className="fas fa-check-double read-receipt"></i>
-											)}
-											{isOwn && !message.read && (
-												<i className="fas fa-check sent-receipt"></i>
-											)}
-										</div>
-									)}
-								</div>
-							</div>
-						</div>
+						<MessageItem
+							key={message.id}
+							message={message}
+							previousMessage={previousMessage}
+							user={user}
+							conversation={conversation}
+							showTimestamps={showTimestamps}
+							formatMessageDate={formatMessageDate}
+							formatMessageTime={formatMessageTime}
+						/>
 					);
 				})}
 				
 				{typingUsers.length > 0 && (
-					<div className="typing-indicator-message">
-						<img 
-							src={conversation.otherUser?.avatar || avatarImg} 
-							alt={conversation.otherUser?.name}
-							className="message-avatar"
-						/>
-						<div className="typing-dots">
-							<span></span>
-							<span></span>
-							<span></span>
-						</div>
-					</div>
+					<TypingIndicator conversation={conversation} />
 				)}
 				
 				<div ref={messagesEndRef} />
