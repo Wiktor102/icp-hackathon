@@ -154,6 +154,12 @@ function ProfileDropdown({ onLogout }) {
 							<div className="profile-dropdown-item__label">Favorites</div>
 						</div>
 					</Link>
+					<Link to="/chat" onClick={() => setIsOpen(false)}>
+						<div className="profile-dropdown-item">
+							<i className="fas fa-comments"></i>
+							<div className="profile-dropdown-item__label">Messages</div>
+						</div>
+					</Link>
 					<div
 						className="profile-dropdown-item"
 						onClick={() => {

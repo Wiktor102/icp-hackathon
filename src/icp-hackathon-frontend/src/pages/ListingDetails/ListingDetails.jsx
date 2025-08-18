@@ -26,6 +26,8 @@ function ListingDetails() {
 	const user = useStore(state => state.user);
 	const userListings = useStore(state => state.userListings);
 	const deleteListing = useStore(state => state.deleteListing);
+	const addConversation = useStore(state => state.addConversation);
+	const conversations = useStore(state => state.conversations);
 	const [deleting, setDeleting] = useState(false);
 
 	const { listing, loading, error } = useListing(+productId);
@@ -91,6 +93,44 @@ function ListingDetails() {
 		}
 	}
 
+	function startChat() {
+		if (!owner || !user) return;
+
+		// Check if conversation already exists
+		const existingConversation = Object.values(conversations).find(conv => 
+			conv.otherUser?.id === owner.id
+		);
+
+		if (existingConversation) {
+			// Navigate to existing conversation
+			navigate(`/chat/${existingConversation.id}`);
+			return;
+		}
+
+		// Create new conversation
+		const newConversation = {
+			id: `${user.id}-${owner.id}-${Date.now()}`,
+			participants: [user.id, owner.id],
+			otherUser: {
+				id: owner.id,
+				name: owner.name,
+				avatar: null, // Will use default avatar
+				isOnline: false // Will be determined by backend later
+			},
+			messages: [],
+			createdAt: new Date().toISOString(),
+			lastMessage: null,
+			lastMessageTime: null,
+			unreadCount: 0,
+			typingUsers: {},
+			listingId: +productId, // Reference to the listing this chat is about
+			listingTitle: title
+		};
+
+		addConversation(newConversation);
+		navigate(`/chat/${newConversation.id}`);
+	}
+
 	if (error) {
 		return (
 			<main className="listing-details">
@@ -120,10 +160,15 @@ function ListingDetails() {
 				{/* <ListingContactForm /> */}
 				<ContactInfo user={owner} />
 				{user && !isOwner && (
-					<Button>
-						{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
-						{favorite ? "Remove from" : "Add to"} favorites
-					</Button>
+					<>
+						<Button>
+							{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
+							{favorite ? "Remove from" : "Add to"} favorites
+						</Button>
+						<Button onClick={startChat}>
+							<i className="fas fa-comments"></i> Start Chat
+						</Button>
+					</>
 				)}
 				{isOwner && (
 					<>
