@@ -19,12 +19,12 @@ import "./Chat.scss";
 function Chat() {
 	const { conversationId } = useParams();
 	const navigate = useNavigate();
-	
+
 	const user = useStore(state => state.user);
 	const conversations = useStore(state => state.conversations);
 	const activeConversationId = useStore(state => state.activeConversationId);
 	const setActiveConversation = useStore(state => state.setActiveConversation);
-	
+
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
 	if (protection === "loading" || !user) {
@@ -48,8 +48,8 @@ function Chat() {
 		}
 	}, [conversationId, conversations, setActiveConversation, navigate]);
 
-	const conversationList = Object.values(conversations).sort((a, b) => 
-		new Date(b.lastMessageTime || b.createdAt) - new Date(a.lastMessageTime || a.createdAt)
+	const conversationList = Object.values(conversations).sort(
+		(a, b) => new Date(b.lastMessageTime || b.createdAt) - new Date(a.lastMessageTime || a.createdAt)
 	);
 
 	return (
@@ -65,21 +65,20 @@ function Chat() {
 							No conversations yet. Start chatting by visiting a product listing!
 						</Empty>
 					) : (
-						<ConversationList 
+						<ConversationList
 							conversations={conversationList}
 							activeConversationId={activeConversationId}
-							onConversationSelect={(id) => navigate(`/chat/${id}`)}
+							onConversationSelect={id => navigate(`/chat/${id}`)}
 						/>
 					)}
 				</div>
-				
+
 				<div className="chat-main">
 					{activeConversationId && conversations[activeConversationId] ? (
 						<ChatWindow conversation={conversations[activeConversationId]} />
 					) : (
 						<div className="chat-placeholder">
-							<Empty>
-								<i className="fas fa-comment-dots"></i>
+							<Empty icon={<i className="fas fa-comment-dots"></i>}>
 								Select a conversation to start chatting
 							</Empty>
 						</div>
