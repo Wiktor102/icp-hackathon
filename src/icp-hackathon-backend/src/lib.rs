@@ -4,8 +4,8 @@ use crate::config::Config;
 use crate::user::User;
 use crate::category::Category;
 use crate::review::Review;
+use crate::chat::{Conversation, Message, get_or_create_conversation, add_message_to_conversation, mark_conversation_as_read, update_typing_status};
 use candid::{self, CandidType, Deserialize};
-use std::collections::HashMap;
 use base64::Engine;
 
 mod category;
@@ -13,6 +13,7 @@ mod listing;
 mod config;
 mod user;
 mod review;
+mod chat;
 
 // This code is from docs.identitykit
 
@@ -65,146 +66,118 @@ thread_local! {
     static LISTINGS: RefCell<Vec<Listing>> = RefCell::new(Vec::new());
     static USERS: RefCell<Vec<User>> = RefCell::new(Vec::new());
     static IMAGES: RefCell<Vec<String>> = RefCell::new(Vec::new());
-    static CHATS: RefCell<HashMap<u64, Chat>> = RefCell::new(HashMap::new());
-    static CHAT_ID_COUNTER: RefCell<u64> = RefCell::new(0);
 }
 
 
-#[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct Message {
-    pub sender_id: String,
-    pub content: String,
-    pub timestamp: u64,
-}
-
-#[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct Chat {
-    pub id: u64,
-    pub listing_id: u64,
-    pub user1: String,
-    pub user2: String,
-    pub messages: Vec<Message>,
-}
-
-// Helper to get a unique chat id
-fn next_chat_id() -> u64 {
-    CHAT_ID_COUNTER.with(|counter| {
-        let mut c = counter.borrow_mut();
-        *c += 1;
-        *c
-    })
-}
-
-// Helper to get chat key (listing_id + user1 + user2, sorted)
-fn chat_key(listing_id: u64, user1: &str, user2: &str) -> String {
-    let (a, b) = if user1 < user2 { (user1, user2) } else { (user2, user1) };
-    format!("{}:{}:{}", listing_id, a, b)
-}
-
-// Map from chat_key to chat_id for fast lookup
-thread_local! {
-    static CHAT_KEYS: RefCell<HashMap<String, u64>> = RefCell::new(HashMap::new());
-}
-
-// Get or create a chat for two users and a listing
+// Chat API endpoints
 #[ic_cdk::update]
-fn get_or_create_chat(listing_id: u64, other_user_id: String) -> Chat {
+fn create_conversation(listing_id: u64, other_user_id: String) -> Result<Conversation, String> {
     let caller = ic_cdk::caller().to_string();
-    let key = chat_key(listing_id, &caller, &other_user_id);
-
-    let chat_id = CHAT_KEYS.with(|keys| {
-        let mut keys = keys.borrow_mut();
-        if let Some(&id) = keys.get(&key) {
-            id
-        } else {
-            let id = next_chat_id();
-            keys.insert(key.clone(), id);
-            id
-        }
+    
+    ic_cdk::print(&format!("create_conversation called by {} for listing {} with other user {}", 
+        caller, listing_id, other_user_id));
+    
+    if caller == other_user_id {
+        return Err("Cannot create conversation with yourself".to_string());
+    }
+    
+    // Get listing info
+    let listing = LISTINGS.with(|listings| {
+        listings.borrow().iter().find(|l| l.id == listing_id).cloned()
     });
-
-    CHATS.with(|chats| {
-        let mut chats = chats.borrow_mut();
-        chats.entry(chat_id).or_insert_with(|| Chat {
-            id: chat_id,
-            listing_id,
-            user1: caller.clone(),
-            user2: other_user_id.clone(),
-            messages: Vec::new(),
-        }).clone()
-    })
+    
+    let listing_title = listing.map(|l| l.title).unwrap_or_else(|| "Unknown Listing".to_string());
+    
+    let conversation = get_or_create_conversation(listing_id, listing_title, caller, other_user_id);
+    
+    ic_cdk::print(&format!("Created conversation with ID: {}", conversation.id));
+    
+    Ok(conversation)
 }
 
-// Send a message in a chat (creates chat if not exists)
 #[ic_cdk::update]
-fn send_message(listing_id: u64, to_user_id: String, content: String) -> Result<Message, String> {
+fn send_chat_message(conversation_id: String, content: String) -> Result<Message, String> {
     let sender_id = ic_cdk::caller().to_string();
-    if sender_id == to_user_id {
-        return Err("Cannot send message to yourself.".to_string());
-    }
-    let key = chat_key(listing_id, &sender_id, &to_user_id);
-
-    let chat_id = CHAT_KEYS.with(|keys| {
-        let mut keys = keys.borrow_mut();
-        if let Some(&id) = keys.get(&key) {
-            id
+    
+    // Debug logging
+    ic_cdk::print(&format!("send_chat_message called by {} for conversation {}", sender_id, conversation_id));
+    
+    // Verify conversation exists and user is participant
+    let (is_participant, debug_info) = chat::CONVERSATIONS.with(|convs| {
+        let convs = convs.borrow();
+        
+        // Debug: log all conversation IDs
+        let all_conv_ids: Vec<String> = convs.keys().cloned().collect();
+        ic_cdk::print(&format!("Available conversation IDs: {:?}", all_conv_ids));
+        
+        if let Some(conv) = convs.get(&conversation_id) {
+            let is_participant = conv.participants.contains(&sender_id);
+            ic_cdk::print(&format!("Found conversation. Participants: {:?}, Sender: {}, Is participant: {}", 
+                conv.participants, sender_id, is_participant));
+            (is_participant, format!("Found conversation with participants: {:?}", conv.participants))
         } else {
-            let id = next_chat_id();
-            keys.insert(key.clone(), id);
-            id
+            ic_cdk::print(&format!("Conversation {} not found", conversation_id));
+            (false, "Conversation not found".to_string())
         }
     });
-
-    let msg = Message {
-        sender_id: sender_id.clone(),
-        content,
-        timestamp: ic_cdk::api::time(),
-    };
-
-    CHATS.with(|chats| {
-        let mut chats = chats.borrow_mut();
-        let chat = chats.entry(chat_id).or_insert_with(|| Chat {
-            id: chat_id,
-            listing_id,
-            user1: sender_id.clone(),
-            user2: to_user_id.clone(),
-            messages: Vec::new(),
-        });
-        chat.messages.push(msg.clone());
-        chat.clone()
-    });
-
-    // TODO: Integrate with ic-websocket-gateway for real-time notification
-
-    Ok(msg)
-}
-
-// Get all messages for a chat (between caller and other user for a listing)
-#[ic_cdk::query]
-fn get_messages(listing_id: u64, other_user_id: String) -> Vec<Message> {
-    let caller = ic_cdk::caller().to_string();
-    let key = chat_key(listing_id, &caller, &other_user_id);
-
-    let chat_id_opt = CHAT_KEYS.with(|keys| keys.borrow().get(&key).cloned());
-    if let Some(chat_id) = chat_id_opt {
-        CHATS.with(|chats| {
-            chats.borrow().get(&chat_id).map(|c| c.messages.clone()).unwrap_or_default()
-        })
-    } else {
-        Vec::new()
+    
+    if !is_participant {
+        return Err(format!("Not a participant in this conversation. Debug: {}", debug_info));
     }
+    
+    let message = Message::new(sender_id, content, "text".to_string());
+    
+    if let Err(e) = add_message_to_conversation(&conversation_id, message.clone()) {
+        return Err(e);
+    }
+    
+    // TODO: Add WebSocket broadcasting here
+    
+    Ok(message)
 }
 
-// Optionally: get all chats for the active user
 #[ic_cdk::query]
-fn get_chats_for_active_user() -> Vec<Chat> {
+fn get_conversation_messages(conversation_id: String) -> Result<Vec<Message>, String> {
     let caller = ic_cdk::caller().to_string();
-    CHATS.with(|chats| {
-        chats.borrow().values()
-            .filter(|chat| chat.user1 == caller || chat.user2 == caller)
-            .cloned()
-            .collect()
+    
+    chat::CONVERSATIONS.with(|convs| {
+        let convs = convs.borrow();
+        
+        if let Some(conversation) = convs.get(&conversation_id) {
+            if conversation.participants.contains(&caller) {
+                Ok(conversation.messages.clone())
+            } else {
+                Err("Not a participant in this conversation".to_string())
+            }
+        } else {
+            Err("Conversation not found".to_string())
+        }
     })
+}
+
+#[ic_cdk::query]
+fn get_user_conversations() -> Vec<Conversation> {
+    let caller = ic_cdk::caller().to_string();
+    chat::get_user_conversations(&caller)
+}
+
+#[ic_cdk::update]
+fn mark_conversation_read(conversation_id: String) -> Result<(), String> {
+    let caller = ic_cdk::caller().to_string();
+    mark_conversation_as_read(&conversation_id, &caller)
+}
+
+#[ic_cdk::update]
+fn set_typing_status(conversation_id: String, is_typing: bool) -> Result<(), String> {
+    let caller = ic_cdk::caller().to_string();
+    
+    if let Err(e) = update_typing_status(&conversation_id, &caller, is_typing) {
+        return Err(e);
+    }
+    
+    // TODO: Add WebSocket broadcasting here
+    
+    Ok(())
 }
 
 #[ic_cdk::update]

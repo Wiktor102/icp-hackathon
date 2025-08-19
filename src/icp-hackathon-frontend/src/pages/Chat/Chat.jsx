@@ -11,9 +11,6 @@ import Empty from "../../common/components/Empty/Empty.jsx";
 import ConversationList from "./ConversationList.jsx";
 import ChatWindow from "./ChatWindow.jsx";
 
-// sample data (remove when backend is ready)
-import { initializeSampleData } from "../../common/sampleChatData.js";
-
 import "./Chat.scss";
 
 function Chat() {
@@ -24,6 +21,10 @@ function Chat() {
 	const conversations = useStore(state => state.conversations);
 	const activeConversationId = useStore(state => state.activeConversationId);
 	const setActiveConversation = useStore(state => state.setActiveConversation);
+	const chatInitialized = useStore(state => state.chatInitialized);
+	const chatLoading = useStore(state => state.chatLoading);
+	const chatError = useStore(state => state.chatError);
+	const initializeChat = useStore(state => state.initializeChat);
 
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
@@ -31,22 +32,45 @@ function Chat() {
 		return <Loader />;
 	}
 
-	// Initialize sample data for testing (remove when backend is ready)
+	// Initialize chat services when component mounts
 	useEffect(() => {
-		if (Object.keys(conversations).length === 0) {
-			initializeSampleData();
+		if (!chatInitialized && !chatLoading && user) {
+			// Use correct canister ID for local development
+			const canisterId =
+				process.env.DFX_NETWORK === "ic"
+					? process.env.CANISTER_ID_ICP_HACKATHON_BACKEND || "mzik2-kaaaa-aaaao-qjw3q-cai"
+					: "bkyz2-fmaaa-aaaaa-qaaaq-cai"; // Local canister ID
+			initializeChat(canisterId);
 		}
-	}, [conversations]);
+	}, [chatInitialized, chatLoading, user, initializeChat]);
 
 	// Set active conversation from URL params
 	useEffect(() => {
 		if (conversationId && conversations[conversationId]) {
 			setActiveConversation(conversationId);
-		} else if (conversationId && !conversations[conversationId]) {
+		} else if (conversationId && !conversations[conversationId] && chatInitialized) {
 			// Invalid conversation ID, redirect to chat home
 			navigate("/chat");
 		}
-	}, [conversationId, conversations, setActiveConversation, navigate]);
+	}, [conversationId, conversations, setActiveConversation, navigate, chatInitialized]);
+
+	// Show loading state while initializing chat
+	if (chatLoading || !chatInitialized) {
+		return <Loader />;
+	}
+
+	// Show error state if chat initialization failed
+	if (chatError) {
+		return (
+			<div className="chat-page">
+				<div className="chat-error">
+					<Empty icon={<i className="fas fa-exclamation-triangle"></i>}>
+						Failed to initialize chat: {chatError}
+					</Empty>
+				</div>
+			</div>
+		);
+	}
 
 	const conversationList = Object.values(conversations).sort(
 		(a, b) => new Date(b.lastMessageTime || b.createdAt) - new Date(a.lastMessageTime || a.createdAt)

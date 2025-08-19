@@ -10,6 +10,17 @@ type Config = record {
   min_title_len : nat8;
   min_company_name_len : nat8;
 };
+type Conversation = record {
+  id : text;
+  participants : vec text;
+  listing_id : nat64;
+  listing_title : text;
+  messages : vec Message;
+  created_at : nat64;
+  last_message_time : opt nat64;
+  unread_counts : vec record { text; nat32 };
+  typing_users : vec record { text; bool };
+};
 type Icrc28TrustedOriginsResponse = record { trusted_origins : vec text };
 type Listing = record {
   id : nat64;
@@ -24,6 +35,14 @@ type Listing = record {
   amount : nat32;
   categories_path : text;
 };
+type Message = record {
+  id : text;
+  sender_id : text;
+  content : text;
+  message_type : text;
+  timestamp : nat64;
+  read : bool;
+};
 type Result = variant { Ok : User; Err : text };
 type Result_1 = variant { Ok : Listing; Err : text };
 type Result_2 = variant { Ok : Review; Err : text };
@@ -31,6 +50,10 @@ type Result_3 = variant { Ok : float64; Err : text };
 type Result_4 = variant { Ok : text; Err : text };
 type Result_5 = variant { Ok : vec Listing; Err : text };
 type Result_6 = variant { Ok : vec Review; Err : text };
+type Result_7 = variant { Ok : Conversation; Err : text };
+type Result_8 = variant { Ok : Message; Err : text };
+type Result_9 = variant { Ok : vec Message; Err : text };
+type Result_10 = variant { Ok; Err : text };
 type Review = record { comment : text; owner_id : text; rating : nat8 };
 type SupportedStandard = record { url : text; name : text };
 type User = record {
@@ -52,6 +75,7 @@ service : {
   add_review : (nat64, nat8, text) -> (Result_2);
   add_user : (text, text, text, text) -> (Result);
   calculate_average_rating_of_listing : (nat64) -> (Result_3) query;
+  create_conversation : (nat64, text) -> (Result_7);
   delete_listing : (nat64) -> (opt text);
   delete_review : (nat64) -> (opt text);
   edit_active_user : (text, text, text, text) -> (opt text);
@@ -63,6 +87,7 @@ service : {
   get_active_user_favorite_listings : () -> (vec Listing) query;
   get_categories : () -> (vec Category) query;
   get_config : () -> (Config) query;
+  get_conversation_messages : (text) -> (Result_9) query;
   get_image_by_id : (nat64) -> (opt text) query;
   get_listing_by_id : (nat64) -> (opt Listing) query;
   get_listings : () -> (vec Listing) query;
@@ -71,7 +96,11 @@ service : {
   get_listings_id_by_category : (text) -> (vec nat64) query;
   get_reviews_of_listing : (nat64) -> (Result_6) query;
   get_user_by_principal : (text) -> (opt User) query;
+  get_user_conversations : () -> (vec Conversation) query;
   get_users : () -> (vec User) query;
   icrc10_supported_standards : () -> (vec SupportedStandard);
   icrc28_trusted_origins : () -> (Icrc28TrustedOriginsResponse);
+  mark_conversation_read : (text) -> (Result_10);
+  send_chat_message : (text, text) -> (Result_8);
+  set_typing_status : (text, bool) -> (Result_10);
 }
