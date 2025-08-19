@@ -4,8 +4,9 @@ use crate::config::Config;
 use crate::user::User;
 use crate::category::Category;
 use crate::review::Review;
-use regex::Regex;
 use candid::{self, CandidType, Deserialize};
+use std::collections::HashMap;
+use base64::Engine;
 
 mod category;
 mod listing;
@@ -64,8 +65,147 @@ thread_local! {
     static LISTINGS: RefCell<Vec<Listing>> = RefCell::new(Vec::new());
     static USERS: RefCell<Vec<User>> = RefCell::new(Vec::new());
     static IMAGES: RefCell<Vec<String>> = RefCell::new(Vec::new());
+    static CHATS: RefCell<HashMap<u64, Chat>> = RefCell::new(HashMap::new());
+    static CHAT_ID_COUNTER: RefCell<u64> = RefCell::new(0);
 }
 
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct Message {
+    pub sender_id: String,
+    pub content: String,
+    pub timestamp: u64,
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize)]
+pub struct Chat {
+    pub id: u64,
+    pub listing_id: u64,
+    pub user1: String,
+    pub user2: String,
+    pub messages: Vec<Message>,
+}
+
+// Helper to get a unique chat id
+fn next_chat_id() -> u64 {
+    CHAT_ID_COUNTER.with(|counter| {
+        let mut c = counter.borrow_mut();
+        *c += 1;
+        *c
+    })
+}
+
+// Helper to get chat key (listing_id + user1 + user2, sorted)
+fn chat_key(listing_id: u64, user1: &str, user2: &str) -> String {
+    let (a, b) = if user1 < user2 { (user1, user2) } else { (user2, user1) };
+    format!("{}:{}:{}", listing_id, a, b)
+}
+
+// Map from chat_key to chat_id for fast lookup
+thread_local! {
+    static CHAT_KEYS: RefCell<HashMap<String, u64>> = RefCell::new(HashMap::new());
+}
+
+// Get or create a chat for two users and a listing
+#[ic_cdk::update]
+fn get_or_create_chat(listing_id: u64, other_user_id: String) -> Chat {
+    let caller = ic_cdk::caller().to_string();
+    let key = chat_key(listing_id, &caller, &other_user_id);
+
+    let chat_id = CHAT_KEYS.with(|keys| {
+        let mut keys = keys.borrow_mut();
+        if let Some(&id) = keys.get(&key) {
+            id
+        } else {
+            let id = next_chat_id();
+            keys.insert(key.clone(), id);
+            id
+        }
+    });
+
+    CHATS.with(|chats| {
+        let mut chats = chats.borrow_mut();
+        chats.entry(chat_id).or_insert_with(|| Chat {
+            id: chat_id,
+            listing_id,
+            user1: caller.clone(),
+            user2: other_user_id.clone(),
+            messages: Vec::new(),
+        }).clone()
+    })
+}
+
+// Send a message in a chat (creates chat if not exists)
+#[ic_cdk::update]
+fn send_message(listing_id: u64, to_user_id: String, content: String) -> Result<Message, String> {
+    let sender_id = ic_cdk::caller().to_string();
+    if sender_id == to_user_id {
+        return Err("Cannot send message to yourself.".to_string());
+    }
+    let key = chat_key(listing_id, &sender_id, &to_user_id);
+
+    let chat_id = CHAT_KEYS.with(|keys| {
+        let mut keys = keys.borrow_mut();
+        if let Some(&id) = keys.get(&key) {
+            id
+        } else {
+            let id = next_chat_id();
+            keys.insert(key.clone(), id);
+            id
+        }
+    });
+
+    let msg = Message {
+        sender_id: sender_id.clone(),
+        content,
+        timestamp: ic_cdk::api::time(),
+    };
+
+    CHATS.with(|chats| {
+        let mut chats = chats.borrow_mut();
+        let chat = chats.entry(chat_id).or_insert_with(|| Chat {
+            id: chat_id,
+            listing_id,
+            user1: sender_id.clone(),
+            user2: to_user_id.clone(),
+            messages: Vec::new(),
+        });
+        chat.messages.push(msg.clone());
+        chat.clone()
+    });
+
+    // TODO: Integrate with ic-websocket-gateway for real-time notification
+
+    Ok(msg)
+}
+
+// Get all messages for a chat (between caller and other user for a listing)
+#[ic_cdk::query]
+fn get_messages(listing_id: u64, other_user_id: String) -> Vec<Message> {
+    let caller = ic_cdk::caller().to_string();
+    let key = chat_key(listing_id, &caller, &other_user_id);
+
+    let chat_id_opt = CHAT_KEYS.with(|keys| keys.borrow().get(&key).cloned());
+    if let Some(chat_id) = chat_id_opt {
+        CHATS.with(|chats| {
+            chats.borrow().get(&chat_id).map(|c| c.messages.clone()).unwrap_or_default()
+        })
+    } else {
+        Vec::new()
+    }
+}
+
+// Optionally: get all chats for the active user
+#[ic_cdk::query]
+fn get_chats_for_active_user() -> Vec<Chat> {
+    let caller = ic_cdk::caller().to_string();
+    CHATS.with(|chats| {
+        chats.borrow().values()
+            .filter(|chat| chat.user1 == caller || chat.user2 == caller)
+            .cloned()
+            .collect()
+    })
+}
 
 #[ic_cdk::update]
 fn add_listing(
@@ -82,13 +222,13 @@ fn add_listing(
         users.borrow().iter().find(|user| user.id == caller).cloned()
     });
 
-    if let Some(owner) = owner {
+    if let Some(_owner) = owner {
         let config = CONFIG.with(|config| config.borrow().clone());
 
         let images_id = IMAGES.with(|images| {
             let mut images_ref = images.borrow_mut();
             images_strings.iter().map(|s| {
-                images_ref.push(base64::encode(s));
+                images_ref.push(base64::engine::general_purpose::STANDARD.encode(s));
                 (images_ref.len() - 1) as u64
             }).collect::<Vec<u64>>()
         });
@@ -138,7 +278,7 @@ fn edit_listing(
     let images_id = IMAGES.with(|images| {
         let mut images_ref = images.borrow_mut();
         images_strings.iter().map(|s| {
-            images_ref.push(base64::encode(s));
+            images_ref.push(base64::engine::general_purpose::STANDARD.encode(s));
             (images_ref.len() - 1) as u64
         }).collect::<Vec<u64>>()
     });
@@ -527,8 +667,61 @@ fn delete_review(listing_id: u64) -> Option<String> {
         }
     })
 }
+// REMOVE the following block unless you have the ic-websocket-gateway crate and want to implement it now:
+/*
+use ic_cdk::export::candid;
+use ic_cdk::export::Principal;
+use ic_websocket_gateway::{
+    CanisterWsCloseArguments, CanisterWsMessageArguments, CanisterWsOpenArguments,
+    CanisterWsSendResult, WsHandlers, WsInitParams, ws_init, ws_open, ws_message, ws_close,
+};
 
+thread_local! {
+    static WS_HANDLERS: WsHandlers = WsHandlers {
+        on_open: Some(on_open),
+        on_message: Some(on_message),
+        on_close: Some(on_close),
+    };
+}
 
+#[ic_cdk::init]
+fn init() {
+    let params = WsInitParams {
+        max_connections: Some(100),
+        max_message_size_bytes: Some(1024 * 64),
+        ..Default::default()
+    };
+    WS_HANDLERS.with(|h| ws_init(params, h.clone()));
+}
 
-ic_cdk::export_candid!();
+#[ic_cdk::update]
+fn ws_open(args: CanisterWsOpenArguments) {
+    ws_open(args);
+}
+
+#[ic_cdk::update]
+fn ws_message(args: CanisterWsMessageArguments) -> CanisterWsSendResult {
+    ws_message(args)
+}
+
+#[ic_cdk::update]
+fn ws_close(args: CanisterWsCloseArguments) {
+    ws_close(args);
+}
+
+// Obsługa zdarzeń WebSocket
+fn on_open(client_principal: Principal) {
+    ic_cdk::println!("Nowe połączenie: {:?}", client_principal);
+}
+
+fn on_message(client_principal: Principal, msg: Vec<u8>) {
+    ic_cdk::println!("Wiadomość od {:?}: {:?}", client_principal, msg);
+}
+
+fn on_close(client_principal: Principal) {
+    ic_cdk::println!("Połączenie zamknięte: {:?}", client_principal);
+}
+*/
+
+candid::export_service!();
 

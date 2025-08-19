@@ -1,9 +1,7 @@
-use base64;
 use candid::{CandidType, Deserialize};
 use ic_cdk::api::time;
 use std::sync::atomic::{AtomicU64, Ordering};
 use crate::review::Review;
-use candid::Principal;
 
 static AMOUNT_OF_LISTINGS: AtomicU64 = AtomicU64::new(0);
 
