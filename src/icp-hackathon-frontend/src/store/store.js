@@ -59,7 +59,60 @@ const useStore = create(set => ({
 	authClient: null,
 	setAuthClient: authClient => set({ authClient }),
 	identity: null,
-	setIdentity: identity => set({ identity })
+	setIdentity: identity => set({ identity }),
+
+	// Chat state
+	conversations: {},
+	activeConversationId: null,
+	setActiveConversation: conversationId => set({ activeConversationId: conversationId }),
+	addConversation: conversation => set(state => ({
+		conversations: { ...state.conversations, [conversation.id]: conversation }
+	})),
+	addMessage: (conversationId, message) => set(state => {
+		const conversation = state.conversations[conversationId];
+		if (!conversation) return state;
+		
+		const updatedConversation = {
+			...conversation,
+			messages: [...conversation.messages, message],
+			lastMessage: message,
+			lastMessageTime: message.timestamp,
+			unreadCount: conversation.unreadCount + (message.senderId !== state.user?.id ? 1 : 0)
+		};
+		
+		return {
+			conversations: { ...state.conversations, [conversationId]: updatedConversation }
+		};
+	}),
+	markConversationAsRead: conversationId => set(state => {
+		const conversation = state.conversations[conversationId];
+		if (!conversation) return state;
+		
+		return {
+			conversations: {
+				...state.conversations,
+				[conversationId]: { ...conversation, unreadCount: 0 }
+			}
+		};
+	}),
+	updateTypingStatus: (conversationId, userId, isTyping) => set(state => {
+		const conversation = state.conversations[conversationId];
+		if (!conversation) return state;
+		
+		const typingUsers = { ...conversation.typingUsers };
+		if (isTyping) {
+			typingUsers[userId] = true;
+		} else {
+			delete typingUsers[userId];
+		}
+		
+		return {
+			conversations: {
+				...state.conversations,
+				[conversationId]: { ...conversation, typingUsers }
+			}
+		};
+	})
 }));
 
 export default useStore;

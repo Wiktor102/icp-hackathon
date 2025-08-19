@@ -9,6 +9,7 @@ import Profile from "./pages/Profile/Profile.jsx";
 import Favorites from "./pages/Favorites/Favorites.jsx";
 import AddListing from "./pages/AddListing/AddListing.jsx";
 import ListingDetails from "./pages/ListingDetails/ListingDetails.jsx";
+import Chat from "./pages/Chat/Chat.jsx";
 
 import { IdentityKitAuthType, InternetIdentity } from "@nfid/identitykit";
 import { IdentityKitProvider } from "@nfid/identitykit/react";
@@ -54,6 +55,8 @@ function App() {
 						<Route path="/favorites" element={<Favorites />} />
 						<Route path="/add" element={<AddListing />} />
 						<Route path="/product/:productId" element={<ListingDetails />} />
+						<Route path="/chat" element={<Chat />} />
+						<Route path="/chat/:conversationId" element={<Chat />} />
 					</Route>
 				</Routes>
 			</BrowserRouter>

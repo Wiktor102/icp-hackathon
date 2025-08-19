@@ -1,0 +1,137 @@
+.conversation-list {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0.5rem;
+}
+
+.conversation-item {
+	display: flex;
+	align-items: center;
+	padding: 1rem;
+	margin-bottom: 0.5rem;
+	border-radius: 0.75rem;
+	cursor: pointer;
+	transition: background-color 0.2s;
+	
+	&:hover {
+		background-color: var(--surface-variant-highlight);
+	}
+	
+	&.active {
+		background-color: var(--accent);
+		
+		.conversation-name {
+			color: var(--on-elevated-surface);
+		}
+		
+		.conversation-time {
+			color: var(--on-elevated-surface);
+			opacity: 0.8;
+		}
+		
+		.last-message {
+			color: var(--on-elevated-surface);
+			opacity: 0.9;
+		}
+	}
+}
+
+.conversation-avatar {
+	position: relative;
+	margin-right: 1rem;
+	flex-shrink: 0;
+	
+	img {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+	
+	.online-indicator {
+		position: absolute;
+		bottom: 2px;
+		right: 2px;
+		width: 12px;
+		height: 12px;
+		background-color: #4ade80;
+		border: 2px solid var(--surface-variant);
+		border-radius: 50%;
+	}
+}
+
+.conversation-content {
+	flex: 1;
+	min-width: 0; // Allows text truncation
+}
+
+.conversation-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 0.25rem;
+}
+
+.conversation-name {
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--on-surface-variant);
+	truncate: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.conversation-time {
+	font-size: 0.8rem;
+	color: var(--on-surface-variant);
+	opacity: 0.7;
+	flex-shrink: 0;
+	margin-left: 0.5rem;
+}
+
+.conversation-preview {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.last-message {
+	font-size: 0.85rem;
+	color: var(--on-surface-variant);
+	opacity: 0.8;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	flex: 1;
+	
+	&.no-message {
+		opacity: 0.6;
+		font-style: italic;
+	}
+}
+
+.unread-badge {
+	background-color: var(--emphasis);
+	color: var(--surface);
+	font-size: 0.7rem;
+	font-weight: 600;
+	padding: 0.2rem 0.5rem;
+	border-radius: 1rem;
+	min-width: 1.2rem;
+	height: 1.2rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-left: 0.5rem;
+	flex-shrink: 0;
+}
+
+.typing-indicator {
+	margin-top: 0.25rem;
+	
+	span {
+		font-size: 0.75rem;
+		color: var(--emphasis);
+		font-style: italic;
+	}
+}

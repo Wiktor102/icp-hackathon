@@ -1,0 +1,77 @@
+@use "../../common/scss/mixins" as *;
+
+.chat-page {
+	@include page-container;
+	padding-block: 1rem;
+	height: calc(100vh - 6.5rem); // Account for header height
+}
+
+.chat-layout {
+	display: grid;
+	grid-template-columns: 350px 1fr;
+	height: 100%;
+	gap: 1rem;
+
+	@media (max-width: 768px) {
+		grid-template-columns: 1fr;
+
+		.chat-sidebar {
+			display: none;
+		}
+
+		&.mobile-sidebar-open {
+			.chat-sidebar {
+				display: block;
+			}
+
+			.chat-main {
+				display: none;
+			}
+		}
+	}
+}
+
+.chat-sidebar {
+	@include elevated-container;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+.chat-header {
+	padding: 1rem;
+	border-bottom: 1px solid var(--surface);
+
+	h2 {
+		margin: 0;
+		font-size: 1.25rem;
+		font-weight: 600;
+	}
+}
+
+.chat-main {
+	@include elevated-container;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	overflow: hidden;
+}
+
+.chat-placeholder {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	.empty {
+		text-align: center;
+
+		i {
+			font-size: 3rem;
+			margin-bottom: 1rem;
+			opacity: 0.5;
+		}
+	}
+}
