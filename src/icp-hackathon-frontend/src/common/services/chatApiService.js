@@ -6,6 +6,8 @@ class ChatApiService {
 		this.agent = null;
 		this.actor = null;
 		this.canisterId = null;
+		this.ws = null;
+		this.messageHandlers = new Set();
 	}
 
 	async initialize(canisterId, identity = null) {
@@ -32,11 +34,24 @@ class ChatApiService {
 				canisterId
 			});
 
+			// Initialize WebSocket connection
+			await this.initializeWebSocket();
+
 			return true;
 		} catch (error) {
 			console.error("Failed to initialize chat API:", error);
 			throw error;
 		}
+	}
+
+	async initializeWebSocket() {
+		console.log("Chat API initialized successfully (WebSocket disabled for simplicity)");
+		return true;
+	}
+
+	onMessage(handler) {
+		this.messageHandlers.add(handler);
+		return () => this.messageHandlers.delete(handler);
 	}
 
 	getAgent() {
@@ -51,6 +66,7 @@ class ChatApiService {
 		try {
 			const result = await this.actor.create_conversation(listingId, otherUserId);
 			if ("Ok" in result) {
+				// Always use result.Ok as the conversation ID for further actions!
 				return result.Ok;
 			} else {
 				throw new Error(result.Err);
@@ -61,20 +77,66 @@ class ChatApiService {
 		}
 	}
 
+	async isUserParticipant(conversationId) {
+		if (!this.actor) {
+			throw new Error("Chat API not initialized");
+		}
+		try {
+			const conversations = await this.getUserConversations();
+			return conversations.some(conv => conv.id === conversationId);
+		} catch (error) {
+			console.error("Failed to check user participation:", { error, conversationId });
+			return false;
+		}
+	}
+
 	async sendMessage(conversationId, content) {
 		if (!this.actor) {
 			throw new Error("Chat API not initialized");
 		}
 
+		// Improved validation for conversationId
+		if (
+			!conversationId ||
+			typeof conversationId !== "string" ||
+			conversationId.trim() === "" ||
+			conversationId.startsWith("undefined") ||
+			conversationId.includes("undefined")
+		) {
+			console.warn("Attempted to send message to invalid conversationId:", conversationId);
+			throw new Error(`Invalid conversation ID: ${conversationId}`);
+		}
+
+		const isParticipant = await this.isUserParticipant(conversationId);
+		if (!isParticipant) {
+			console.error("User is not a participant in this conversation.", { conversationId, content });
+			throw new Error("User is not a participant in this conversation.");
+		}
+
 		try {
 			const result = await this.actor.send_chat_message(conversationId, content);
 			if ("Ok" in result) {
+				// Try to broadcast the message
+				try {
+					await this.actor.broadcast_message(conversationId, content);
+				} catch (broadcastError) {
+					console.warn("Failed to broadcast message:", broadcastError);
+				}
 				return result.Ok;
 			} else {
+				console.error("Failed to send message:", {
+					error: result.Err,
+					conversationId,
+					content
+				});
 				throw new Error(result.Err);
 			}
 		} catch (error) {
-			console.error("Failed to send message:", error);
+			console.error("Failed to send message:", {
+				error,
+				conversationId,
+				content
+			});
 			throw error;
 		}
 	}
@@ -150,3 +212,5 @@ class ChatApiService {
 // Export singleton instance
 export const chatApiService = new ChatApiService();
 export default chatApiService;
+
+

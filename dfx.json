@@ -3,7 +3,8 @@
         "icp-hackathon-backend": {
             "candid": "src/icp-hackathon-backend/icp-hackathon-backend.did",
             "package": "icp-hackathon-backend",
-            "type": "rust"
+            "type": "rust",
+            "build": "cargo build --target wasm32-unknown-unknown --release"
         },
         "icp-hackathon-frontend": {
             "dependencies": [
