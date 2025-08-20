@@ -49,7 +49,7 @@ function useFetchCategoryListings() {
 
 	async function fetchListings(category) {
 		try {
-			const response = await backend.get_listings_by_category(category);
+			const response = await backend.get_listings_id_by_category(category);
 			addListings(...response.map(parseBackendListing));
 		} catch (error) {
 			console.error(error);

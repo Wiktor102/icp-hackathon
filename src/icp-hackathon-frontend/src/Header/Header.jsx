@@ -28,7 +28,7 @@ function Header() {
 					? "https://identity.ic0.app/#authorize"
 					: // : `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}#authorize`,
 					  //   `http://localhost:4943?canisterId=bw4dl-smaaa-aaaaa-qaacq-cai#authorize`,
-					  `http://be2us-64aaa-aaaaa-qaabq-cai.localhost:4943/#authorize`,
+					  `http://asrmz-lmaaa-aaaaa-qaaeq-cai.localhost:4943/#authorize`,
 			onSuccess: async () => {
 				const identity = await authClient.getIdentity();
 				setIdentity(identity);

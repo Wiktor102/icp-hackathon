@@ -16,16 +16,15 @@
             "workspace": "icp-hackathon-frontend"
         },
         "internet_identity": {
-            "type": "custom",
             "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-            "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
-            "shrink": false,
+            "type": "custom",
+            "specified_id": "asrmz-lmaaa-aaaaa-qaaeq-cai",
             "remote": {
-                "candid": "internet_identity.did",
                 "id": {
-                    "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+                "ic": "asrmz-lmaaa-aaaaa-qaaeq-cai"
                 }
-            }
+            },
+            "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
         }
     },
     "defaults": {
