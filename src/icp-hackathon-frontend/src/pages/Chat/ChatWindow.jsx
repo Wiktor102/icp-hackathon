@@ -39,8 +39,8 @@ function MessageItem({
 	const shouldShowDateSeparator = (currentMessage, previousMessage) => {
 		if (!previousMessage) return true;
 
-		const currentDate = new Date(currentMessage.timestamp).toDateString();
-		const previousDate = new Date(previousMessage.timestamp).toDateString();
+		const currentDate = new Date(Number(currentMessage.timestamp / 1000000n)).toDateString();
+		const previousDate = new Date(Number(previousMessage.timestamp / 1000000n)).toDateString();
 
 		return currentDate !== previousDate;
 	};
@@ -117,12 +117,12 @@ function ChatWindow({ conversation }) {
 	}, [conversation.id, conversation.unreadCount, markConversationAsRead]);
 
 	const formatMessageTime = timestamp => {
-		const date = new Date(timestamp);
+		const date = new Date(Number(timestamp / 1000000n));
 		return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 	};
 
 	const formatMessageDate = timestamp => {
-		const date = new Date(timestamp);
+		const date = new Date(Number(timestamp / 1000000n));
 		const today = new Date();
 		const yesterday = new Date(today);
 		yesterday.setDate(yesterday.getDate() - 1);
