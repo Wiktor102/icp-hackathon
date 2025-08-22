@@ -1,7 +1,8 @@
 use candid::{CandidType, Deserialize};
 use ic_cdk::api::{time};
+use serde::Serialize;
 
-#[derive(Clone, CandidType, Deserialize, Debug)]
+#[derive(Clone, CandidType, Deserialize, Debug, Serialize)]
 pub struct User {
     pub id: String,
     pub name: String,

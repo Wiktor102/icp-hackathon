@@ -408,12 +408,16 @@ fn get_users() -> Vec<User> {
     USERS.with(|users| users.borrow().clone())
 }
 
-// TODO: This returns too much data.
-// ! DANGEROUS: This exposes user data that should not be accessible.
 #[ic_cdk::query]
-fn get_user_by_principal(principal: String) -> Option<User> {
+fn get_user_by_principal(principal: String) -> Option<Vec<u8>> {
     USERS.with(|users| {
-        users.borrow().iter().find(|user| user.id == principal).cloned()
+        users.borrow().iter().find(|user| user.id == principal).map(|user| {
+            let mut value = serde_json::to_value(user).unwrap();
+            if let serde_json::Value::Object(ref mut map) = value {
+                map.remove("favorites_id");
+            }
+            serde_json::to_vec(&value).unwrap()
+        })
     })
 }
 
