@@ -77,7 +77,23 @@ class AuthService {
 			return null;
 		}
 
-		return this.authClient.getIdentity();
+		try {
+			const identity = this.authClient.getIdentity();
+
+			// Validate identity is not anonymous and has proper principal
+			if (!identity || identity.getPrincipal().isAnonymous()) {
+				console.warn("Identity is anonymous or invalid, clearing session");
+				await this.logout();
+				return null;
+			}
+
+			return identity;
+		} catch (error) {
+			console.error("Failed to get identity:", error);
+			// Clear potentially corrupted session
+			await this.logout();
+			return null;
+		}
 	}
 
 	/**

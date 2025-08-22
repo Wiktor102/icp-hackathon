@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import useStore from "../../store/store.js";
+import useUser from "../../hooks/useUser.js";
 import Button from "../Button.jsx";
 
 function StartChatButton({ listingId, listingTitle, ownerId, className = "" }) {
 	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
 
-	const user = useStore(state => state.user);
+	// Use React Query user data, fallback to store for backward compatibility
+	const { user: queryUser } = useUser();
+	const storeUser = useStore(state => state.user);
+	const user = queryUser || storeUser;
 	const createConversation = useStore(state => state.createConversation);
 
 	const handleStartChat = async () => {

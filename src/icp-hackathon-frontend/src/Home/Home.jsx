@@ -3,6 +3,7 @@ import { NavLink, useSearchParams } from "react-router";
 
 // hooks
 import useStore from "../store/store.js";
+import useUser from "../common/hooks/useUser.js";
 import { useFetchCategoryListings } from "../common/hooks/useFetchListings.js";
 
 // components
@@ -18,7 +19,10 @@ import SubtleButton from "../common/components/SubtleButton/SubtleButton.jsx";
 import "./Home.scss";
 
 function Home() {
-	const user = useStore(state => state.user);
+	// Use React Query user data, fallback to store for backward compatibility
+	const { user: queryUser } = useUser();
+	const storeUser = useStore(state => state.user);
+	const user = queryUser || storeUser;
 	const allListings = useStore(state => state.listings);
 
 	const [listingsToDisplay, setListingsToDisplay] = useState(Object.values(allListings));

@@ -2,6 +2,7 @@ import { forwardRef, useRef, useState } from "react";
 
 // hooks
 import useStore from "../../../store/store.js";
+import useUser from "../../hooks/useUser.js";
 
 // components
 import LoadingOverlay from "../LoadingOverlay/LoadingOverlay.jsx";
@@ -22,6 +23,7 @@ const Wrapper = forwardRef(({ condition, children, ...props }, ref) =>
 
 function ContactInfo({ editButton = false, user }) {
 	const setUser = useStore(state => state.setUser);
+	const { invalidateUser } = useUser(); // Get the invalidate function to refresh user data
 	const [actorLoading, actor] = useAuthenticatedActor();
 
 	const [editable, setEditable] = useState(editButton && !user?.initialised);
@@ -75,7 +77,9 @@ function ContactInfo({ editButton = false, user }) {
 			return false;
 		}
 
-		setUser({ name, email, phone, company, initialised: true });
+		// Update both store (for backward compatibility) and invalidate React Query cache
+		setUser({ ...user, name, email, phone, company, initialised: true });
+		invalidateUser(); // This will refresh the user data from the backend
 		return true;
 	};
 

@@ -10,27 +10,58 @@ const ICP_API_HOST = "http://localhost:4943/";
 
 function useAuthenticatedActor() {
 	const identity = useStore(state => state.identity);
-	const [unauthenticatedAgent, setUnauthenticatedAgent] = useState(null);
+	const [agent, setAgent] = useState(null);
+	const [isAgentReady, setIsAgentReady] = useState(false);
 
+	// Create and setup agent when identity changes
 	useEffect(() => {
-		HttpAgent.create({ host: process.env.DFX_NETWORK === "ic" ? undefined : ICP_API_HOST }).then(
-			setUnauthenticatedAgent
-		);
-	}, []);
+		if (!identity) {
+			setAgent(null);
+			setIsAgentReady(false);
+			return;
+		}
+
+		const initializeAgent = async () => {
+			try {
+				setIsAgentReady(false);
+
+				// Create agent with proper host
+				const host = process.env.DFX_NETWORK === "ic" ? undefined : ICP_API_HOST;
+				const newAgent = new HttpAgent({ host, identity });
+
+				// For local development, fetch root key first
+				if (process.env.DFX_NETWORK !== "ic") {
+					await newAgent.fetchRootKey();
+				}
+
+				setAgent(newAgent);
+				setIsAgentReady(true);
+			} catch (error) {
+				console.error("Failed to initialize agent:", error);
+				setAgent(null);
+				setIsAgentReady(false);
+			}
+		};
+
+		initializeAgent();
+	}, [identity]);
 
 	const authenticatedActor = useMemo(() => {
-		return (
-			identity &&
-			createActor(canisterId, {
-				agentOptions: {
-					identity
-				}
-				// canisterId: TARGET_CANISTER_ID_TO_CALL
-			})
-		);
-	}, [identity, targetIdlFactory]);
+		if (!identity || !agent || !isAgentReady) {
+			return null;
+		}
 
-	return [authenticatedActor == null, authenticatedActor];
+		try {
+			return createActor(canisterId, {
+				agent
+			});
+		} catch (error) {
+			console.error("Failed to create actor:", error);
+			return null;
+		}
+	}, [identity, agent, isAgentReady]);
+
+	return [authenticatedActor === null, authenticatedActor];
 }
 
 export { useAuthenticatedActor };

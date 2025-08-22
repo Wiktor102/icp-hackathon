@@ -3,6 +3,8 @@ import { Link } from "react-router";
 // hooks
 import useStore from "../../store/store.js";
 import useProtectRoute from "../../common/hooks/useProtectRoute.js";
+import useUser from "../../common/hooks/useUser.js";
+import { useUserListings } from "../../common/hooks/useBackend.js";
 
 // components
 import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
@@ -17,21 +19,32 @@ import avatarImg from "../../assets/avatar.png";
 import "./Profile.scss";
 
 function Profile() {
-	const user = useStore(state => state.user);
-	const loadingUser = useStore(state => state.loadingUser);
-	const userCreating = useStore(state => state.userCreating);
-	const userListings = useStore(state => state.userListings);
-	const userListingsLoading = useStore(state => state.userListingsLoading);
-	const userListingsError = useStore(state => state.userListingsError);
+	// Use the new React Query hooks
+	const { user, isLoading: userLoading, isCreatingUser } = useUser();
+	const { data: userListingsData, isLoading: userListingsLoading, error: userListingsError } = useUserListings();
 
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
-	if (protection === "loading" || loadingUser || userCreating || !user || userListingsLoading) {
+	if (protection === "loading" || userLoading || isCreatingUser || !user || userListingsLoading) {
 		return <Loader />;
 	}
 
 	if (userListingsError) {
-		return <Empty icon={<i className="fas fa-exclamation-triangle" />}>An error occurred: {userListingsError}</Empty>;
+		return (
+			<Empty icon={<i className="fas fa-exclamation-triangle" />}>
+				An error occurred: {userListingsError.message}
+			</Empty>
+		);
+	}
+
+	// Handle the backend response format (Ok/Err)
+	let userListings = [];
+	if (userListingsData) {
+		if (userListingsData.Ok) {
+			userListings = userListingsData.Ok;
+		} else if (Array.isArray(userListingsData)) {
+			userListings = userListingsData;
+		}
 	}
 
 	return (

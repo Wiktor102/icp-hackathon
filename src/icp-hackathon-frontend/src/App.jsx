@@ -17,7 +17,6 @@ import { IdentityKitProvider } from "@nfid/identitykit/react";
 import useStore from "./store/store.js";
 import useFetchCategories from "./common/hooks/useFetchCategories.js";
 import useFetchListings from "./common/hooks/useFetchListings.js";
-import { useFetchUserListings } from "./common/hooks/useFetchUserListings.js";
 
 // styles
 import "@nfid/identitykit/react/styles.css";
@@ -26,7 +25,7 @@ import "./common/scss/loaders.min.css";
 function App() {
 	useFetchListings();
 	useFetchCategories();
-	useFetchUserListings();
+	// User listings are now fetched on-demand using React Query in individual components
 
 	// Authentication is now handled by the useAuth hook in Header component
 

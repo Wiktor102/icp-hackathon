@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Link, Outlet } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 
 // components
 import Button from "../common/Button";
@@ -11,11 +11,18 @@ import useUser from "../common/hooks/useUser.js";
 import "./Header.scss";
 
 function Header() {
+	const navigate = useNavigate();
+
 	// Authentication
 	const { isAuthenticated, isInitializing, login, logout } = useAuth();
-
+	
 	// User management with React Query
-	const { user, isLoading: userLoading, isCreatingUser, error: userError } = useUser();
+	const { 
+		user, 
+		isLoading: userLoading, 
+		isCreatingUser, 
+		error: userError 
+	} = useUser();
 
 	const handleLogin = async () => {
 		try {
@@ -51,7 +58,10 @@ function Header() {
 				</Link>
 				<div>
 					{isAuthenticated ? (
-						<ProfileDropdown onLogout={handleLogout} userLoading={userLoading || isCreatingUser} />
+						<ProfileDropdown 
+							onLogout={handleLogout}
+							userLoading={userLoading || isCreatingUser}
+						/>
 					) : (
 						<Button onClick={handleLogin} disabled={isInitializing}>
 							{isInitializing ? "Initializing..." : "Log In"}
@@ -84,6 +94,49 @@ function ProfileDropdown({ onLogout, userLoading }) {
 			<Button onClick={() => setIsOpen(!isOpen)} disabled={userLoading}>
 				<i className="fas fa-user"></i>
 				{userLoading ? "Loading..." : "Profile"}
+			</Button>
+
+			{isOpen && (
+				<div className="profile-dropdown-menu">
+					<Link to="/profile" onClick={() => setIsOpen(false)}>
+						<div className="profile-dropdown-item">
+							<i className="fas fa-circle-info"></i>
+							<div className="profile-dropdown-item__label">Details</div>
+						</div>
+					</Link>
+					<Link to="/favorites" onClick={() => setIsOpen(false)}>
+						<div className="profile-dropdown-item">
+							<i className="fas fa-star"></i>
+							<div className="profile-dropdown-item__label">Favorites</div>
+						</div>
+					</Link>
+					<Link to="/chat" onClick={() => setIsOpen(false)}>
+						<div className="profile-dropdown-item">
+							<i className="fas fa-comments"></i>
+							<div className="profile-dropdown-item__label">Messages</div>
+						</div>
+					</Link>
+					<div
+						className="profile-dropdown-item"
+						onClick={async () => {
+							setIsOpen(false);
+							await onLogout();
+						}}
+					>
+						<i className="fas fa-arrow-right-from-bracket"></i>
+						<div className="profile-dropdown-item__label">Log Out</div>
+					</div>
+				</div>
+			)}
+		</div>
+	);
+}
+
+	return (
+		<div className="profile-dropdown" ref={dropdownRef}>
+			<Button onClick={() => setIsOpen(!isOpen)}>
+				<i className="fas fa-user"></i>
+				Profile
 			</Button>
 
 			{isOpen && (
