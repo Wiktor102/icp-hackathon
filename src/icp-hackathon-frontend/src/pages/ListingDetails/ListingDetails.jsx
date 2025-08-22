@@ -128,7 +128,7 @@ function ListingDetails() {
 
 			console.log("No existing conversation found, creating new one");
 			// Create new conversation via backend API using the principal ID
-			const conversationId = await createConversation(+productId, ownerId, title);
+			const conversationId = await createConversation(+productId, title);
 			console.log("Created conversation with ID:", conversationId);
 
 			// Navigate to the new conversation

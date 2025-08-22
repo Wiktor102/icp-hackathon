@@ -24,7 +24,7 @@ function StartChatButton({ listingId, listingTitle, ownerId, className = "" }) {
 
 		setIsLoading(true);
 		try {
-			const conversationId = await createConversation(listingId, ownerId, listingTitle);
+			const conversationId = await createConversation(listingId, listingTitle);
 			navigate(`/chat/${conversationId}`);
 		} catch (error) {
 			console.error("Failed to start conversation:", error);

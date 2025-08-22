@@ -75,7 +75,7 @@ service : {
   add_review : (nat64, nat8, text) -> (Result_2);
   add_user : (text, text, text, text) -> (Result);
   calculate_average_rating_of_listing : (nat64) -> (Result_3) query;
-  create_conversation : (nat64, text) -> (Result_7);
+  create_conversation : (nat64) -> (Result_7);
   delete_listing : (nat64) -> (opt text);
   delete_review : (nat64) -> (opt text);
   edit_active_user : (text, text, text, text) -> (opt text);

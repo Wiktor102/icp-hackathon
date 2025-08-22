@@ -71,24 +71,32 @@ thread_local! {
 
 // Chat API endpoints
 #[ic_cdk::update]
-fn create_conversation(listing_id: u64, other_user_id: String) -> Result<Conversation, String> {
+fn create_conversation(listing_id: u64) -> Result<Conversation, String> {
     let caller = ic_cdk::caller().to_string();
     
-    ic_cdk::print(&format!("create_conversation called by {} for listing {} with other user {}", 
-        caller, listing_id, other_user_id));
-    
-    if caller == other_user_id {
-        return Err("Cannot create conversation with yourself".to_string());
-    }
+    ic_cdk::print(&format!("create_conversation called by {} for listing {}", 
+        caller, listing_id));
     
     // Get listing info
     let listing = LISTINGS.with(|listings| {
         listings.borrow().iter().find(|l| l.id == listing_id).cloned()
     });
     
-    let listing_title = listing.map(|l| l.title).unwrap_or_else(|| "Unknown Listing".to_string());
+    let listing = match listing {
+        Some(listing) => listing,
+        None => return Err("Listing not found".to_string()),
+    };
     
-    let conversation = get_or_create_conversation(listing_id, listing_title, caller, other_user_id);
+    let other_user_id = listing.owner_id.clone();
+    
+    if caller == other_user_id {
+        return Err("Cannot create conversation with yourself".to_string());
+    }
+    
+    ic_cdk::print(&format!("Creating conversation between {} and listing owner {}", 
+        caller, other_user_id));
+    
+    let conversation = get_or_create_conversation(listing_id, listing.title, caller, other_user_id);
     
     ic_cdk::print(&format!("Created conversation with ID: {}", conversation.id));
     

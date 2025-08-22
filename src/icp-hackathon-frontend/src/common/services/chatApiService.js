@@ -58,15 +58,15 @@ class ChatApiService {
 		return this.agent;
 	}
 
-	async createConversation(listingId, otherUserId) {
+	async createConversation(listingId) {
 		if (!this.actor) {
 			throw new Error("Chat API not initialized");
 		}
 
-		console.log("ChatAPI: Creating conversation with:", { listingId, otherUserId });
+		console.log("ChatAPI: Creating conversation for listing id:", listingId);
 
 		try {
-			const result = await this.actor.create_conversation(listingId, otherUserId);
+			const result = await this.actor.create_conversation(listingId);
 			console.log("ChatAPI: Backend result:", result);
 
 			if ("Ok" in result) {

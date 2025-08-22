@@ -222,7 +222,7 @@ const useStore = create(set => ({
 		}
 	},
 
-	createConversation: async (listingId, otherUserId, listingTitle) => {
+	createConversation: async (listingId, listingTitle) => {
 		try {
 			// Ensure chat is initialized
 			const state = useStore.getState();
@@ -232,9 +232,9 @@ const useStore = create(set => ({
 				await state.initializeChat(canisterId);
 			}
 
-			console.log("Creating conversation:", { listingId, otherUserId, listingTitle });
+			console.log("Creating conversation:", { listingId, listingTitle });
 
-			const conversation = await chatApiService.createConversation(listingId, otherUserId);
+			const conversation = await chatApiService.createConversation(listingId);
 			console.log("Backend returned conversation:", conversation);
 
 			// Convert backend conversation format to frontend format
