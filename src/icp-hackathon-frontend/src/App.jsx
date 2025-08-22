@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
-import { AuthClient } from "@dfinity/auth-client";
 
 // components
 import Home from "./Home/Home";
@@ -29,12 +28,7 @@ function App() {
 	useFetchCategories();
 	useFetchUserListings();
 
-	const setAuthClient = useStore(state => state.setAuthClient);
-	useEffect(() => {
-		AuthClient.create({
-			/*options can go here */
-		}).then(setAuthClient);
-	}, []);
+	// Authentication is now handled by the useAuth hook in Header component
 
 	return (
 		<IdentityKitProvider

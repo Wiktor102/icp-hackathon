@@ -1,13 +1,15 @@
 import { useEffect } from "react";
-import { useIdentity } from "@nfid/identitykit/react";
 
 // hooks and utilities
 import useStore from "../../store/store.js";
 import { parseBackendListing } from "./useFetchListings.js";
 import { useAuthenticatedActor } from "./useActor.js";
+import useAuth from "./useAuth.js";
 
 export function useFetchUserListings() {
-	const identity = useStore(state => state.identity);
+	const { isAuthenticated, isInitializing } = useAuth();
+	const user = useStore(state => state.user);
+	const userCreating = useStore(state => state.userCreating);
 	const setUserListings = useStore(state => state.setUserListings);
 	const setUserListingsLoading = useStore(state => state.setUserListingsLoading);
 	const setUserListingsError = useStore(state => state.setUserListingsError);
@@ -16,7 +18,8 @@ export function useFetchUserListings() {
 
 	useEffect(() => {
 		const fetchUserListings = async () => {
-			if (!identity) {
+			// Don't fetch if auth is initializing, not authenticated, user is being created, or we don't have a user yet
+			if (isInitializing || !isAuthenticated || userCreating || !user) {
 				setUserListings([]);
 				return;
 			}
@@ -42,5 +45,16 @@ export function useFetchUserListings() {
 
 		if (actorLoading) return;
 		fetchUserListings();
-	}, [identity, setUserListings, setUserListingsLoading, setUserListingsError, addListings, actor, actorLoading]);
+	}, [
+		isAuthenticated,
+		isInitializing,
+		user,
+		userCreating,
+		setUserListings,
+		setUserListingsLoading,
+		setUserListingsError,
+		addListings,
+		actor,
+		actorLoading
+	]);
 }

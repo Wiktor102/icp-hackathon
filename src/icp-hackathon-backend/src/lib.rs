@@ -493,8 +493,9 @@ fn get_listings_by_active_user() -> Result<Vec<Listing>, String> {
         users.borrow().iter().find(|user| user.id == caller).cloned()
     });
 
+    // If user doesn't exist yet (e.g., during user creation), return empty array instead of error
     if owner.is_none() {
-        return Err("Nie znaleziono użytkownika!".to_string());
+        return Ok(Vec::new());
     }
 
     let user_listings = LISTINGS.with(|listings| {

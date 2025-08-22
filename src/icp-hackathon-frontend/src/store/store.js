@@ -5,11 +5,14 @@ import { canisterId } from "../../../declarations/icp-hackathon-backend/index.js
 
 const useStore = create(set => ({
 	user: null,
-	setUser: user => set({ user, loadingUser: false }),
+	setUser: user => set({ user, loadingUser: false, userCreating: false }),
 	addFavorite: listingId => set(state => ({ user: { ...state.user, favorites: [...state.user.favorites, listingId] } })),
 
 	loadingUser: false,
 	setUserLoading: () => set({ loadingUser: true }),
+
+	userCreating: false,
+	setUserCreating: creating => set({ userCreating: creating }),
 
 	categories: null,
 	setCategories: categories => set({ categories }),
@@ -63,6 +66,10 @@ const useStore = create(set => ({
 	setAuthClient: authClient => set({ authClient }),
 	identity: null,
 	setIdentity: identity => set({ identity }),
+
+	// Authentication initialization state
+	authInitialized: false,
+	setAuthInitialized: initialized => set({ authInitialized: initialized }),
 
 	// Chat state
 	conversations: {},

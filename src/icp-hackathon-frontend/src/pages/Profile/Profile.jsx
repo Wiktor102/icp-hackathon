@@ -19,13 +19,14 @@ import "./Profile.scss";
 function Profile() {
 	const user = useStore(state => state.user);
 	const loadingUser = useStore(state => state.loadingUser);
+	const userCreating = useStore(state => state.userCreating);
 	const userListings = useStore(state => state.userListings);
 	const userListingsLoading = useStore(state => state.userListingsLoading);
 	const userListingsError = useStore(state => state.userListingsError);
 
 	const protection = useProtectRoute();
 	if (protection === "error") return null;
-	if (protection === "loading" || loadingUser || !user || userListingsLoading) {
+	if (protection === "loading" || loadingUser || userCreating || !user || userListingsLoading) {
 		return <Loader />;
 	}
 

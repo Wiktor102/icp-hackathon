@@ -1,13 +1,11 @@
-import { useIdentity, useIsInitializing } from "@nfid/identitykit/react";
 import { useNavigate } from "react-router";
-import useStore from "../../store/store.js";
+import useAuth from "./useAuth.js";
 
 function useProtectRoute() {
-	const identity = useStore(state => state.identity);
+	const { isAuthenticated, isInitializing } = useAuth();
 	const navigate = useNavigate();
-	const isInitializing = useIsInitializing();
 
-	if (!identity && !isInitializing) {
+	if (!isAuthenticated && !isInitializing) {
 		navigate("/");
 		return "error";
 	}

@@ -4,36 +4,48 @@ import { Link, Outlet, useNavigate } from "react-router";
 // components
 import Button from "../common/Button";
 
-// hookjs
+// hooks
 import useStore from "../store/store.js";
 import { useAuthenticatedActor } from "../common/hooks/useActor.js";
+import useAuth from "../common/hooks/useAuth.js";
 
 import "./Header.scss";
 
 function Header() {
 	const navigate = useNavigate();
 
-	const identity = useStore(state => state.identity);
+	// Use the new authentication hook
+	const { identity, isAuthenticated, isInitializing, login, logout } = useAuth();
+
+	// User state from store
 	const setUser = useStore(state => state.setUser);
 	const setUserLoading = useStore(state => state.setUserLoading);
+	const setUserCreating = useStore(state => state.setUserCreating);
 	const [actorLoading, actor] = useAuthenticatedActor();
 
-	const authClient = useStore(state => state.authClient);
-	const setIdentity = useStore(state => state.setIdentity);
+	// Check for existing authentication session on page load
+	// This is now handled by the useAuth hook automatically
 
-	function login() {
-		authClient.login({
-			identityProvider:
-				process.env.DFX_NETWORK === "ic"
-					? "https://identity.ic0.app/#authorize"
-					: // : `http://localhost:4943?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}#authorize`,
-					  //   `http://localhost:4943?canisterId=bw4dl-smaaa-aaaaa-qaacq-cai#authorize`,
-					  `http://asrmz-lmaaa-aaaaa-qaaeq-cai.localhost:4943/#authorize`,
-			onSuccess: async () => {
-				const identity = await authClient.getIdentity();
-				setIdentity(identity);
-			}
-		});
+	async function handleLogin() {
+		try {
+			await login();
+		} catch (error) {
+			console.error("Login failed:", error);
+			alert("Login failed. Please try again.");
+		}
+	}
+
+	async function handleLogout() {
+		try {
+			await logout();
+			setUser(null);
+			setUserCreating(false);
+		} catch (error) {
+			console.error("Logout failed:", error);
+			// Still clear user state even if logout fails
+			setUser(null);
+			setUserCreating(false);
+		}
 	}
 
 	function parseBackendUser(user) {
@@ -55,11 +67,13 @@ function Header() {
 	}
 
 	async function createEmptyUser() {
+		setUserCreating(true);
 		try {
 			const { Ok, Err } = await actor.add_empty_user();
 			if (Err) {
 				console.warn(Err);
 				alert("An error occurred while creating user");
+				setUserCreating(false);
 				return;
 			}
 
@@ -68,31 +82,44 @@ function Header() {
 		} catch (err) {
 			console.error("(creating user) backend error:" + err);
 			alert("An unknown error occurred while creating account. Try again later.");
+			setUserCreating(false);
 		}
 	}
 
 	function fetchUser() {
 		setUserLoading(true);
-		actor.get_active_user().then(response => {
-			if (Array.isArray(response) && response.length === 0) {
-				createEmptyUser();
-				return;
-			}
+		actor
+			.get_active_user()
+			.then(response => {
+				if (Array.isArray(response) && response.length === 0) {
+					createEmptyUser();
+					return;
+				}
 
-			parseBackendUser(response[0]);
-		});
+				parseBackendUser(response[0]);
+			})
+			.catch(error => {
+				console.error("Error fetching user:", error);
+				setUserLoading(false);
+			});
 	}
 
 	useEffect(() => {
-		if (identity == null || actorLoading) {
+		// Don't proceed if auth is still initializing
+		if (isInitializing) {
+			return;
+		}
+
+		// Clear user if not authenticated or actor is loading
+		if (!isAuthenticated || actorLoading) {
 			setUser(null);
 			setUserLoading(false);
 			return;
 		}
 
-		// Always fetch user data when identity changes
+		// Fetch user data when authenticated and actor is ready
 		fetchUser();
-	}, [identity]);
+	}, [isAuthenticated, isInitializing, actorLoading]);
 
 	return (
 		<>
@@ -101,15 +128,12 @@ function Header() {
 					<h1>HurtChain</h1>
 				</Link>
 				<div>
-					{identity ? (
-						<ProfileDropdown
-							onLogout={() => {
-								setUser(null);
-								setIdentity(null);
-							}}
-						/>
+					{isAuthenticated ? (
+						<ProfileDropdown onLogout={handleLogout} />
 					) : (
-						<Button onClick={login}>Log In</Button>
+						<Button onClick={handleLogin} disabled={isInitializing}>
+							{isInitializing ? "Initializing..." : "Log In"}
+						</Button>
 					)}
 				</div>
 			</header>
@@ -162,9 +186,9 @@ function ProfileDropdown({ onLogout }) {
 					</Link>
 					<div
 						className="profile-dropdown-item"
-						onClick={() => {
+						onClick={async () => {
 							setIsOpen(false);
-							onLogout();
+							await onLogout();
 						}}
 					>
 						<i className="fas fa-arrow-right-from-bracket"></i>
