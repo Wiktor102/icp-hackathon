@@ -9,13 +9,13 @@ import useUserDetails from "../../common/hooks/useUserDetails.js";
 function MessageBubble({ message }) {
 	return (
 		<div className="message-bubble">
-			{message.type === "text" && <p>{message.content}</p>}
-			{message.type === "image" && (
+			{message.message_type === "text" && <p>{message.content}</p>}
+			{message.message_type === "image" && (
 				<div className="message-image">
 					<img src={message.content} alt="Shared image" />
 				</div>
 			)}
-			{message.type === "file" && (
+			{message.message_type === "file" && (
 				<div className="message-file">
 					<i className="fas fa-file"></i>
 					<span>{message.fileName || "File"}</span>
@@ -103,6 +103,7 @@ function ChatWindow({ conversation }) {
 	const messagesEndRef = useRef(null);
 	const [showTimestamps, setShowTimestamps] = useState(false);
 	const { userDetails: otherUser, isLoading: otherUserLoading } = useUserDetails(conversation.otherUserId);
+	console.log(conversation);
 
 	// Auto-scroll to bottom when new messages arrive
 	useEffect(() => {
