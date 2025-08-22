@@ -108,12 +108,7 @@ const useStore = create(set => ({
 						: null,
 					createdAt: new Date(Number(conv.created_at) / 1000000).toISOString(),
 					unreadCount: conv.unread_counts[useStore.getState().user?.id] || 0,
-					otherUser: {
-						id: conv.participants.find(p => p !== useStore.getState().user?.id),
-						name: "Unknown User", // TODO: Fetch user details
-						avatar: null,
-						isOnline: false
-					}
+					otherUserId: conv.participants.find(p => p !== useStore.getState().user?.id)
 				};
 				return acc;
 			}, {});
@@ -277,12 +272,7 @@ const useStore = create(set => ({
 				createdAt: new Date(Number(conversation.created_at) / 1000000).toISOString(),
 				unreadCount: conversation.unread_counts?.[useStore.getState().user?.id] || 0,
 				typingUsers: {},
-				otherUser: {
-					id: conversation.participants.find(p => p !== useStore.getState().user?.id) || otherUserId,
-					name: "Unknown User", // TODO: Fetch user details
-					avatar: null,
-					isOnline: false
-				}
+				otherUserId: conversation.participants.find(p => p !== useStore.getState().user?.id) || otherUserId
 			};
 
 			console.log("Enhanced conversation:", enhancedConversation);
@@ -313,12 +303,7 @@ const useStore = create(set => ({
 					createdAt: new Date(Number(conv.created_at) / 1000000).toISOString(),
 					unreadCount: conv.unread_counts?.[useStore.getState().user?.id] || 0,
 					typingUsers: {},
-					otherUser: {
-						id: conv.participants.find(p => p !== useStore.getState().user?.id) || "unknown",
-						name: "Unknown User", // TODO: Fetch user details
-						avatar: null,
-						isOnline: false
-					}
+					otherUserId: conv.participants.find(p => p !== useStore.getState().user?.id) || "unknown"
 				};
 				return acc;
 			}, {});

@@ -408,6 +408,8 @@ fn get_users() -> Vec<User> {
     USERS.with(|users| users.borrow().clone())
 }
 
+// TODO: This returns too much data.
+// ! DANGEROUS: This exposes user data that should not be accessible.
 #[ic_cdk::query]
 fn get_user_by_principal(principal: String) -> Option<User> {
     USERS.with(|users| {
