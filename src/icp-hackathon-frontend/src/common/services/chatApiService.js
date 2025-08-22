@@ -63,16 +63,22 @@ class ChatApiService {
 			throw new Error("Chat API not initialized");
 		}
 
+		console.log("ChatAPI: Creating conversation with:", { listingId, otherUserId });
+
 		try {
 			const result = await this.actor.create_conversation(listingId, otherUserId);
+			console.log("ChatAPI: Backend result:", result);
+
 			if ("Ok" in result) {
-				// Always use result.Ok as the conversation ID for further actions!
+				// Return the full conversation object from the backend
+				console.log("ChatAPI: Conversation created successfully:", result.Ok);
 				return result.Ok;
 			} else {
+				console.error("ChatAPI: Backend error:", result.Err);
 				throw new Error(result.Err);
 			}
 		} catch (error) {
-			console.error("Failed to create conversation:", error);
+			console.error("ChatAPI: Failed to create conversation:", error);
 			throw error;
 		}
 	}
@@ -212,5 +218,3 @@ class ChatApiService {
 // Export singleton instance
 export const chatApiService = new ChatApiService();
 export default chatApiService;
-
-

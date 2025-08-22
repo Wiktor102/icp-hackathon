@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { chatApiService } from "../common/services/chatApiService.js";
 import { chatWebSocketService } from "../common/services/chatWebSocketService.js";
+import { canisterId } from "../../../declarations/icp-hackathon-backend/index.js";
 
 const useStore = create(set => ({
 	user: null,
@@ -223,31 +224,65 @@ const useStore = create(set => ({
 
 	createConversation: async (listingId, otherUserId, listingTitle) => {
 		try {
-			const conversation = await chatApiService.createConversation(listingId, otherUserId);
+			// Ensure chat is initialized
+			const state = useStore.getState();
+			if (!state.chatInitialized) {
+				console.log("Chat not initialized, initializing now...");
+				// Initialize chat with the backend canister ID
+				await state.initializeChat(canisterId);
+			}
 
-			// Add other user details (you'll need to fetch these from your user service)
+			console.log("Creating conversation:", { listingId, otherUserId, listingTitle });
+
+			const conversation = await chatApiService.createConversation(listingId, otherUserId);
+			console.log("Backend returned conversation:", conversation);
+
+			// Convert backend conversation format to frontend format
 			const enhancedConversation = {
-				...conversation,
-				lastMessage: null,
-				lastMessageTime: null,
+				id: conversation.id,
+				participants: conversation.participants,
+				listingId: conversation.listing_id,
+				listingTitle: conversation.listing_title,
+				messages: conversation.messages.map(msg => ({
+					id: msg.id,
+					senderId: msg.sender_id,
+					content: msg.content,
+					type: msg.message_type,
+					timestamp: new Date(Number(msg.timestamp) / 1000000).toISOString(),
+					read: msg.read
+				})),
+				lastMessage:
+					conversation.messages.length > 0
+						? {
+								id: conversation.messages[conversation.messages.length - 1].id,
+								senderId: conversation.messages[conversation.messages.length - 1].sender_id,
+								content: conversation.messages[conversation.messages.length - 1].content,
+								type: conversation.messages[conversation.messages.length - 1].message_type,
+								timestamp: new Date(
+									Number(conversation.messages[conversation.messages.length - 1].timestamp) / 1000000
+								).toISOString(),
+								read: conversation.messages[conversation.messages.length - 1].read
+						  }
+						: null,
+				lastMessageTime: conversation.last_message_time
+					? new Date(Number(conversation.last_message_time) / 1000000).toISOString()
+					: null,
 				createdAt: new Date(Number(conversation.created_at) / 1000000).toISOString(),
-				unreadCount: 0,
+				unreadCount: conversation.unread_counts?.[useStore.getState().user?.id] || 0,
 				typingUsers: {},
 				otherUser: {
-					id: otherUserId,
+					id: conversation.participants.find(p => p !== useStore.getState().user?.id) || otherUserId,
 					name: "Unknown User", // TODO: Fetch user details
 					avatar: null,
 					isOnline: false
 				}
 			};
 
+			console.log("Enhanced conversation:", enhancedConversation);
+
 			set(state => ({
 				conversations: { ...state.conversations, [conversation.id]: enhancedConversation }
 			}));
-
-			// Reload conversations to ensure we have the latest state
-			const { loadConversations } = useStore.getState();
-			await loadConversations();
 
 			return conversation.id;
 		} catch (error) {

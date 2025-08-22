@@ -27,6 +27,7 @@ function ListingDetails() {
 	const userListings = useStore(state => state.userListings);
 	const deleteListing = useStore(state => state.deleteListing);
 	const addConversation = useStore(state => state.addConversation);
+	const createConversation = useStore(state => state.createConversation);
 	const conversations = useStore(state => state.conversations);
 	const [deleting, setDeleting] = useState(false);
 
@@ -93,42 +94,49 @@ function ListingDetails() {
 		}
 	}
 
-	function startChat() {
-		if (!owner || !user) return;
-
-		// Check if conversation already exists
-		const existingConversation = Object.values(conversations).find(conv => 
-			conv.otherUser?.id === owner.id
-		);
-
-		if (existingConversation) {
-			// Navigate to existing conversation
-			navigate(`/chat/${existingConversation.id}`);
+	async function startChat() {
+		if (!ownerId || !user) {
+			console.warn("Cannot start chat: missing ownerId or user", { ownerId, user });
 			return;
 		}
 
-		// Create new conversation
-		const newConversation = {
-			id: `${user.id}-${owner.id}-${Date.now()}`,
-			participants: [user.id, owner.id],
-			otherUser: {
-				id: owner.id,
-				name: owner.name,
-				avatar: null, // Will use default avatar
-				isOnline: false // Will be determined by backend later
-			},
-			messages: [],
-			createdAt: new Date().toISOString(),
-			lastMessage: null,
-			lastMessageTime: null,
-			unreadCount: 0,
-			typingUsers: {},
-			listingId: +productId, // Reference to the listing this chat is about
-			listingTitle: title
-		};
+		try {
+			// Check if conversation already exists for this listing between these users
+			const currentUserId = user.id;
+			console.log("Checking for existing conversation", {
+				currentUserId,
+				ownerId,
+				productId: +productId,
+				conversations: Object.values(conversations)
+			});
 
-		addConversation(newConversation);
-		navigate(`/chat/${newConversation.id}`);
+			const existingConversation = Object.values(conversations).find(conv => {
+				// Check if this conversation is for the same listing
+				if (conv.listingId !== +productId) return false;
+
+				// Check if both users are participants
+				const participants = conv.participants || [];
+				return participants.includes(currentUserId) && participants.includes(ownerId);
+			});
+
+			if (existingConversation) {
+				console.log("Found existing conversation:", existingConversation);
+				// Navigate to existing conversation
+				navigate(`/chat/${existingConversation.id}`);
+				return;
+			}
+
+			console.log("No existing conversation found, creating new one");
+			// Create new conversation via backend API using the principal ID
+			const conversationId = await createConversation(+productId, ownerId, title);
+			console.log("Created conversation with ID:", conversationId);
+
+			// Navigate to the new conversation
+			navigate(`/chat/${conversationId}`);
+		} catch (error) {
+			console.error("Failed to start chat:", error);
+			alert(`Failed to start chat: ${error.message || error}`);
+		}
 	}
 
 	if (error) {
@@ -159,7 +167,7 @@ function ListingDetails() {
 				</div>
 				{/* <ListingContactForm /> */}
 				<ContactInfo user={owner} />
-				{user && !isOwner && (
+				{user && !isOwner && ownerId && (
 					<>
 						<Button>
 							{favorite ? <i className="fas fa-star"></i> : <i className="fa-regular fa-star"></i>}
