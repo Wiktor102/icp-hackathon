@@ -19,6 +19,7 @@ import ImageCarousel from "../../common/components/ImageCarousel/ImageCarousel.j
 import LoadingOverlay from "../../common/components/LoadingOverlay/LoadingOverlay.jsx";
 
 import "./ListingDetails.scss";
+import useUserDetails from "../../common/hooks/useUserDetails.js";
 
 function ListingDetails() {
 	const { productId } = useParams();
@@ -313,26 +314,35 @@ function AddReview() {
 	);
 }
 
+function ListingReviewItem({ id, owner_id, rating, comment }) {
+	const { userDetails, isLoading } = useUserDetails(owner_id);
+
+	return (
+		<li className="listing-details__review">
+			<div className="review-header">
+				<div className="user">
+					{/* <img src={userDetails.avatar} alt={userDetails.name} /> */}
+					{!isLoading && <span>{userDetails.name}</span>}
+					{isLoading && <span>Loading...</span>}
+				</div>
+				<div className="rating">
+					{new Array(rating).fill(null).map((_, i) => (
+						<i className="fas fa-star" key={i}></i>
+					))}
+				</div>
+			</div>
+			<p>{comment}</p>
+		</li>
+	);
+}
+
 function ListingReviews({ reviews }) {
 	return (
 		<section className="listing-details__reviews">
 			{reviews.length === 0 && <Empty icon={<i className="fa-solid fa-comment-slash"></i>}>No reviews</Empty>}
 			<ul>
-				{reviews.map(({ id, owner_id, rating, comment }) => (
-					<li key={id} className="listing-details__review">
-						<div className="review-header">
-							<div className="user">
-								{/* <img src={review.user.avatar} alt={review.user.name} /> */}
-								<span>{owner_id}</span>
-							</div>
-							<div className="rating">
-								{new Array(rating).fill(null).map((_, i) => (
-									<i className="fas fa-star" key={i}></i>
-								))}
-							</div>
-						</div>
-						<p>{comment}</p>
-					</li>
+				{reviews.map(review => (
+					<ListingReviewItem key={review.id} {...review} />
 				))}
 			</ul>
 		</section>
