@@ -42,30 +42,7 @@ function ListingDetails() {
 
 	const isOwner = useMemo(() => userListings.some(listing => listing.id == +productId), [userListings, productId]);
 	const [actorLoading, actor] = useAuthenticatedActor();
-
-	const [owner, setOwner] = useState(null);
-
-	function parseBackendUser(user) {
-		var user = {
-			id: user.id,
-			name: user.name,
-			email: user.email,
-			phone: user.phone_number,
-			company: user.company_name,
-			favorites: user.favorites_id ?? [],
-			initialised: user.initialised
-		};
-
-		user.initialised = !(user.name === "" && user.email === "" && user.phone === "" && user.company === "");
-		return user;
-	}
-
-	useEffect(() => {
-		if (!ownerId) return;
-		backend.get_user_by_principal(ownerId).then(([response]) => {
-			setOwner(parseBackendUser(response));
-		});
-	}, [ownerId]);
+	const { userDetails: owner } = useUserDetails(ownerId);
 
 	function handleEdit() {
 		alert("Listing edit function is unavailable in the prototype version of the application.");
