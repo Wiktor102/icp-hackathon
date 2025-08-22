@@ -26,12 +26,6 @@ function Chat() {
 	const chatError = useStore(state => state.chatError);
 	const initializeChat = useStore(state => state.initializeChat);
 
-	const protection = useProtectRoute();
-	if (protection === "error") return null;
-	if (protection === "loading" || !user) {
-		return <Loader />;
-	}
-
 	// Initialize chat services when component mounts
 	useEffect(() => {
 		if (!chatInitialized && !chatLoading && user) {
@@ -53,6 +47,12 @@ function Chat() {
 			navigate("/chat");
 		}
 	}, [conversationId, conversations, setActiveConversation, navigate, chatInitialized]);
+
+	const protection = useProtectRoute();
+	if (protection === "error") return null;
+	if (protection === "loading" || !user) {
+		return <Loader />;
+	}
 
 	// Show loading state while initializing chat
 	if (chatLoading || !chatInitialized) {
