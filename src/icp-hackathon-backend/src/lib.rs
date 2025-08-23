@@ -14,6 +14,13 @@ mod config;
 mod user;
 mod review;
 mod chat;
+mod handlers;
+use crate::handlers::{on_close, on_message, on_open, AppMessage};
+use ic_websocket_cdk::{
+    CanisterWsCloseArguments, CanisterWsCloseResult, CanisterWsGetMessagesArguments,
+    CanisterWsGetMessagesResult, CanisterWsMessageArguments, CanisterWsMessageResult,
+    CanisterWsOpenArguments, CanisterWsOpenResult, WsHandlers, WsInitParams,
+};
 
 // This code is from docs.identitykit
 
@@ -655,61 +662,45 @@ fn delete_review(listing_id: u64) -> Option<String> {
         }
     })
 }
-// REMOVE the following block unless you have the ic-websocket-gateway crate and want to implement it now:
-/*
-use ic_cdk::export::candid;
-use ic_cdk::export::Principal;
-use ic_websocket_gateway::{
-    CanisterWsCloseArguments, CanisterWsMessageArguments, CanisterWsOpenArguments,
-    CanisterWsSendResult, WsHandlers, WsInitParams, ws_init, ws_open, ws_message, ws_close,
-};
 
-thread_local! {
-    static WS_HANDLERS: WsHandlers = WsHandlers {
+// Zmień init, aby przekazać handlery:
+#[ic_cdk::init]
+fn init() {
+    let handlers = WsHandlers {
         on_open: Some(on_open),
         on_message: Some(on_message),
         on_close: Some(on_close),
     };
+    // Dodaj gateway_principal jako drugi argument (wstaw właściwy principal gatewaya)
+    let gateway_principal = "vqipa-2my6w-wlxk3-d4tww-qcxns-hewzb-opbsy-idda6-lbluu-z6q2y-zqe".to_string(); // <-- zamień na właściwy principal gatewaya
+    let params = WsInitParams::new(handlers, gateway_principal);
+    ic_websocket_cdk::init(params);
 }
 
-#[ic_cdk::init]
-fn init() {
-    let params = WsInitParams {
-        max_connections: Some(100),
-        max_message_size_bytes: Some(1024 * 64),
-        ..Default::default()
-    };
-    WS_HANDLERS.with(|h| ws_init(params, h.clone()));
-}
-
-#[ic_cdk::update]
-fn ws_open(args: CanisterWsOpenArguments) {
-    ws_open(args);
+#[ic_cdk::post_upgrade]
+fn post_upgrade() {
+    init();
 }
 
 #[ic_cdk::update]
-fn ws_message(args: CanisterWsMessageArguments) -> CanisterWsSendResult {
-    ws_message(args)
+fn ws_open(args: CanisterWsOpenArguments) -> CanisterWsOpenResult {
+    ic_websocket_cdk::ws_open(args)
 }
 
 #[ic_cdk::update]
-fn ws_close(args: CanisterWsCloseArguments) {
-    ws_close(args);
+fn ws_close(args: CanisterWsCloseArguments) -> CanisterWsCloseResult {
+    ic_websocket_cdk::ws_close(args)
 }
 
-// Obsługa zdarzeń WebSocket
-fn on_open(client_principal: Principal) {
-    ic_cdk::println!("Nowe połączenie: {:?}", client_principal);
+#[ic_cdk::update]
+fn ws_message(args: CanisterWsMessageArguments) -> CanisterWsMessageResult {
+    ic_websocket_cdk::ws_message(args)
 }
 
-fn on_message(client_principal: Principal, msg: Vec<u8>) {
-    ic_cdk::println!("Wiadomość od {:?}: {:?}", client_principal, msg);
+#[ic_cdk::query]
+fn ws_get_messages(args: CanisterWsGetMessagesArguments) -> CanisterWsGetMessagesResult {
+    ic_websocket_cdk::ws_get_messages(args)
 }
-
-fn on_close(client_principal: Principal) {
-    ic_cdk::println!("Połączenie zamknięte: {:?}", client_principal);
-}
-*/
 
 candid::export_service!();
 

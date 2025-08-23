@@ -1,3 +1,5 @@
+import "./ws_types.did";
+
 type Category = record { name : text; lower_categories : opt Vec };
 type Config = record {
   categories : vec Category;
@@ -66,12 +68,20 @@ type User = record {
   creation_date : nat64;
 };
 type Vec = vec record { name : text; lower_categories : opt Vec };
+type AppMessage = record {
+  text : text;
+  timestamp : nat64;
+};
 service : {
+  // WebSocket endpoints (zgodnie z ws_types.did i Twoim Rust backendem)
+  ws_open : (CanisterWsOpenArguments) -> (CanisterWsOpenResult);
+  ws_close : (CanisterWsCloseArguments) -> (CanisterWsCloseResult);
+  ws_message : (CanisterWsMessageArguments, opt AppMessage) -> (CanisterWsMessageResult);
+  ws_get_messages : (CanisterWsGetMessagesArguments) -> (CanisterWsGetMessagesResult) query;
+
   add_empty_user : () -> (Result);
   add_favorite_listing : (nat64) -> ();
-  add_listing : (text, text, text, float64, nat32, vec text, text) -> (
-      Result_1,
-    );
+  add_listing : (text, text, text, float64, nat32, vec text, text) -> (Result_1);
   add_review : (nat64, nat8, text) -> (Result_2);
   add_user : (text, text, text, text) -> (Result);
   calculate_average_rating_of_listing : (nat64) -> (Result_3) query;
@@ -79,9 +89,7 @@ service : {
   delete_listing : (nat64) -> (opt text);
   delete_review : (nat64) -> (opt text);
   edit_active_user : (text, text, text, text) -> (opt text);
-  edit_listing : (nat64, text, text, text, float64, nat32, vec text, text) -> (
-      Result_4,
-    );
+  edit_listing : (nat64, text, text, text, float64, nat32, vec text, text) -> (Result_4);
   edit_review : (nat64, nat8, text) -> (opt text);
   get_active_user : () -> (opt User) query;
   get_active_user_favorite_listings : () -> (vec Listing) query;
