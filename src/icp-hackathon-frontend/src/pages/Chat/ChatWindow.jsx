@@ -35,12 +35,24 @@ function MessageItem({
 	formatMessageDate,
 	formatMessageTime
 }) {
-	const isOwn = message.senderId === user?.id;
+	// Handle both backend message format (sender_id) and frontend format (senderId)
+	const senderId = message.sender_id || message.senderId;
+	const isOwn = senderId === user?.id;
+
 	const shouldShowDateSeparator = (currentMessage, previousMessage) => {
 		if (!previousMessage) return true;
 
-		const currentDate = new Date(Number(currentMessage.timestamp / 1000000n)).toDateString();
-		const previousDate = new Date(Number(previousMessage.timestamp / 1000000n)).toDateString();
+		// Handle both timestamp formats (nanoseconds from backend, ISO string from frontend)
+		const getCurrentTimestamp = msg => {
+			if (typeof msg.timestamp === "string") {
+				return new Date(msg.timestamp);
+			} else {
+				return new Date(Number(msg.timestamp) / 1000000);
+			}
+		};
+
+		const currentDate = getCurrentTimestamp(currentMessage).toDateString();
+		const previousDate = getCurrentTimestamp(previousMessage).toDateString();
 
 		return currentDate !== previousDate;
 	};
@@ -118,12 +130,25 @@ function ChatWindow({ conversation }) {
 	}, [conversation.id, conversation.unreadCount, markConversationAsRead]);
 
 	const formatMessageTime = timestamp => {
-		const date = new Date(Number(timestamp / 1000000n));
+		// Handle both timestamp formats (nanoseconds from backend, ISO string from frontend)
+		let date;
+		if (typeof timestamp === "string") {
+			date = new Date(timestamp);
+		} else {
+			date = new Date(Number(timestamp) / 1000000);
+		}
 		return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 	};
 
 	const formatMessageDate = timestamp => {
-		const date = new Date(Number(timestamp / 1000000n));
+		// Handle both timestamp formats (nanoseconds from backend, ISO string from frontend)
+		let date;
+		if (typeof timestamp === "string") {
+			date = new Date(timestamp);
+		} else {
+			date = new Date(Number(timestamp) / 1000000);
+		}
+
 		const today = new Date();
 		const yesterday = new Date(today);
 		yesterday.setDate(yesterday.getDate() - 1);

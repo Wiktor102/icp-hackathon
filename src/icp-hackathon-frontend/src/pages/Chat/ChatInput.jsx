@@ -66,32 +66,9 @@ function ChatInput({ conversationId }) {
 		try {
 			// Send text message if there's content
 			if (message.trim() !== "") {
-				const newMessage = {
-					id: Date.now() + Math.random(),
-					senderId: user.id,
-					content: message.trim(),
-					type: "text",
-					timestamp: new Date().toISOString(),
-					read: false
-				};
-
-				await addMessage(conversationId, newMessage);
+				// Just pass the content - the backend will create the full message
+				await addMessage(conversationId, { content: message.trim() });
 			}
-
-			// TODO: Handle attachment messages when file upload is implemented
-			// attachments.forEach((attachment, index) => {
-			// 	const attachmentMessage = {
-			// 		id: Date.now() + Math.random() + index,
-			// 		senderId: user.id,
-			// 		content: attachment.url,
-			// 		type: attachment.type,
-			// 		fileName: attachment.name,
-			// 		timestamp: new Date().toISOString(),
-			// 		read: false
-			// 	};
-			//
-			// 	addMessage(conversationId, attachmentMessage);
-			// });
 
 			// Clear input
 			setMessage("");

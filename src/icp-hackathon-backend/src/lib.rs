@@ -15,7 +15,7 @@ mod user;
 mod review;
 mod chat;
 mod handlers;
-use crate::handlers::{on_close, on_message, on_open, AppMessage};
+use crate::handlers::{on_close, on_message, on_open};
 use ic_websocket_cdk::{
     CanisterWsCloseArguments, CanisterWsCloseResult, CanisterWsGetMessagesArguments,
     CanisterWsGetMessagesResult, CanisterWsMessageArguments, CanisterWsMessageResult,
@@ -146,7 +146,8 @@ fn send_chat_message(conversation_id: String, content: String) -> Result<Message
         return Err(e);
     }
     
-    // TODO: Add WebSocket broadcasting here
+    // Broadcast message via WebSocket
+    handlers::broadcast_message_to_conversation(&conversation_id, &message);
     
     Ok(message)
 }
@@ -190,7 +191,8 @@ fn set_typing_status(conversation_id: String, is_typing: bool) -> Result<(), Str
         return Err(e);
     }
     
-    // TODO: Add WebSocket broadcasting here
+    // Broadcast typing status via WebSocket
+    handlers::broadcast_typing_status_to_conversation(&conversation_id, &caller, is_typing);
     
     Ok(())
 }

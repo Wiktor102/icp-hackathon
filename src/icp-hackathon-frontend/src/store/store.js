@@ -94,21 +94,71 @@ const useStore = create(set => ({
 			// Initialize API service with identity
 			await chatApiService.initialize(canisterId, identity);
 
-			// Skip WebSocket initialization for now - not needed for basic chat functionality
-			console.log("Chat API initialized successfully (WebSocket disabled for simplicity)");
+			// Initialize WebSocket service
+			try {
+				await chatWebSocketService.initialize(canisterId, identity);
+				console.log("WebSocket service initialized successfully");
+
+				// Set up WebSocket event handlers
+				chatWebSocketService.onMessage(data => {
+					console.log("WebSocket message received:", data);
+					const { conversationId, message } = data;
+
+					// Add the message to the store
+					set(state => ({
+						conversations: {
+							...state.conversations,
+							[conversationId]: {
+								...state.conversations[conversationId],
+								messages: [...(state.conversations[conversationId]?.messages || []), message],
+								lastMessage: message,
+								lastMessageTime: message.timestamp
+							}
+						}
+					}));
+				});
+
+				chatWebSocketService.onTyping(data => {
+					console.log("Typing status received:", data);
+					const { conversationId, userId, isTyping } = data;
+
+					// Update typing status in conversation
+					set(state => ({
+						conversations: {
+							...state.conversations,
+							[conversationId]: {
+								...state.conversations[conversationId],
+								typingUsers: {
+									...state.conversations[conversationId]?.typingUsers,
+									[userId]: isTyping
+								}
+							}
+						}
+					}));
+				});
+
+				chatWebSocketService.onConnection(data => {
+					console.log("WebSocket connection status:", data);
+				});
+			} catch (wsError) {
+				console.warn("WebSocket initialization failed, chat will work without real-time updates:", wsError);
+				// Don't fail the entire chat initialization if WebSocket fails
+			}
 
 			// Load initial conversations
 			const conversations = await chatApiService.getUserConversations();
 			const conversationsMap = conversations.reduce((acc, conv) => {
 				acc[conv.id] = {
 					...conv,
-					lastMessage: conv.messages[conv.messages.length - 1] || null,
+					messages: conv.messages || [],
+					lastMessage: conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null,
 					lastMessageTime: conv.last_message_time
 						? new Date(Number(conv.last_message_time) / 1000000).toISOString()
 						: null,
 					createdAt: new Date(Number(conv.created_at) / 1000000).toISOString(),
 					unreadCount: conv.unread_counts[useStore.getState().user?.id] || 0,
-					otherUserId: conv.participants.find(p => p !== useStore.getState().user?.id)
+					otherUserId: conv.participants.find(p => p !== useStore.getState().user?.id),
+					typingUsers: {}
 				};
 				return acc;
 			}, {});
@@ -218,7 +268,12 @@ const useStore = create(set => ({
 	sendTypingStatus: async (conversationId, isTyping) => {
 		try {
 			// Send typing status via WebSocket for real-time updates
-			await chatWebSocketService.sendTypingStatus(conversationId, isTyping);
+			if (chatWebSocketService.isConnectedToWebSocket()) {
+				await chatWebSocketService.sendTypingStatus(conversationId, isTyping);
+			} else {
+				// Fallback to API if WebSocket is not available
+				await chatApiService.setTypingStatus(conversationId, isTyping);
+			}
 		} catch (error) {
 			console.error("Failed to send typing status:", error);
 		}

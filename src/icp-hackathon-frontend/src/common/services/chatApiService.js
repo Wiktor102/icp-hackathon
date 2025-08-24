@@ -122,12 +122,7 @@ class ChatApiService {
 		try {
 			const result = await this.actor.send_chat_message(conversationId, content);
 			if ("Ok" in result) {
-				// Try to broadcast the message
-				try {
-					await this.actor.broadcast_message(conversationId, content);
-				} catch (broadcastError) {
-					console.warn("Failed to broadcast message:", broadcastError);
-				}
+				// Message broadcasting is now handled automatically by the backend
 				return result.Ok;
 			} else {
 				console.error("Failed to send message:", {

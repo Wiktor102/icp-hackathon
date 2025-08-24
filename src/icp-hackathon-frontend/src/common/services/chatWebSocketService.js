@@ -1,5 +1,5 @@
-import { IcWebSocket, generateRandomIdentity } from "ic-websocket-js";
-import { Actor } from "@dfinity/agent";
+import { IcWebSocket } from "ic-websocket-js";
+import { Actor, HttpAgent } from "@dfinity/agent";
 import { idlFactory } from "../../../../declarations/icp-hackathon-backend/icp-hackathon-backend.did.js";
 
 class ChatWebSocketService {
@@ -12,20 +12,30 @@ class ChatWebSocketService {
 		this.canisterId = null;
 		this.identity = null;
 		this.canisterActor = null;
+		this.reconnectAttempts = 0;
+		this.maxReconnectAttempts = 5;
+		this.reconnectDelay = 1000; // Start with 1 second
 	}
 
-	async initialize(canisterId, identity = null, agent = null) {
+	async initialize(canisterId, identity) {
 		if (!identity) {
 			throw new Error("Identity is required for WebSocket initialization");
-		}
-
-		if (!agent) {
-			throw new Error("Agent is required for WebSocket initialization");
 		}
 
 		try {
 			this.canisterId = canisterId;
 			this.identity = identity;
+
+			// Create HTTP agent
+			const agent = new HttpAgent({
+				host: process.env.DFX_NETWORK === "ic" ? "https://icp-api.io" : "http://localhost:4943",
+				identity: this.identity
+			});
+
+			// Fetch root key for local development
+			if (process.env.DFX_NETWORK !== "ic") {
+				await agent.fetchRootKey();
+			}
 
 			// Create canister actor for WebSocket
 			this.canisterActor = Actor.createActor(idlFactory, {
@@ -37,7 +47,7 @@ class ChatWebSocketService {
 			const gatewayUrl =
 				process.env.DFX_NETWORK === "ic"
 					? "wss://gateway.icws.io" // Production gateway
-					: "ws://127.0.0.1:8080"; // Local gateway
+					: "ws://127.0.0.1:7777"; // Local gateway on port 7777
 
 			console.log("Initializing IC WebSocket with gateway:", gatewayUrl);
 
@@ -46,20 +56,27 @@ class ChatWebSocketService {
 				canisterId: this.canisterId,
 				canisterActor: this.canisterActor,
 				identity: this.identity,
-				networkUrl: process.env.DFX_NETWORK === "ic" ? "https://ic0.app" : "http://localhost:4943"
+				networkUrl: process.env.DFX_NETWORK === "ic" ? "https://icp-api.io" : "http://localhost:4943"
 			});
 
 			// Set up event handlers
 			this.ws.onopen = () => {
 				console.log("WebSocket connection opened");
 				this.isConnected = true;
+				this.reconnectAttempts = 0;
+				this.reconnectDelay = 1000;
 				this.notifyConnectionHandlers({ type: "connected" });
 			};
 
-			this.ws.onclose = () => {
-				console.log("WebSocket connection closed");
+			this.ws.onclose = event => {
+				console.log("WebSocket connection closed", event);
 				this.isConnected = false;
 				this.notifyConnectionHandlers({ type: "disconnected" });
+
+				// Attempt to reconnect if it wasn't intentional
+				if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
+					this.scheduleReconnect();
+				}
 			};
 
 			this.ws.onerror = error => {
@@ -74,113 +91,87 @@ class ChatWebSocketService {
 			return true;
 		} catch (error) {
 			console.error("Failed to initialize WebSocket:", error);
-			throw error; // Don't fallback to mock mode, fail properly
+			throw error;
 		}
+	}
+
+	scheduleReconnect() {
+		if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+			console.error("Max reconnection attempts reached");
+			return;
+		}
+
+		this.reconnectAttempts++;
+		const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1); // Exponential backoff
+
+		console.log(
+			`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
+		);
+
+		setTimeout(async () => {
+			try {
+				await this.initialize(this.canisterId, this.identity);
+			} catch (error) {
+				console.error("Reconnection failed:", error);
+				this.scheduleReconnect();
+			}
+		}, delay);
 	}
 
 	handleIncomingMessage(rawData) {
 		try {
-			const message = JSON.parse(rawData);
+			console.log("Raw WebSocket message received:", rawData);
 
-			switch (message.message_type) {
-				case "new_message":
-					const messageData = JSON.parse(message.data);
-					this.notifyMessageHandlers({
-						type: "new_message",
-						conversationId: message.conversation_id,
-						message: messageData
-					});
-					break;
-
-				case "typing_status":
-					const typingData = JSON.parse(message.data);
-					this.notifyTypingHandlers({
-						type: "typing_status",
-						conversationId: typingData.conversation_id,
-						userId: typingData.user_id,
-						isTyping: typingData.is_typing
-					});
-					break;
-
-				default:
-					console.warn("Unknown message type:", message.message_type);
+			// The message should be a Candid-encoded message
+			// For now, let's try to parse it as different message types
+			if (typeof rawData === "string") {
+				const message = JSON.parse(rawData);
+				this.processMessage(message);
+			} else {
+				// It's likely a Candid-encoded message, we'd need to decode it
+				console.log("Received binary message, attempting to decode...");
+				// For now, just log it
 			}
 		} catch (error) {
-			console.error("Error parsing incoming message:", error);
+			console.error("Failed to parse incoming message:", error, rawData);
 		}
 	}
 
-	async sendMessage(conversationId, content) {
-		if (!this.isConnected || !this.ws) {
-			console.warn("WebSocket not connected - message will be sent via API only");
-			return;
+	processMessage(message) {
+		console.log("Processing message:", message);
+
+		switch (message.message_type) {
+			case "new_message":
+				this.notifyMessageHandlers({
+					type: "new_message",
+					conversationId: message.conversation_id,
+					message: {
+						id: Date.now() + Math.random(), // Generate a temporary ID
+						sender_id: message.sender_id,
+						content: message.content,
+						timestamp: message.timestamp,
+						message_type: "text",
+						read: false
+					}
+				});
+				break;
+
+			case "typing_status":
+				this.notifyTypingHandlers({
+					type: "typing_status",
+					conversationId: message.conversation_id,
+					userId: message.user_id,
+					isTyping: message.is_typing
+				});
+				break;
+
+			case "connection_established":
+				console.log("Connection established with backend");
+				break;
+
+			default:
+				console.log("Unknown message type:", message.message_type);
 		}
-
-		try {
-			const message = {
-				message_type: "new_message",
-				conversation_id: conversationId,
-				data: JSON.stringify({
-					content: content,
-					timestamp: Date.now()
-				})
-			};
-
-			this.ws.send(JSON.stringify(message));
-			console.log("Message sent via WebSocket");
-		} catch (error) {
-			console.error("Failed to send message via WebSocket:", error);
-		}
-	}
-
-	async sendTypingStatus(conversationId, isTyping) {
-		if (!this.isConnected || !this.ws) {
-			return;
-		}
-
-		try {
-			const message = {
-				message_type: "typing_status",
-				conversation_id: conversationId,
-				data: JSON.stringify({
-					is_typing: isTyping,
-					timestamp: Date.now()
-				})
-			};
-
-			this.ws.send(JSON.stringify(message));
-		} catch (error) {
-			console.error("Failed to send typing status via WebSocket:", error);
-		}
-	}
-
-	async markAsRead(conversationId) {
-		if (!this.isConnected || !this.ws) {
-			return;
-		}
-
-		try {
-			const message = {
-				message_type: "mark_read",
-				conversation_id: conversationId,
-				data: JSON.stringify({
-					timestamp: Date.now()
-				})
-			};
-
-			this.ws.send(JSON.stringify(message));
-		} catch (error) {
-			console.error("Failed to send mark as read via WebSocket:", error);
-		}
-	}
-
-	disconnect() {
-		if (this.ws) {
-			this.ws.close();
-			this.ws = null;
-		}
-		this.isConnected = false;
-		console.log("WebSocket disconnected");
 	}
 
 	// Event handler management
@@ -229,20 +220,69 @@ class ChatWebSocketService {
 		});
 	}
 
-	disconnect() {
-		this.isConnected = false;
-		console.log("Mock WebSocket disconnected");
+	// Send message via WebSocket
+	sendMessage(conversationId, content) {
+		if (!this.isConnected || !this.ws) {
+			throw new Error("WebSocket not connected");
+		}
+
+		const message = {
+			message_type: "chat_message",
+			data: JSON.stringify({
+				message_type: "chat_message",
+				conversation_id: conversationId,
+				sender_id: this.identity.getPrincipal().toString(),
+				content: content,
+				timestamp: Date.now() * 1000000 // Convert to nanoseconds
+			})
+		};
+
+		try {
+			this.ws.send(message);
+		} catch (error) {
+			console.error("Failed to send message via WebSocket:", error);
+			throw error;
+		}
 	}
 
-	getConnectionStatus() {
-		return {
-			isConnected: this.isConnected,
-			canisterId: this.canisterId,
-			mockMode: this.mockMode
+	// Send typing status via WebSocket
+	sendTypingStatus(conversationId, isTyping) {
+		if (!this.isConnected || !this.ws) {
+			console.warn("WebSocket not connected, skipping typing status");
+			return;
+		}
+
+		const message = {
+			message_type: "typing_status",
+			data: JSON.stringify({
+				conversation_id: conversationId,
+				user_id: this.identity.getPrincipal().toString(),
+				is_typing: isTyping
+			})
 		};
+
+		try {
+			this.ws.send(message);
+		} catch (error) {
+			console.error("Failed to send typing status via WebSocket:", error);
+		}
+	}
+
+	// Close connection
+	disconnect() {
+		if (this.ws) {
+			this.ws.close();
+			this.ws = null;
+		}
+		this.isConnected = false;
+		this.reconnectAttempts = this.maxReconnectAttempts; // Prevent auto-reconnect
+	}
+
+	// Check connection status
+	isConnectedToWebSocket() {
+		return this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN;
 	}
 }
 
 // Export singleton instance
 export const chatWebSocketService = new ChatWebSocketService();
-export default chatWebSocketService;
