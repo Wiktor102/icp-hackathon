@@ -66,7 +66,7 @@ function Header() {
 		return user;
 	}
 
-	async function createEmptyUser() {
+	async function createEmptyUser(actor) {
 		setUserCreating(true);
 		try {
 			const { Ok, Err } = await actor.add_empty_user();
@@ -86,13 +86,13 @@ function Header() {
 		}
 	}
 
-	function fetchUser() {
+	function fetchUser(actor) {
 		setUserLoading(true);
 		actor
 			.get_active_user()
 			.then(response => {
 				if (Array.isArray(response) && response.length === 0) {
-					createEmptyUser();
+					createEmptyUser(actor);
 					return;
 				}
 
@@ -118,8 +118,10 @@ function Header() {
 		}
 
 		// Fetch user data when authenticated and actor is ready
-		fetchUser();
-	}, [isAuthenticated, isInitializing, actorLoading]);
+		if (actor) {
+			fetchUser(actor);
+		}
+	}, [isAuthenticated, isInitializing, actorLoading, actor]);
 
 	return (
 		<>

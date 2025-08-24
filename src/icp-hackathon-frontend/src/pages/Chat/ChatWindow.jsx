@@ -112,8 +112,10 @@ function TypingIndicator({ conversation }) {
 function ChatWindow({ conversation }) {
 	const user = useStore(state => state.user);
 	const markConversationAsRead = useStore(state => state.markConversationAsRead);
+	const refreshConversationMessages = useStore(state => state.refreshConversationMessages);
 	const messagesEndRef = useRef(null);
 	const [showTimestamps, setShowTimestamps] = useState(false);
+	const [isRefreshing, setIsRefreshing] = useState(false);
 	const { userDetails: otherUser, isLoading: otherUserLoading } = useUserDetails(conversation.otherUserId);
 	console.log(conversation);
 
@@ -128,6 +130,17 @@ function ChatWindow({ conversation }) {
 			markConversationAsRead(conversation.id);
 		}
 	}, [conversation.id, conversation.unreadCount, markConversationAsRead]);
+
+	const handleRefreshMessages = async () => {
+		setIsRefreshing(true);
+		try {
+			await refreshConversationMessages(conversation.id);
+		} catch (error) {
+			console.error("Failed to refresh messages:", error);
+		} finally {
+			setIsRefreshing(false);
+		}
+	};
 
 	const formatMessageTime = timestamp => {
 		// Handle both timestamp formats (nanoseconds from backend, ISO string from frontend)
@@ -181,6 +194,14 @@ function ChatWindow({ conversation }) {
 				</div>
 
 				<div className="chat-actions">
+					<button
+						className="refresh-button"
+						onClick={handleRefreshMessages}
+						disabled={isRefreshing}
+						title="Refresh messages"
+					>
+						<i className={`fas fa-sync-alt ${isRefreshing ? 'fa-spin' : ''}`}></i>
+					</button>
 					<button
 						className="timestamp-toggle"
 						onClick={() => setShowTimestamps(!showTimestamps)}

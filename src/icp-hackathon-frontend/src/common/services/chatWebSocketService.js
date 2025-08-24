@@ -47,7 +47,7 @@ class ChatWebSocketService {
 			const gatewayUrl =
 				process.env.DFX_NETWORK === "ic"
 					? "wss://gateway.icws.io" // Production gateway
-					: "ws://127.0.0.1:7777"; // Local gateway on port 7777
+					: "ws://localhost:7777"; // Local gateway on port 7777
 
 			console.log("Initializing IC WebSocket with gateway:", gatewayUrl);
 

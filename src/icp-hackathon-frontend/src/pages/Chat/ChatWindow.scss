@@ -42,6 +42,10 @@
 }
 
 .chat-actions {
+	display: flex;
+	gap: 0.5rem;
+	
+	.refresh-button,
 	.timestamp-toggle {
 		background: none;
 		border: none;
@@ -51,8 +55,13 @@
 		border-radius: 0.25rem;
 		transition: background-color 0.2s;
 		
-		&:hover {
+		&:hover:not(:disabled) {
 			background-color: var(--surface-variant-highlight);
+		}
+		
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
 		}
 		
 		i {

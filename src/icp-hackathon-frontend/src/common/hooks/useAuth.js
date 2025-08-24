@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useStore from "../../store/store.js";
-import authService from "../services/authService.js";
+import authService from "../services/authService";
 
 /**
  * Production-grade authentication hook

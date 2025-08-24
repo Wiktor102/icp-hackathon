@@ -1,36 +1,53 @@
 import { useEffect, useMemo, useState } from "react";
 import { HttpAgent } from "@dfinity/agent";
-import { idlFactory as targetIdlFactory } from "../../../../declarations/icp-hackathon-backend/icp-hackathon-backend.did.js";
-import { icp_hackathon_backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 import { canisterId, createActor } from "../../../../declarations/icp-hackathon-backend/index.js";
 import useStore from "../../store/store.js";
 
-const TARGET_CANISTER_ID_TO_CALL = "bkyz2-fmaaa-aaaaa-qaaaq-cai";
 const ICP_API_HOST = "http://localhost:4943/";
 
 function useAuthenticatedActor() {
 	const identity = useStore(state => state.identity);
-	const [unauthenticatedAgent, setUnauthenticatedAgent] = useState(null);
+	const [actor, setActor] = useState(null);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		HttpAgent.create({ host: process.env.DFX_NETWORK === "ic" ? undefined : ICP_API_HOST }).then(
-			setUnauthenticatedAgent
-		);
-	}, []);
+		async function createAgentAndActor() {
+			if (!identity) {
+				setActor(null);
+				setLoading(false);
+				return;
+			}
 
-	const authenticatedActor = useMemo(() => {
-		return (
-			identity &&
-			createActor(canisterId, {
-				agentOptions: {
+			setLoading(true);
+
+			try {
+				const agent = new HttpAgent({
+					host: process.env.DFX_NETWORK === "ic" ? "https://icp-api.io" : ICP_API_HOST,
 					identity
-				}
-				// canisterId: TARGET_CANISTER_ID_TO_CALL
-			})
-		);
-	}, [identity, targetIdlFactory]);
+				});
 
-	return [authenticatedActor == null, authenticatedActor];
+				// Fetch root key for local development
+				if (process.env.DFX_NETWORK !== "ic") {
+					await agent.fetchRootKey();
+				}
+
+				const newActor = createActor(canisterId, {
+					agent
+				});
+
+				setActor(newActor);
+			} catch (err) {
+				console.error("Error creating actor:", err);
+				setActor(null);
+			} finally {
+				setLoading(false);
+			}
+		}
+
+		createAgentAndActor();
+	}, [identity]);
+
+	return [loading, actor];
 }
 
 export { useAuthenticatedActor };

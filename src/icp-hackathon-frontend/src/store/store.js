@@ -367,6 +367,45 @@ const useStore = create(set => ({
 		} catch (error) {
 			console.error("Failed to load conversations:", error);
 		}
+	},
+
+	// Refresh messages for a specific conversation
+	refreshConversationMessages: async (conversationId) => {
+		try {
+			const messages = await chatApiService.getConversationMessages(conversationId);
+			
+			set(state => {
+				const conversation = state.conversations[conversationId];
+				if (!conversation) return state;
+
+				const formattedMessages = messages.map(msg => ({
+					id: msg.id,
+					senderId: msg.sender_id,
+					content: msg.content,
+					type: msg.message_type,
+					timestamp: new Date(Number(msg.timestamp) / 1000000).toISOString(),
+					read: msg.read
+				}));
+
+				const updatedConversation = {
+					...conversation,
+					messages: formattedMessages,
+					lastMessage: formattedMessages[formattedMessages.length - 1] || null,
+					lastMessageTime: formattedMessages.length > 0 
+						? formattedMessages[formattedMessages.length - 1].timestamp 
+						: null
+				};
+
+				return {
+					conversations: {
+						...state.conversations,
+						[conversationId]: updatedConversation
+					}
+				};
+			});
+		} catch (error) {
+			console.error("Failed to refresh conversation messages:", error);
+		}
 	}
 }));
 

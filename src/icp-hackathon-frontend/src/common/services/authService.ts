@@ -1,10 +1,23 @@
-import { AuthClient } from "@dfinity/auth-client";
+import { AuthClient, AuthClientCreateOptions } from "@dfinity/auth-client";
+import type { Identity } from "@dfinity/agent";
+
+interface LoginOptions {
+	identityProvider?: string;
+	maxTimeToLive?: bigint;
+	onSuccess?: () => void;
+	onError?: (error: unknown) => void;
+	[key: string]: unknown;
+}
 
 /**
  * Production-grade authentication service for ICP
  * Handles session persistence, restoration, and cleanup
  */
 class AuthService {
+	private authClient: AuthClient | null;
+	private isInitialized: boolean;
+	private initializationPromise: Promise<AuthClient> | null;
+
 	constructor() {
 		this.authClient = null;
 		this.isInitialized = false;
@@ -13,14 +26,12 @@ class AuthService {
 
 	/**
 	 * Initialize the auth client and restore any existing session
-	 * @returns {Promise<AuthClient>}
 	 */
-	async initialize() {
+	async initialize(): Promise<AuthClient> {
 		if (this.isInitialized && this.authClient) {
 			return this.authClient;
 		}
 
-		// Prevent multiple initialization calls
 		if (this.initializationPromise) {
 			return this.initializationPromise;
 		}
@@ -33,16 +44,14 @@ class AuthService {
 	 * Internal method to create and configure AuthClient
 	 * @private
 	 */
-	async _initializeClient() {
+	private async _initializeClient(): Promise<AuthClient> {
 		try {
 			this.authClient = await AuthClient.create({
 				idleOptions: {
-					// Disable idle timeout for development, adjust for production
 					disableIdle: process.env.DFX_NETWORK !== "ic",
-					// In production, set appropriate idle timeout (e.g., 30 minutes)
 					idleTimeout: process.env.DFX_NETWORK === "ic" ? 30 * 60 * 1000 : undefined
 				}
-			});
+			} as AuthClientCreateOptions);
 
 			this.isInitialized = true;
 			return this.authClient;
@@ -54,71 +63,67 @@ class AuthService {
 
 	/**
 	 * Check if user is currently authenticated
-	 * @returns {Promise<boolean>}
 	 */
-	async isAuthenticated() {
+	async isAuthenticated(): Promise<boolean> {
 		if (!this.authClient) {
 			await this.initialize();
 		}
-		return this.authClient.isAuthenticated();
+		return this.authClient!.isAuthenticated();
 	}
 
 	/**
 	 * Get the current identity if authenticated
-	 * @returns {Promise<Identity|null>}
 	 */
-	async getIdentity() {
+	async getIdentity(): Promise<Identity | null> {
 		if (!this.authClient) {
 			await this.initialize();
 		}
 
-		const isAuth = await this.authClient.isAuthenticated();
+		const isAuth = await this.authClient!.isAuthenticated();
 		if (!isAuth) {
 			return null;
 		}
 
-		return this.authClient.getIdentity();
+		return this.authClient!.getIdentity();
 	}
 
 	/**
 	 * Login with Internet Identity
-	 * @param {Object} options - Login options
-	 * @returns {Promise<Identity>}
 	 */
-	async login(options = {}) {
+	async login(options: LoginOptions = {}): Promise<Identity> {
 		if (!this.authClient) {
 			await this.initialize();
 		}
 
-		const defaultOptions = {
+		const defaultOptions: LoginOptions = {
 			identityProvider: this._getIdentityProvider(),
-			maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000), // 7 days in nanoseconds
+			maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
 			...options
 		};
 
-		return new Promise((resolve, reject) => {
-			this.authClient.login({
-				...defaultOptions,
-				onSuccess: async () => {
-					try {
-						const identity = await this.authClient.getIdentity();
-						resolve(identity);
-					} catch (error) {
-						reject(error);
-					}
-				},
-				onError: error => {
+		const { resolve, reject, promise } = Promise.withResolvers<Identity>();
+		this.authClient!.login({
+			...defaultOptions,
+			onSuccess: async () => {
+				try {
+					const identity = await this.authClient!.getIdentity();
+					resolve(identity);
+				} catch (error) {
 					reject(error);
 				}
-			});
+			},
+			onError: (error: unknown) => {
+				reject(error);
+			}
 		});
+
+		return promise;
 	}
 
 	/**
 	 * Logout and clear session
-	 * @returns {Promise<void>}
 	 */
-	async logout() {
+	async logout(): Promise<void> {
 		if (!this.authClient) {
 			return;
 		}
@@ -127,7 +132,6 @@ class AuthService {
 			await this.authClient.logout();
 		} catch (error) {
 			console.error("Logout error:", error);
-			// Continue with cleanup even if logout fails
 		}
 	}
 
@@ -135,20 +139,17 @@ class AuthService {
 	 * Get the appropriate identity provider URL based on environment
 	 * @private
 	 */
-	_getIdentityProvider() {
+	private _getIdentityProvider(): string {
 		if (process.env.DFX_NETWORK === "ic") {
 			return "https://identity.ic0.app/#authorize";
 		}
-
-		// Local development
 		return `http://asrmz-lmaaa-aaaaa-qaaeq-cai.localhost:4943/#authorize`;
 	}
 
 	/**
 	 * Get the AuthClient instance (for backward compatibility)
-	 * @returns {AuthClient|null}
 	 */
-	getAuthClient() {
+	getAuthClient(): AuthClient | null {
 		return this.authClient;
 	}
 }
