@@ -38,6 +38,8 @@ function MessageItem({
 	// Handle both backend message format (sender_id) and frontend format (senderId)
 	const senderId = message.sender_id || message.senderId;
 	const isOwn = senderId === user?.id;
+	const isOptimistic = message.isOptimistic;
+	const isFailed = message.failed;
 
 	const shouldShowDateSeparator = (currentMessage, previousMessage) => {
 		if (!previousMessage) return true;
@@ -66,7 +68,11 @@ function MessageItem({
 				</div>
 			)}
 
-			<div className={`message ${isOwn ? "own" : "other"}`}>
+			<div
+				className={`message ${isOwn ? "own" : "other"} ${isOptimistic ? "optimistic" : ""} ${
+					isFailed ? "failed" : ""
+				}`}
+			>
 				{!isOwn && (
 					<img
 						src={conversation.otherUser?.avatar || avatarImg}
@@ -81,8 +87,16 @@ function MessageItem({
 					{showTimestamps && (
 						<div className="message-time">
 							{formatMessageTime(message.timestamp)}
-							{isOwn && message.read && <i className="fas fa-check-double read-receipt"></i>}
-							{isOwn && !message.read && <i className="fas fa-check sent-receipt"></i>}
+							{isOwn && !isOptimistic && !isFailed && message.read && (
+								<i className="fas fa-check-double read-receipt"></i>
+							)}
+							{isOwn && !isOptimistic && !isFailed && !message.read && (
+								<i className="fas fa-check sent-receipt"></i>
+							)}
+							{isOwn && isOptimistic && <i className="fas fa-clock pending-receipt" title="Sending..."></i>}
+							{isOwn && isFailed && (
+								<i className="fas fa-exclamation-triangle failed-receipt" title="Failed to send"></i>
+							)}
 						</div>
 					)}
 				</div>
@@ -130,6 +144,20 @@ function ChatWindow({ conversation }) {
 			markConversationAsRead(conversation.id);
 		}
 	}, [conversation.id, conversation.unreadCount, markConversationAsRead]);
+
+	// Periodic refresh of messages every 5 seconds
+	useEffect(() => {
+		const refreshInterval = setInterval(async () => {
+			try {
+				await refreshConversationMessages(conversation.id);
+			} catch (error) {
+				console.error("Failed to auto-refresh messages:", error);
+			}
+		}, 5000); // 5 seconds
+
+		// Cleanup interval on component unmount or conversation change
+		return () => clearInterval(refreshInterval);
+	}, [conversation.id, refreshConversationMessages]);
 
 	const handleRefreshMessages = async () => {
 		setIsRefreshing(true);
@@ -200,7 +228,7 @@ function ChatWindow({ conversation }) {
 						disabled={isRefreshing}
 						title="Refresh messages"
 					>
-						<i className={`fas fa-sync-alt ${isRefreshing ? 'fa-spin' : ''}`}></i>
+						<i className={`fas fa-sync-alt ${isRefreshing ? "fa-spin" : ""}`}></i>
 					</button>
 					<button
 						className="timestamp-toggle"

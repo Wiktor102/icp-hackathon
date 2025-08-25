@@ -16,7 +16,7 @@
 .chat-participant {
 	display: flex;
 	align-items: center;
-	
+
 	img {
 		width: 40px;
 		height: 40px;
@@ -33,7 +33,7 @@
 		font-weight: 600;
 		color: var(--on-surface-variant);
 	}
-	
+
 	.participant-status {
 		font-size: 0.8rem;
 		color: var(--on-surface-variant);
@@ -44,7 +44,7 @@
 .chat-actions {
 	display: flex;
 	gap: 0.5rem;
-	
+
 	.refresh-button,
 	.timestamp-toggle {
 		background: none;
@@ -54,16 +54,16 @@
 		padding: 0.5rem;
 		border-radius: 0.25rem;
 		transition: background-color 0.2s;
-		
+
 		&:hover:not(:disabled) {
 			background-color: var(--surface-variant-highlight);
 		}
-		
+
 		&:disabled {
 			opacity: 0.5;
 			cursor: not-allowed;
 		}
-		
+
 		i {
 			font-size: 1rem;
 		}
@@ -83,9 +83,9 @@
 	text-align: center;
 	margin: 1rem 0;
 	position: relative;
-	
+
 	&::before {
-		content: '';
+		content: "";
 		position: absolute;
 		top: 50%;
 		left: 0;
@@ -93,7 +93,7 @@
 		height: 1px;
 		background-color: var(--surface);
 	}
-	
+
 	span {
 		background-color: var(--surface-variant);
 		padding: 0.25rem 1rem;
@@ -109,27 +109,27 @@
 .message {
 	display: flex;
 	margin-bottom: 0.5rem;
-	
+
 	&.own {
 		justify-content: flex-end;
-		
+
 		.message-content {
 			align-items: flex-end;
 		}
-		
+
 		.message-bubble {
 			background-color: var(--accent);
 			color: var(--on-elevated-surface);
 		}
-		
+
 		.message-time {
 			text-align: right;
 		}
 	}
-	
+
 	&.other {
 		justify-content: flex-start;
-		
+
 		.message-bubble {
 			background-color: var(--elevated-surface);
 			color: var(--on-elevated-surface);
@@ -157,7 +157,7 @@
 	padding: 0.75rem 1rem;
 	border-radius: 1.25rem;
 	word-wrap: break-word;
-	
+
 	p {
 		margin: 0;
 		line-height: 1.4;
@@ -181,12 +181,12 @@
 	background-color: var(--surface);
 	border-radius: 0.5rem;
 	margin-top: 0.25rem;
-	
+
 	i {
 		font-size: 1.2rem;
 		opacity: 0.7;
 	}
-	
+
 	span {
 		font-size: 0.9rem;
 	}
@@ -214,7 +214,7 @@
 	display: flex;
 	align-items: flex-end;
 	margin-bottom: 0.5rem;
-	
+
 	.message-avatar {
 		margin-bottom: 0.5rem;
 	}
@@ -226,7 +226,7 @@
 	border-radius: 1.25rem;
 	display: flex;
 	gap: 0.25rem;
-	
+
 	span {
 		width: 8px;
 		height: 8px;
@@ -234,15 +234,15 @@
 		background-color: var(--on-elevated-surface);
 		opacity: 0.6;
 		animation: typing 1.4s infinite ease-in-out;
-		
+
 		&:nth-child(1) {
 			animation-delay: 0s;
 		}
-		
+
 		&:nth-child(2) {
 			animation-delay: 0.2s;
 		}
-		
+
 		&:nth-child(3) {
 			animation-delay: 0.4s;
 		}
@@ -250,13 +250,64 @@
 }
 
 @keyframes typing {
-	0%, 60%, 100% {
+	0%,
+	60%,
+	100% {
 		transform: translateY(0);
 		opacity: 0.6;
 	}
-	
+
 	30% {
 		transform: translateY(-10px);
+		opacity: 1;
+	}
+}
+
+// Optimistic message styles (messages being sent)
+.message.optimistic {
+	.message-bubble {
+		opacity: 0.7;
+		position: relative;
+
+		&::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: rgba(255, 255, 255, 0.1);
+			border-radius: inherit;
+			animation: pulse 1.5s ease-in-out infinite;
+		}
+	}
+}
+
+// Failed message styles
+.message.failed {
+	.message-bubble {
+		background-color: var(--error) !important;
+		opacity: 0.8;
+	}
+}
+
+// Receipt icons
+.pending-receipt {
+	color: var(--on-surface-variant);
+	opacity: 0.6;
+	animation: pulse 1.5s ease-in-out infinite;
+}
+
+.failed-receipt {
+	color: var(--error);
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 0.6;
+	}
+	50% {
 		opacity: 1;
 	}
 }

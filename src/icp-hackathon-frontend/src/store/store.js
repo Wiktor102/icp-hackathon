@@ -104,18 +104,40 @@ const useStore = create(set => ({
 					console.log("WebSocket message received:", data);
 					const { conversationId, message } = data;
 
-					// Add the message to the store
-					set(state => ({
-						conversations: {
-							...state.conversations,
-							[conversationId]: {
-								...state.conversations[conversationId],
-								messages: [...(state.conversations[conversationId]?.messages || []), message],
-								lastMessage: message,
-								lastMessageTime: message.timestamp
-							}
+					// Add the message to the store, avoiding duplicates
+					set(state => {
+						const conversation = state.conversations[conversationId];
+						if (!conversation) return state;
+
+						// Check if message already exists (avoid duplicates)
+						const existingMessageIndex = conversation.messages.findIndex(
+							msg =>
+								msg.id === message.id ||
+								(msg.isOptimistic && msg.content === message.content && msg.sender_id === message.sender_id)
+						);
+
+						let updatedMessages;
+						if (existingMessageIndex !== -1) {
+							// Replace existing message (could be optimistic or duplicate)
+							updatedMessages = [...conversation.messages];
+							updatedMessages[existingMessageIndex] = { ...message, isOptimistic: false };
+						} else {
+							// Add new message
+							updatedMessages = [...conversation.messages, { ...message, isOptimistic: false }];
 						}
-					}));
+
+						return {
+							conversations: {
+								...state.conversations,
+								[conversationId]: {
+									...conversation,
+									messages: updatedMessages,
+									lastMessage: message,
+									lastMessageTime: message.timestamp
+								}
+							}
+						};
+					});
 				});
 
 				chatWebSocketService.onTyping(data => {
@@ -213,15 +235,85 @@ const useStore = create(set => ({
 		}),
 
 	addMessage: async (conversationId, message) => {
+		const state = useStore.getState();
+		const user = state.user;
+
+		// Create optimistic message object
+		const optimisticMessage = {
+			id: `temp-${Date.now()}-${Math.random()}`, // Temporary ID
+			content: message.content,
+			message_type: "text",
+			sender_id: user.id,
+			timestamp: new Date().toISOString(),
+			read: false,
+			isOptimistic: true // Flag to identify optimistic messages
+		};
+
+		// Add message to local state immediately (optimistic update)
+		set(state => {
+			const conversation = state.conversations[conversationId];
+			if (!conversation) return state;
+
+			const updatedConversation = {
+				...conversation,
+				messages: [...conversation.messages, optimisticMessage],
+				lastMessage: optimisticMessage,
+				updatedAt: new Date().toISOString()
+			};
+
+			return {
+				conversations: { ...state.conversations, [conversationId]: updatedConversation }
+			};
+		});
+
 		try {
 			// Send via backend API (this will also trigger WebSocket broadcast)
-			await chatApiService.sendMessage(conversationId, message.content);
+			const response = await chatApiService.sendMessage(conversationId, message.content);
 
-			// The message will be added to the conversation via WebSocket event
-			// No need to update local state manually here
+			// If we get a response with message details, replace optimistic message
+			if (response && response.id) {
+				set(state => {
+					const conversation = state.conversations[conversationId];
+					if (!conversation) return state;
+
+					const updatedMessages = conversation.messages.map(msg =>
+						msg.id === optimisticMessage.id ? { ...response, isOptimistic: false } : msg
+					);
+
+					const updatedConversation = {
+						...conversation,
+						messages: updatedMessages,
+						lastMessage: response
+					};
+
+					return {
+						conversations: { ...state.conversations, [conversationId]: updatedConversation }
+					};
+				});
+			}
+			// If no response or response doesn't have message details,
+			// the WebSocket handler will replace the optimistic message
 		} catch (error) {
 			console.error("Failed to send message:", error);
-			// TODO: Add error handling UI
+
+			// Remove optimistic message on error and mark as failed
+			set(state => {
+				const conversation = state.conversations[conversationId];
+				if (!conversation) return state;
+
+				const updatedMessages = conversation.messages.map(msg =>
+					msg.id === optimisticMessage.id ? { ...msg, failed: true, isOptimistic: false } : msg
+				);
+
+				const updatedConversation = {
+					...conversation,
+					messages: updatedMessages
+				};
+
+				return {
+					conversations: { ...state.conversations, [conversationId]: updatedConversation }
+				};
+			});
 		}
 	},
 
@@ -370,10 +462,10 @@ const useStore = create(set => ({
 	},
 
 	// Refresh messages for a specific conversation
-	refreshConversationMessages: async (conversationId) => {
+	refreshConversationMessages: async conversationId => {
 		try {
 			const messages = await chatApiService.getConversationMessages(conversationId);
-			
+
 			set(state => {
 				const conversation = state.conversations[conversationId];
 				if (!conversation) return state;
@@ -391,9 +483,8 @@ const useStore = create(set => ({
 					...conversation,
 					messages: formattedMessages,
 					lastMessage: formattedMessages[formattedMessages.length - 1] || null,
-					lastMessageTime: formattedMessages.length > 0 
-						? formattedMessages[formattedMessages.length - 1].timestamp 
-						: null
+					lastMessageTime:
+						formattedMessages.length > 0 ? formattedMessages[formattedMessages.length - 1].timestamp : null
 				};
 
 				return {

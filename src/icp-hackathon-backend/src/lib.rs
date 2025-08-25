@@ -674,7 +674,7 @@ fn init() {
         on_close: Some(on_close),
     };
     // Dodaj gateway_principal jako drugi argument (wstaw właściwy principal gatewaya)
-    let gateway_principal = "vqipa-2my6w-wlxk3-d4tww-qcxns-hewzb-opbsy-idda6-lbluu-z6q2y-zqe".to_string(); // <-- zamień na właściwy principal gatewaya
+    let gateway_principal = "va7o5-qcirk-xq622-h57sh-4g5wa-rlmzv-cnviv-wisvx-43fyw-ozbpw-4ae".to_string(); // <-- zamień na właściwy principal gatewaya
     let params = WsInitParams::new(handlers, gateway_principal);
     ic_websocket_cdk::init(params);
 }
