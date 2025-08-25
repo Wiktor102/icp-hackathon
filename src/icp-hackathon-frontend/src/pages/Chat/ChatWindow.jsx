@@ -7,15 +7,23 @@ import useUserDetails from "../../common/hooks/useUserDetails.js";
 
 // Component for rendering message content based on message type
 function MessageBubble({ message }) {
+	// Debug logging to see what's in the message
+	if (!message.content && !message.fileName) {
+		console.warn("MessageBubble received empty message:", message);
+	}
+
+	// Default to text if message_type is not specified
+	const messageType = message.message_type || "text";
+
 	return (
 		<div className="message-bubble">
-			{message.message_type === "text" && <p>{message.content}</p>}
-			{message.message_type === "image" && (
+			{(messageType === "text" || !messageType) && <p>{message.content}</p>}
+			{messageType === "image" && (
 				<div className="message-image">
 					<img src={message.content} alt="Shared image" />
 				</div>
 			)}
-			{message.message_type === "file" && (
+			{messageType === "file" && (
 				<div className="message-file">
 					<i className="fas fa-file"></i>
 					<span>{message.fileName || "File"}</span>

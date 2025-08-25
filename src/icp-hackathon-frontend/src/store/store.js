@@ -119,10 +119,29 @@ const useStore = create(set => ({
 						let updatedMessages;
 						if (existingMessageIndex !== -1) {
 							// Replace existing message (could be optimistic or duplicate)
+							const existingMessage = conversation.messages[existingMessageIndex];
+							console.log("Replacing existing message:", existingMessage, "with:", message);
 							updatedMessages = [...conversation.messages];
-							updatedMessages[existingMessageIndex] = { ...message, isOptimistic: false };
+
+							// If replacing an optimistic message, preserve content and merge with server data
+							if (existingMessage.isOptimistic) {
+								const mergedMessage = {
+									...existingMessage, // Keep optimistic message fields like content
+									...message, // Override with server data like id, timestamp
+									isOptimistic: false,
+									// Ensure content is preserved
+									content: existingMessage.content || message.content,
+									message_type: existingMessage.message_type || message.message_type || "text"
+								};
+								console.log("Merged optimistic message:", mergedMessage);
+								updatedMessages[existingMessageIndex] = mergedMessage;
+							} else {
+								// Just replace non-optimistic message
+								updatedMessages[existingMessageIndex] = { ...message, isOptimistic: false };
+							}
 						} else {
 							// Add new message
+							console.log("Adding new message:", message);
 							updatedMessages = [...conversation.messages, { ...message, isOptimistic: false }];
 						}
 
@@ -277,13 +296,22 @@ const useStore = create(set => ({
 					if (!conversation) return state;
 
 					const updatedMessages = conversation.messages.map(msg =>
-						msg.id === optimisticMessage.id ? { ...response, isOptimistic: false } : msg
+						msg.id === optimisticMessage.id
+							? {
+									...optimisticMessage, // Preserve optimistic message fields
+									...response, // Override with API response
+									isOptimistic: false,
+									// Ensure content is preserved
+									content: optimisticMessage.content || response.content,
+									message_type: optimisticMessage.message_type || response.message_type || "text"
+							  }
+							: msg
 					);
 
 					const updatedConversation = {
 						...conversation,
 						messages: updatedMessages,
-						lastMessage: response
+						lastMessage: { ...optimisticMessage, ...response, isOptimistic: false }
 					};
 
 					return {
