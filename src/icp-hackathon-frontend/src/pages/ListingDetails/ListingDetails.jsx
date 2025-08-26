@@ -159,7 +159,7 @@ function ListingDetails() {
 				{isOwner && (
 					<>
 						<Button onClick={handleEdit}>
-							<i className="fas fa-pencil"></i> Edytuj ogłoszenie
+							<i className="fas fa-pencil"></i> Edit listing
 						</Button>
 						<Button onClick={handleDelete} className="danger">
 							<i className="fas fa-trash"></i> Delete listing
@@ -169,7 +169,7 @@ function ListingDetails() {
 				)}
 			</section>
 			<section className="listing-details__description">
-				<h2>Opis produktu</h2>
+				<h2>Product description</h2>
 				{description}
 			</section>
 			<ListingReviewSummary reviews={reviews} avgRating={avgRating} />
@@ -182,21 +182,21 @@ function ListingDetails() {
 function ListingContactForm() {
 	return (
 		<form className="listing-details__contact-form">
-			<h3>Skontaktuj się z ogłoszeniodawcą</h3>
+			<h3>Contact the lister</h3>
 			<div>
-				<label htmlFor="name">Imię</label>
+				<label htmlFor="name">Name</label>
 				<input type="text" id="name" />
 			</div>
 			<div>
-				<label htmlFor="email">Adres e-mail</label>
+				<label htmlFor="email">Email address</label>
 				<input type="email" id="email" />
 			</div>
 			<div className="message-container">
-				<label htmlFor="message">Wiadomość</label>
+				<label htmlFor="message">Message</label>
 				<textarea id="message"></textarea>
 			</div>
 			<Button>
-				Wyślij <i className="fas fa-envelope"></i>
+				Send <i className="fas fa-envelope"></i>
 			</Button>
 		</form>
 	);
@@ -267,7 +267,7 @@ function AddReview() {
 		<form className="listing-details__add-review" onSubmit={saveReview}>
 			<h2>Add Review</h2>
 			<div className="left-panel">
-				<label htmlFor="rating">Ocena</label>
+				<label htmlFor="rating">Rating</label>
 				<div className="rating-buttons">
 					{[1, 2, 3, 4, 5].map(value => (
 						<label key={value}>
@@ -280,12 +280,12 @@ function AddReview() {
 				</div>
 			</div>
 			<div className="right-panel">
-				<label htmlFor="message">Wiadomość</label>
+				<label htmlFor="message">Message</label>
 				<textarea id="message" name="message"></textarea>
 			</div>
 			<Button>
 				<i className="fas fa-envelope"></i>
-				Wyślij
+				Send
 			</Button>
 			{(loading || actorLoading) && <LoadingOverlay />}
 		</form>

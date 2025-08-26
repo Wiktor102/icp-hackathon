@@ -24,7 +24,7 @@ function useFavorite(id) {
 				addFavorite(id);
 			} catch (error) {
 				console.error(error);
-				alert("Wystąpił nieznany błąd! Proszę spróbować ponownie.");
+				alert("An unknown error occurred. Please try again.");
 			} finally {
 				setLoading(false);
 			}
@@ -37,7 +37,7 @@ function useFavorite(id) {
 				await actor.remove_favorite_listing(BigInt(id));
 			} catch (error) {
 				console.error(error);
-				alert("Wystąpił nieznany błąd! Proszę spróbować ponownie.");
+				alert("An unknown error occurred. Please try again.");
 			} finally {
 				setLoading(false);
 			}

@@ -226,10 +226,10 @@ fn add_listing(
 
         
         if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
-            return Err("Długość tytułu jest poza zakresem!".to_string());
+            return Err("Title length is out of range!".to_string());
         }
         if description.len() > config.max_description_len as usize || description.len() < config.min_description_len as usize {
-            return Err("Długość opisu jest poza zakresem!".to_string());
+            return Err("Description length is out of range!".to_string());
         }
 
         let listing = Listing::new(
@@ -247,7 +247,7 @@ fn add_listing(
 
         Ok(listing)
     } else {
-        Err("Nie znaleziono użytkownika!".to_string())
+        Err("User not found!".to_string())
     }
 }
 
@@ -274,10 +274,10 @@ fn edit_listing(
     });
 
     if title.len() > config.max_title_len as usize || title.len() < config.min_title_len as usize {
-        return Err("Długość tytułu jest nieprawidłowa!".to_string());
+        return Err("Title length is invalid!".to_string());
     }
     if description.len() > config.max_description_len as usize || description.len() < config.min_description_len as usize {
-        return Err("Długość opisu jest nieprawidłowa!".to_string());
+        return Err("Description length is invalid!".to_string());
     }
 
     LISTINGS.with(|listings| {
@@ -285,7 +285,7 @@ fn edit_listing(
 
         if let Some(listing) = listings.iter_mut().find(|listing| listing.id == id) {
             if listing.owner_id != caller {
-                return Err("Brak uprawnień: Nie jesteś właścicielem tego ogłoszenia.".to_string());
+                return Err("Permission denied: You are not the owner of this listing.".to_string());
             }
 
             listing.title = title;
@@ -296,9 +296,9 @@ fn edit_listing(
             listing.categories_path = categories_path;
             listing.images_id = images_id;
 
-            Ok("Ogłoszenie zostało pomyślnie zaktualizowane!".to_string())
+            Ok("Listing successfully updated!".to_string())
         } else {
-            Err("Nie znaleziono ogłoszenia!".to_string())
+            Err("Listing not found!".to_string())
         }
     })
 }
@@ -345,13 +345,13 @@ fn delete_listing(id: u64) -> Option<String> {
 
         if let Some(index) = listings.iter().position(|listing| listing.id == id) {
             if listings[index].owner_id != caller {
-                return Some("Brak uprawnień: Nie jesteś właścicielem tego ogłoszenia.".to_string());
+                return Some("Permission denied: You are not the owner of this listing.".to_string());
             }
 
             listings.remove(index);
             None
         } else {
-            Some("Nie znaleziono ogłoszenia.".to_string())
+            Some("Listing not found.".to_string())
         }
     })
 }
@@ -388,7 +388,7 @@ fn add_user(name: String, email: String, phone_number: String, company_name: Str
     let caller = ic_cdk::caller().to_string();  // Zamieniamy Principal na String
     
     if USERS.with(|users| users.borrow().iter().any(|user| user.id == caller)) {
-        return Err("Użytkownik już istnieje!".to_string());
+        return Err("User already exists!".to_string());
     }
 
     let user = User::new(caller, name.clone(), email.clone(), phone_number.clone(), company_name.clone());
@@ -402,7 +402,7 @@ fn add_empty_user() -> Result<User, String> {
     let caller = ic_cdk::caller().to_string();  // Zamieniamy Principal na String
 
     if USERS.with(|users| users.borrow().iter().any(|user| user.id == caller)) {
-        return Err("Użytkownik już istnieje!".to_string());
+        return Err("User already exists!".to_string());
     }
 
     let user = User::new(caller, "".to_string(), "".to_string(), "".to_string(), "".to_string());
@@ -452,7 +452,7 @@ fn edit_active_user(name: String, email: String, phone_number: String, company_n
             return None;
         }
 
-        Some("Nie znaleziono użytkownika!".to_string())
+        Some("User not found!".to_string())
     })
 }
 
@@ -528,14 +528,14 @@ fn get_reviews_of_listing(listing_id: u64) -> Result<Vec<Review>, String> {
     LISTINGS.with(|listings| {
         let listings = listings.borrow();
         
-        if let Some(listing) = listings.iter().find(|listing| listing.id == listing_id) {
+                if let Some(listing) = listings.iter().find(|listing| listing.id == listing_id) {
             if let Some(reviews) = &listing.reviews {
                 Ok(reviews.clone())
             } else {
-                Err("Brak opinii dla tego ogłoszenia.".to_string())
+                Err("No reviews for this listing.".to_string())
             }
         } else {
-            Err("Nie znaleziono ogłoszenia.".to_string())
+            Err("Listing not found.".to_string())
         }
     })
 }
@@ -548,7 +548,7 @@ fn calculate_average_rating_of_listing(listing_id: u64) -> Result<f64, String> {
         if let Some(listing) = listings.iter().find(|listing| listing.id == listing_id) {
             if let Some(reviews) = &listing.reviews {
                 if reviews.is_empty() {
-                    return Err("Brak opinii dla tego ogłoszenia.".to_string());
+                    return Err("No reviews for this listing.".to_string());
                 }
 
                 let total_rating: u32 = reviews.iter().map(|review| review.rating as u32).sum();
@@ -556,10 +556,10 @@ fn calculate_average_rating_of_listing(listing_id: u64) -> Result<f64, String> {
 
                 Ok(average_rating)
             } else {
-                Err("Brak opinii dla tego ogłoszenia.".to_string())
+                Err("No reviews for this listing.".to_string())
             }
         } else {
-            Err("Nie znaleziono ogłoszenia.".to_string())
+            Err("Listing not found.".to_string())
         }
     })
 }
@@ -570,13 +570,13 @@ fn add_review(listing_id: u64, rating: u8, comment: String) -> Result<Review, St
 
     // Walidacja oceny
     if rating > 5 {
-        return Err("Ocena musi być w zakresie od 0 do 5.".to_string());
+        return Err("Rating must be between 0 and 5.".to_string());
     }
 
     // Sprawdzenie, czy użytkownik istnieje
     let user_exists = USERS.with(|users| users.borrow().iter().any(|user| user.id == caller));
     if !user_exists {
-        return Err("Nie znaleziono użytkownika.".to_string());
+        return Err("User not found.".to_string());
     }
 
     // Operacje na liście ogłoszeń
@@ -588,13 +588,13 @@ fn add_review(listing_id: u64, rating: u8, comment: String) -> Result<Review, St
         if let Some(listing) = listing {
             // Sprawdzenie, czy użytkownik nie jest właścicielem ogłoszenia
             if listing.owner_id == caller {
-                return Err("Nie możesz wystawić opinii pod własnym ogłoszeniem.".to_string());
+                return Err("You cannot review your own listing.".to_string());
             }
 
             // Sprawdzenie, czy użytkownik już dodał opinię
             if let Some(reviews) = &listing.reviews {
                 if reviews.iter().any(|review| review.owner_id == caller) {
-                    return Err("Już dodałeś opinię dla tego ogłoszenia.".to_string());
+                    return Err("You have already added a review for this listing.".to_string());
                 }
             }
 
@@ -607,7 +607,7 @@ fn add_review(listing_id: u64, rating: u8, comment: String) -> Result<Review, St
             }
             return Ok(review); // Zwrócenie nowej opinii
         }
-        Err("Nie znaleziono ogłoszenia.".to_string()) // Jeśli ogłoszenie nie istnieje
+    Err("Listing not found.".to_string()) // If the listing does not exist
     })
 }
 
@@ -617,7 +617,7 @@ fn edit_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
     let caller = ic_cdk::caller().to_string();
 
     if rating > 5 {
-        return Some("Ocena musi być w zakresie od 0 do 5.".to_string());
+        return Some("Rating must be between 0 and 5.".to_string());
     }
 
     let owner = USERS.with(|users| {
@@ -625,7 +625,7 @@ fn edit_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
     });
 
     if owner.is_none() {
-        return Some("Nie znaleziono użytkownika!".to_string());
+        return Some("User not found!".to_string());
     }
 
     LISTINGS.with(|listings| {
@@ -638,9 +638,9 @@ fn edit_review(listing_id: u64, rating: u8, comment: String) -> Option<String> {
                     return None;
                 }
             }
-            Some("Nie znaleziono opinii.".to_string())
+            Some("Review not found.".to_string())
         } else {
-            Some("Nie znaleziono ogłoszenia.".to_string())
+            Some("Listing not found.".to_string())
         }
     })
 }
@@ -657,9 +657,9 @@ fn delete_review(listing_id: u64) -> Option<String> {
                     return None;
                 }
             }
-            Some("Nie znaleziono opinii.".to_string())
+            Some("Review not found.".to_string())
         } else {
-            Some("Nie znaleziono ogłoszenia.".to_string())
+            Some("Listing not found.".to_string())
         }
     })
 }

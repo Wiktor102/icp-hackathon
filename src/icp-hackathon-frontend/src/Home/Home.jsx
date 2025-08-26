@@ -57,8 +57,8 @@ function Home() {
 				</WarningCard>
 			)}
 			{/* <form className="main-page__search-container">
-				<label htmlFor="search">Szukaj produktów</label>
-				<input type="search" id="search" placeholder="np. Ozdoby świąteczne" />
+				<label htmlFor="search">Search products</label>
+				<input type="search" id="search" placeholder="e.g. Holiday decorations" />
 				<button>
 					<i className="fas fa-search"></i>
 				</button>
