@@ -43,7 +43,7 @@ function Home() {
 			if (!category) {
 				setListingsToDisplay(Object.values(allListings));
 			} else {
-				const filtered = Object.values(allListings).filter(listing => listing.categories_path.startsWith(category));
+				const filtered = Object.values(allListings).filter(listing => listing.category.path.startsWith(category));
 				setListingsToDisplay(filtered);
 			}
 		});
