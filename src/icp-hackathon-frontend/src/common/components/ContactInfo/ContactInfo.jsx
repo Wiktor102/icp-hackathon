@@ -102,36 +102,36 @@ function ContactInfo({ editButton = false, user }) {
 						<i className="fas fa-building"></i>
 						<span className="label">Company:</span>
 						{editable ? (
-							<input type="text" name="company" defaultValue={user.company} />
+							<input type="text" name="company" defaultValue={user?.company} />
 						) : (
-							<span>{user.company ?? user.company_name ?? "???"}</span>
+							<span>{user?.company ?? user?.company_name ?? "???"}</span>
 						)}
 					</div>
 					<div>
 						<i className="fas fa-user"></i>
 						<span className="label">Full name:</span>
 						{editable ? (
-							<input type="text" name="name" defaultValue={user.name} />
+							<input type="text" name="name" defaultValue={user?.name} />
 						) : (
-							<span>{user.name ?? "???"}</span>
+							<span>{user?.name ?? "???"}</span>
 						)}
 					</div>
 					<div>
 						<i className="fas fa-envelope"></i>
 						<span className="label">Email address:</span>
 						{editable ? (
-							<input type="email" name="e-mail" defaultValue={user.email} />
+							<input type="email" name="e-mail" defaultValue={user?.email} />
 						) : (
-							<span>{user.email ?? "???"}</span>
+							<span>{user?.email ?? "???"}</span>
 						)}
 					</div>
 					<div>
 						<i className="fa fa-phone"></i>
 						<span className="label">Phone:</span>
 						{editable ? (
-							<input type="tel" name="phone" defaultValue={user.phone} />
+							<input type="tel" name="phone" defaultValue={user?.phone} />
 						) : (
-							<span>{user.phone ?? user.phone_number ?? "???"}</span>
+							<span>{user?.phone ?? user?.phone_number ?? "???"}</span>
 						)}
 					</div>
 					{(loading || actorLoading) && editButton && <LoadingOverlay />}
