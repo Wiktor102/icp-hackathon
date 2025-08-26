@@ -17,6 +17,22 @@ class ChatWebSocketService {
 		this.reconnectDelay = 1000; // Start with 1 second
 	}
 
+	// Initialize with existing actor and identity (from useCanister hook)
+	initializeWithActor(actor, canisterId, identity) {
+		try {
+			this.canisterId = canisterId;
+			this.identity = identity;
+			this.canisterActor = actor;
+
+			console.log("WebSocket service initialized with actor (WebSocket disabled for simplicity)");
+			// WebSocket functionality is commented out until fully implemented
+			return true;
+		} catch (error) {
+			console.error("Failed to initialize WebSocket with actor:", error);
+			throw error;
+		}
+	}
+
 	async initialize(canisterId, identity) {
 		if (!identity) {
 			throw new Error("Identity is required for WebSocket initialization");
@@ -281,6 +297,11 @@ class ChatWebSocketService {
 	// Check connection status
 	isConnectedToWebSocket() {
 		return this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN;
+	}
+
+	// Check if the service is properly initialized
+	isInitialized() {
+		return this.canisterActor !== null;
 	}
 }
 

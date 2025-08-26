@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { chatApiService } from "../common/services/chatApiService.js";
 import { chatWebSocketService } from "../common/services/chatWebSocketService.js";
-import { canisterId } from "../../../declarations/icp-hackathon-backend/index.js";
 
 const useStore = create(set => ({
 	user: null,
@@ -63,15 +62,6 @@ const useStore = create(set => ({
 		return state.imageCache[id];
 	},
 
-	authClient: null,
-	setAuthClient: authClient => set({ authClient }),
-	identity: null,
-	setIdentity: identity => set({ identity }),
-
-	// Authentication initialization state
-	authInitialized: false,
-	setAuthInitialized: initialized => set({ authInitialized: initialized }),
-
 	// Chat state
 	conversations: {},
 	activeConversationId: null,
@@ -80,27 +70,19 @@ const useStore = create(set => ({
 	chatError: null,
 
 	// Initialize chat services
-	initializeChat: async canisterId => {
+	initializeChat: async () => {
 		set({ chatLoading: true, chatError: null });
 
 		try {
-			// Get current identity
-			const state = useStore.getState();
-			const identity = state.identity;
-
-			if (!identity) {
-				throw new Error("User must be authenticated to use chat");
+			// Check if chat services are already initialized
+			if (!chatApiService.isInitialized()) {
+				throw new Error("Chat API service not initialized. Make sure user is authenticated.");
 			}
 
-			// Initialize API service with identity
-			await chatApiService.initialize(canisterId, identity);
+			// Set up WebSocket event handlers if WebSocket is available
+			if (chatWebSocketService.isInitialized()) {
+				console.log("Setting up WebSocket event handlers");
 
-			// Initialize WebSocket service
-			try {
-				await chatWebSocketService.initialize(canisterId, identity);
-				console.log("WebSocket service initialized successfully");
-
-				// Set up WebSocket event handlers
 				chatWebSocketService.onMessage(data => {
 					console.log("WebSocket message received:", data);
 					const { conversationId, message } = data;
@@ -182,9 +164,8 @@ const useStore = create(set => ({
 				chatWebSocketService.onConnection(data => {
 					console.log("WebSocket connection status:", data);
 				});
-			} catch (wsError) {
-				console.warn("WebSocket initialization failed, chat will work without real-time updates:", wsError);
-				// Don't fail the entire chat initialization if WebSocket fails
+			} else {
+				console.log("WebSocket service not initialized, chat will work without real-time updates");
 			}
 
 			// Load initial conversations
@@ -406,8 +387,8 @@ const useStore = create(set => ({
 			const state = useStore.getState();
 			if (!state.chatInitialized) {
 				console.log("Chat not initialized, initializing now...");
-				// Initialize chat with the backend canister ID
-				await state.initializeChat(canisterId);
+				// Initialize chat (services should already be initialized by the hook)
+				await state.initializeChat();
 			}
 
 			console.log("Creating conversation:", { listingId, listingTitle });

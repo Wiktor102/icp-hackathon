@@ -3,40 +3,50 @@ import { idlFactory } from "../../../../declarations/icp-hackathon-backend/icp-h
 
 class ChatApiService {
 	constructor() {
-		this.agent = null;
 		this.actor = null;
 		this.canisterId = null;
-		this.ws = null;
 		this.messageHandlers = new Set();
 	}
 
+	// Initialize with an actor (from useCanister hook)
+	initializeWithActor(actor, canisterId) {
+		try {
+			this.actor = actor;
+			this.canisterId = canisterId;
+			console.log("Chat API initialized with actor successfully");
+			return true;
+		} catch (error) {
+			console.error("Failed to initialize chat API with actor:", error);
+			throw error;
+		}
+	}
+
+	// Legacy initialize method for backward compatibility
 	async initialize(canisterId, identity = null) {
 		try {
 			this.canisterId = canisterId;
 
 			// Create agent with proper host
 			const host = process.env.DFX_NETWORK === "ic" ? "https://ic0.app" : "http://localhost:4943";
-			this.agent = new HttpAgent({ host });
+			const agent = new HttpAgent({ host });
 
 			// For local development, fetch root key
 			if (process.env.DFX_NETWORK !== "ic") {
-				await this.agent.fetchRootKey();
+				await agent.fetchRootKey();
 			}
 
 			// Use provided identity if available
 			if (identity) {
-				this.agent.replaceIdentity(identity);
+				agent.replaceIdentity(identity);
 			}
 
 			// Create actor
 			this.actor = Actor.createActor(idlFactory, {
-				agent: this.agent,
+				agent: agent,
 				canisterId
 			});
 
-			// Initialize WebSocket connection
-			await this.initializeWebSocket();
-
+			console.log("Chat API initialized successfully");
 			return true;
 		} catch (error) {
 			console.error("Failed to initialize chat API:", error);
@@ -44,18 +54,14 @@ class ChatApiService {
 		}
 	}
 
-	async initializeWebSocket() {
-		console.log("Chat API initialized successfully (WebSocket disabled for simplicity)");
-		return true;
-	}
-
 	onMessage(handler) {
 		this.messageHandlers.add(handler);
 		return () => this.messageHandlers.delete(handler);
 	}
 
-	getAgent() {
-		return this.agent;
+	// Check if the service is properly initialized
+	isInitialized() {
+		return this.actor !== null;
 	}
 
 	async createConversation(listingId) {

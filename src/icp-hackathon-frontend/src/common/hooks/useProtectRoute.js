@@ -1,15 +1,18 @@
 import { useNavigate } from "react-router";
-import useAuth from "./useAuth.js";
+import { useEffect } from "react";
+import { useInternetIdentity } from "ic-use-internet-identity";
 
 function useProtectRoute() {
-	const { isAuthenticated, isInitializing } = useAuth();
+	const { identity, isInitializing } = useInternetIdentity();
 	const navigate = useNavigate();
 
-	if (!isAuthenticated && !isInitializing) {
-		navigate("/");
-		return "error";
-	}
+	useEffect(() => {
+		if (!identity && !isInitializing) {
+			navigate("/");
+		}
+	}, [identity, isInitializing, navigate]);
 
+	if (!identity && !isInitializing) return "error";
 	return isInitializing ? "loading" : "ok";
 }
 

@@ -9,6 +9,7 @@ import Favorites from "./pages/Favorites/Favorites.jsx";
 import AddListing from "./pages/AddListing/AddListing.jsx";
 import ListingDetails from "./pages/ListingDetails/ListingDetails.jsx";
 import Chat from "./pages/Chat/Chat.jsx";
+import ChatProvider from "./common/components/ChatProvider.jsx";
 
 // hooks
 import useFetchCategories from "./common/hooks/useFetchCategories";
@@ -27,17 +28,19 @@ function App() {
 
 	return (
 		<BrowserRouter>
-			<Routes>
-				<Route element={<Header />}>
-					<Route path="/" element={<Home />} />
-					<Route path="/profile" element={<Profile />} />
-					<Route path="/favorites" element={<Favorites />} />
-					<Route path="/add" element={<AddListing />} />
-					<Route path="/product/:productId" element={<ListingDetails />} />
-					<Route path="/chat" element={<Chat />} />
-					<Route path="/chat/:conversationId" element={<Chat />} />
-				</Route>
-			</Routes>
+			<ChatProvider>
+				<Routes>
+					<Route element={<Header />}>
+						<Route path="/" element={<Home />} />
+						<Route path="/profile" element={<Profile />} />
+						<Route path="/favorites" element={<Favorites />} />
+						<Route path="/add" element={<AddListing />} />
+						<Route path="/product/:productId" element={<ListingDetails />} />
+						<Route path="/chat" element={<Chat />} />
+						<Route path="/chat/:conversationId" element={<Chat />} />
+					</Route>
+				</Routes>
+			</ChatProvider>
 		</BrowserRouter>
 	);
 }
