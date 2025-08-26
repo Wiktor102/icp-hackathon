@@ -1,6 +1,4 @@
-import { useMemo } from "react";
 import { Link } from "react-router";
-import { useIdentity } from "@nfid/identitykit/react";
 
 // hooks
 import useStore from "../../store/store.js";

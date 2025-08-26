@@ -101,7 +101,7 @@ service : {
   get_listings : () -> (vec Listing) query;
   get_listings_by_active_user : () -> (Result_5) query;
   get_listings_by_id : (vec nat64) -> (vec Listing) query;
-  get_listings_id_by_category : (text) -> (vec nat64) query;
+  get_listings_id_by_category : (text) -> (vec Listing) query;
   get_reviews_of_listing : (nat64) -> (Result_6) query;
   get_user_by_principal: (text) -> (opt blob) query;
   get_user_conversations : () -> (vec Conversation) query;

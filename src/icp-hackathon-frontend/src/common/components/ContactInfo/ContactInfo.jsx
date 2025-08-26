@@ -2,13 +2,13 @@ import { forwardRef, useRef, useState } from "react";
 
 // hooks
 import useStore from "../../../store/store.js";
+import { useCanister } from "../../hooks/useCanister";
 
 // components
 import LoadingOverlay from "../LoadingOverlay/LoadingOverlay.jsx";
 import OutlinedButton from "../../OutlinedButton/OutlinedButton.jsx";
 
 import "./ContactInfo.scss";
-import { useAuthenticatedActor } from "../../hooks/useActor.js";
 
 const Wrapper = forwardRef(({ condition, children, ...props }, ref) =>
 	condition ? (
@@ -22,7 +22,8 @@ const Wrapper = forwardRef(({ condition, children, ...props }, ref) =>
 
 function ContactInfo({ editButton = false, user }) {
 	const setUser = useStore(state => state.setUser);
-	const [actorLoading, actor] = useAuthenticatedActor();
+	const { actor, loading: actorLoadingFromHook, isLoading } = useCanister();
+	const actorLoading = actorLoadingFromHook ?? isLoading ?? false;
 
 	const [editable, setEditable] = useState(editButton && !user?.initialised);
 	const [loading, setLoading] = useState(false || user == null);

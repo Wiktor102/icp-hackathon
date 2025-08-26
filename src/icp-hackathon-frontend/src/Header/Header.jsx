@@ -6,29 +6,35 @@ import Button from "../common/Button";
 
 // hooks
 import useStore from "../store/store.js";
-import { useAuthenticatedActor } from "../common/hooks/useActor.js";
-import useAuth from "../common/hooks/useAuth.js";
+import { useInternetIdentity } from "ic-use-internet-identity";
 
 import "./Header.scss";
+import { useCanister } from "../common/hooks/useCanister";
 
 function Header() {
 	const navigate = useNavigate();
 
 	// Use the new authentication hook
-	const { identity, isAuthenticated, isInitializing, login, logout } = useAuth();
+	const { identity, clear, isInitializing, login } = useInternetIdentity();
+	const { actor, loading, isLoading, reset } = useCanister();
+	const actorLoading = loading ?? isLoading ?? false;
 
 	// User state from store
 	const setUser = useStore(state => state.setUser);
 	const setUserLoading = useStore(state => state.setUserLoading);
 	const setUserCreating = useStore(state => state.setUserCreating);
-	const [actorLoading, actor] = useAuthenticatedActor();
 
 	// Check for existing authentication session on page load
 	// This is now handled by the useAuth hook automatically
 
 	async function handleLogin() {
 		try {
-			await login();
+			if (identity) {
+				clear();
+				reset();
+			}
+
+			login();
 		} catch (error) {
 			console.error("Login failed:", error);
 			alert("Login failed. Please try again.");
@@ -37,7 +43,8 @@ function Header() {
 
 	async function handleLogout() {
 		try {
-			await logout();
+			clear();
+			reset();
 			setUser(null);
 			setUserCreating(false);
 		} catch (error) {
@@ -55,7 +62,7 @@ function Header() {
 			email: user.email,
 			phone: user.phone_number,
 			company: user.company_name,
-			favorites: user.favorites_id ?? [],
+			favorites: (user.favorites_id ?? []).map(id => Number(id)),
 			initialised: user.initialised
 		};
 
@@ -111,7 +118,7 @@ function Header() {
 		}
 
 		// Clear user if not authenticated or actor is loading
-		if (!isAuthenticated || actorLoading) {
+		if (!identity || actorLoading) {
 			setUser(null);
 			setUserLoading(false);
 			return;
@@ -121,7 +128,7 @@ function Header() {
 		if (actor) {
 			fetchUser(actor);
 		}
-	}, [isAuthenticated, isInitializing, actorLoading, actor]);
+	}, [identity, isInitializing, actorLoading, actor]);
 
 	return (
 		<>
@@ -130,7 +137,7 @@ function Header() {
 					<h1>HurtChain</h1>
 				</Link>
 				<div>
-					{isAuthenticated ? (
+					{identity ? (
 						<ProfileDropdown onLogout={handleLogout} />
 					) : (
 						<Button onClick={handleLogin} disabled={isInitializing}>

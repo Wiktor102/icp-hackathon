@@ -8,7 +8,7 @@ function parseBackendUser(user) {
 		email: user.email,
 		phone: user.phone_number,
 		company: user.company_name,
-		favorites: user.favorites_id ?? [],
+		favorites: (user.favorites_id ?? []).map(id => Number(id)),
 		initialised: user.initialised
 	};
 

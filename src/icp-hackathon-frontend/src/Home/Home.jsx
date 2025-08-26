@@ -3,7 +3,7 @@ import { NavLink, useSearchParams } from "react-router";
 
 // hooks
 import useStore from "../store/store.js";
-import { useFetchCategoryListings } from "../common/hooks/useFetchListings.js";
+import { useFetchCategoryListings } from "../common/hooks/useFetchListings";
 
 // components
 import Grid from "./Grid/Grid";

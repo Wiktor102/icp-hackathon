@@ -3,7 +3,7 @@ import { useMemo } from "react";
 // hooks
 import useStore from "../../store/store.js";
 import useProtectRoute from "../../common/hooks/useProtectRoute.js";
-import { useFetchListingsByIds } from "../../common/hooks/useFetchListings.js";
+import { useFetchListingsByIds } from "../../common/hooks/useFetchListings";
 
 // components
 import List from "../../Home/List/List.jsx";
