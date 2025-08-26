@@ -200,7 +200,7 @@ function AddListing() {
 					<div id="right-group">
 						<div className="form-group">
 							<i className="fas fa-tag"></i>
-							<label htmlFor="price">Price (PLN)</label>
+							<label htmlFor="price">Price (USD)</label>
 							<input type="number" id="price" name="price" min="0" step="0.01" />
 						</div>
 

@@ -35,7 +35,7 @@ function ListingDetails() {
 	const { title, description, price, reviews, ownerId, category, ...rest } = listing ?? {};
 	const [imagesLoading, ...images] = useImage(...(rest?.images ?? []));
 
-	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
+	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "USD" }).format(price);
 	const favorite = false;
 	const avgRating = useCalculateAvgReview(+productId);
 

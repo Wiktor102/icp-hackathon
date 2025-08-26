@@ -38,7 +38,7 @@ function Grid({ listings }) {
 
 function GridItem({ id, images, title, price, reviews }) {
 	const [imgLoading, img] = useImage(images[0]);
-	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
+	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "USD" }).format(price);
 	const avgRating = useCalculateAvgReview(id);
 
 	const identity = useStore(state => state.identity);

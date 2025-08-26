@@ -37,7 +37,7 @@ function List({ listings }) {
 
 function ListItem({ id, images, title, description, price, reviews }) {
 	const [imgLoading, img] = useImage(images[0]);
-	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN" }).format(price);
+	const formattedPrice = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "USD" }).format(price);
 	const shortDescription = description.split(" ").slice(0, 20).join(" ") + "...";
 	const avgRating = useCalculateAvgReview(id);
 
