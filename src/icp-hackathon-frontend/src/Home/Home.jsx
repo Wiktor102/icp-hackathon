@@ -24,19 +24,14 @@ function Home() {
 	const [listingsToDisplay, setListingsToDisplay] = useState(Object.values(allListings));
 	const [isList, setIsList] = useState(false);
 
-	const fetchCategoryListings = useFetchCategoryListings();
 	const [isPending, startTransition] = useTransition();
 	const [searchParams] = useSearchParams();
 	const category = useMemo(() => searchParams.get("category"), [searchParams]);
+	const { data: categoryListings } = useFetchCategoryListings(category);
 
 	function switchDisplayMode() {
 		setIsList(c => !c);
 	}
-
-	useEffect(() => {
-		if (!category) return;
-		fetchCategoryListings(category);
-	}, [category]);
 
 	useEffect(() => {
 		startTransition(() => {
