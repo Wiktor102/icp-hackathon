@@ -5,6 +5,7 @@
         "lib": ["ESNext"],
 		"module": "nodenext",
 		"experimentalDecorators": true,
+        "noImplicitAny": false,
 		"strictPropertyInitialization": false,
 		"moduleResolution": "nodenext",
 		"allowJs": true,

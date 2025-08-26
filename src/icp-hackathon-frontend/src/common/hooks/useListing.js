@@ -5,7 +5,7 @@ import { icp_hackathon_backend as backend } from "declarations/icp-hackathon-bac
 import useStore from "../../store/store.js";
 
 // utils
-import { parseBackendListing } from "./useFetchListings.js";
+import { parseBackendListing } from "./useFetchListings";
 
 function useListing(id) {
 	const allListings = useStore(state => state.listings);

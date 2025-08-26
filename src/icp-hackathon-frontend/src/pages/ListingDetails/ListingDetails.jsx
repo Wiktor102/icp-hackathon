@@ -1,12 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { NavLink, useParams, useNavigate } from "react-router";
-import { icp_hackathon_backend as backend } from "../../../../declarations/icp-hackathon-backend/index.js";
 
 // hooks
 import useStore from "../../store/store.js";
 import useImage from "../../common/hooks/useImage.js";
 import useListing from "../../common/hooks/useListing.js";
-import { useAuthenticatedActor } from "../../common/hooks/useActor.js";
 import useCalculateAvgReview from "../../common/hooks/useCalculateAvgReview.js";
 
 // components
@@ -20,6 +18,7 @@ import LoadingOverlay from "../../common/components/LoadingOverlay/LoadingOverla
 
 import "./ListingDetails.scss";
 import useUserDetails from "../../common/hooks/useUserDetails.js";
+import { useCanister } from "../../common/hooks/useCanister";
 
 function ListingDetails() {
 	const { productId } = useParams();
@@ -41,8 +40,9 @@ function ListingDetails() {
 	const avgRating = useCalculateAvgReview(+productId);
 
 	const isOwner = useMemo(() => userListings.some(listing => listing.id == +productId), [userListings, productId]);
-	const [actorLoading, actor] = useAuthenticatedActor();
 	const { userDetails: owner } = useUserDetails(ownerId);
+	const { actor, loading: actorLoadingFromHook, isLoading } = useCanister();
+	const actorLoading = actorLoadingFromHook ?? isLoading ?? false;
 
 	function handleEdit() {
 		alert("Listing edit function is unavailable in the prototype version of the application.");
@@ -236,7 +236,8 @@ function AddReview() {
 	const addReview = useStore(state => state.addReview);
 	const [loading, setLoading] = useState(false);
 	const { productId } = useParams();
-	const [actorLoading, actor] = useAuthenticatedActor();
+	const { actor, loading: actorLoadingFromHook, isLoading } = useCanister();
+	const actorLoading = actorLoadingFromHook ?? isLoading ?? false;
 
 	async function saveReview(e) {
 		e.preventDefault();

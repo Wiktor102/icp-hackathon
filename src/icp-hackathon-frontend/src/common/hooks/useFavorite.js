@@ -3,14 +3,15 @@ import { useState } from "react";
 // hooks
 import useStore from "../../store/store.js";
 import useIsFavorite from "./useIsFavorite.js";
-import { useAuthenticatedActor } from "./useActor.js";
+import { useCanister } from "./useCanister";
 
 function useFavorite(id) {
 	const identity = useStore(state => state.identity);
 	const addFavorite = useStore(state => state.addFavorite);
 	const isFavorite = useIsFavorite(id);
 	const [loading, setLoading] = useState(false);
-	const [actorLoading, actor] = useAuthenticatedActor();
+	const { actor, loading: actorLoadingFromHook, isLoading } = useCanister();
+	const actorLoading = actorLoadingFromHook ?? isLoading ?? false;
 
 	return {
 		isFavorite,
@@ -19,7 +20,7 @@ function useFavorite(id) {
 			if (isFavorite || loading || !identity || actorLoading) return;
 			setLoading(true);
 			try {
-				await actor.add_favorite_listing(id);
+				await actor.add_favorite_listing(BigInt(id));
 				addFavorite(id);
 			} catch (error) {
 				console.error(error);
@@ -33,7 +34,7 @@ function useFavorite(id) {
 			setLoading(true);
 			try {
 				// TODO: remove_favorite_listing is not implemented in the backend
-				await actor.remove_favorite_listing(id);
+				await actor.remove_favorite_listing(BigInt(id));
 			} catch (error) {
 				console.error(error);
 				alert("Wystąpił nieznany błąd! Proszę spróbować ponownie.");

@@ -3,20 +3,20 @@ import { useNavigate } from "react-router";
 import imageCompression from "browser-image-compression";
 
 // hooks
-import { useAuthenticatedActor } from "../../common/hooks/useActor.js";
 import useProtectRoute from "../../common/hooks/useProtectRoute.js";
 import useStore from "../../store/store.js";
 
 // utilities
-import { parseBackendListing } from "../../common/hooks/useFetchListings.js";
+import { parseBackendListing } from "../../common/hooks/useFetchListings";
 
 // components
-import Button from "../../common/Button";
+import Button from "../../common/Button.jsx";
 import PageHeader from "../../common/components/PageHeader/PageHeader.jsx";
 import LoadingOverlay from "../../common/components/LoadingOverlay/LoadingOverlay.jsx";
 
 // styles
 import "./AddListing.scss";
+import { useCanister } from "../../common/hooks/useCanister";
 
 const MAX_PHOTOS = 1;
 function AddListing() {
@@ -29,7 +29,8 @@ function AddListing() {
 	const categories = useStore(state => state.categories);
 	const addListings = useStore(state => state.addListings);
 	const addUserListings = useStore(state => state.addUserListings);
-	const [actorLoading, actor] = useAuthenticatedActor();
+	const { actor, loading: actorLoadingFromHook, isLoading } = useCanister();
+	const actorLoading = actorLoadingFromHook ?? isLoading ?? false;
 
 	function deletePhoto(e, i) {
 		setPhotoPaths(p => p.filter((_, j) => i !== j));

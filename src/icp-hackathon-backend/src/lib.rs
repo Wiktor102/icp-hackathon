@@ -311,14 +311,13 @@ fn get_image_by_id(image_id: u64) -> Option<String> {
 
 
 #[ic_cdk::query]
-fn get_listings_id_by_category(category: String) -> Vec<usize> {
+fn get_listings_by_category(category: String) -> Vec<Listing> {
     LISTINGS.with(|listings| {
         listings
             .borrow()
             .iter()
-            .enumerate()
-            .filter(|(_, listing)| listing.category == category)
-            .map(|(index, _)| index)
+            .filter(|listing| listing.category == category)
+            .cloned() // <-- Important: clones each Listing
             .collect()
     })
 }

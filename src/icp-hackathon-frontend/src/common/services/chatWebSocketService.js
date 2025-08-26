@@ -1,4 +1,4 @@
-import { IcWebSocket } from "ic-websocket-js";
+// import { IcWebSocket } from "ic-websocket-js";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { idlFactory } from "../../../../declarations/icp-hackathon-backend/icp-hackathon-backend.did.js";
 
@@ -52,41 +52,41 @@ class ChatWebSocketService {
 			console.log("Initializing IC WebSocket with gateway:", gatewayUrl);
 
 			// Create WebSocket connection
-			this.ws = new IcWebSocket(gatewayUrl, undefined, {
-				canisterId: this.canisterId,
-				canisterActor: this.canisterActor,
-				identity: this.identity,
-				networkUrl: process.env.DFX_NETWORK === "ic" ? "https://icp-api.io" : "http://localhost:4943"
-			});
+			// this.ws = new IcWebSocket(gatewayUrl, undefined, {
+			// 	canisterId: this.canisterId,
+			// 	canisterActor: this.canisterActor,
+			// 	identity: this.identity,
+			// 	networkUrl: process.env.DFX_NETWORK === "ic" ? "https://icp-api.io" : "http://localhost:4943"
+			// });
 
-			// Set up event handlers
-			this.ws.onopen = () => {
-				console.log("WebSocket connection opened");
-				this.isConnected = true;
-				this.reconnectAttempts = 0;
-				this.reconnectDelay = 1000;
-				this.notifyConnectionHandlers({ type: "connected" });
-			};
+			// // Set up event handlers
+			// this.ws.onopen = () => {
+			// 	console.log("WebSocket connection opened");
+			// 	this.isConnected = true;
+			// 	this.reconnectAttempts = 0;
+			// 	this.reconnectDelay = 1000;
+			// 	this.notifyConnectionHandlers({ type: "connected" });
+			// };
 
-			this.ws.onclose = event => {
-				console.log("WebSocket connection closed", event);
-				this.isConnected = false;
-				this.notifyConnectionHandlers({ type: "disconnected" });
+			// this.ws.onclose = event => {
+			// 	console.log("WebSocket connection closed", event);
+			// 	this.isConnected = false;
+			// 	this.notifyConnectionHandlers({ type: "disconnected" });
 
-				// Attempt to reconnect if it wasn't intentional
-				if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
-					this.scheduleReconnect();
-				}
-			};
+			// 	// Attempt to reconnect if it wasn't intentional
+			// 	if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
+			// 		this.scheduleReconnect();
+			// 	}
+			// };
 
-			this.ws.onerror = error => {
-				console.error("WebSocket error:", error);
-				this.notifyConnectionHandlers({ type: "error", error });
-			};
+			// this.ws.onerror = error => {
+			// 	console.error("WebSocket error:", error);
+			// 	this.notifyConnectionHandlers({ type: "error", error });
+			// };
 
-			this.ws.onmessage = event => {
-				this.handleIncomingMessage(event.data);
-			};
+			// this.ws.onmessage = event => {
+			// 	this.handleIncomingMessage(event.data);
+			// };
 
 			return true;
 		} catch (error) {
