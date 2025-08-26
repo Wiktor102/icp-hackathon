@@ -46,11 +46,13 @@ function Profile() {
 
 					<ContactInfo user={user} editButton />
 				</div>
-				<Link to="/add">
-					<Button>
-						<i className="fas fa-plus"></i> Add Listing
-					</Button>
-				</Link>
+				{user && user.initialised && (
+					<Link to="/add">
+						<Button>
+							<i className="fas fa-plus"></i> Add Listing
+						</Button>
+					</Link>
+				)}
 			</section>
 			<h2>Your Listings</h2>
 			{userListings.length > 0 && <Grid listings={userListings} />}
